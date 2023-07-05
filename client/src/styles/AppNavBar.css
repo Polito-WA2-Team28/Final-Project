@@ -1,0 +1,27 @@
+.top-bg {
+    background-image: url(https://cdn02.plentymarkets.com/qxzolkbuxzfb/item/images/100114/full/technicalsupport-2.jpg);
+    background-position: center;
+    color: white;
+}
+
+.navbar-items {
+    width: 100%;
+}
+
+
+.btn-navbar {
+    background-color: rgba(0, 0, 0, 0.738)!important; 
+    color: white!important;
+    font-size: 1.5rem!important;
+    border-radius: 0!important;
+    font-weight: bold !important;
+} 
+
+.btn-navbar:hover {
+    background-color: rgba(0, 0, 0, 0.856)!important; 
+}
+
+.btn-xl {
+    padding: .8rem 1rem!important;
+    font-size: 2rem!important;
+}

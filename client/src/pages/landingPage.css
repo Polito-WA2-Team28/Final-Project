@@ -1,0 +1,13 @@
+/* customStyles.css */
+.my-3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .d-inline-block {
+    display: inline-block;
+  }
+  
+  .fw-bold {
+    font-weight: bold;
+  }
