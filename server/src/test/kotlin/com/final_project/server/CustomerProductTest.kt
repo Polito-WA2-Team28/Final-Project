@@ -18,8 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 class CustomerProductTest {
     @Autowired
     lateinit var utilityFunctions:UtilityFunctions
-    @Test
-            /** POST /api/auth/login */
+    @Test /** POST /api/auth/login */
     fun `Successful Customer Login`() {
 
         /* crafting the request  */

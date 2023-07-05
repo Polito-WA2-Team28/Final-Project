@@ -80,7 +80,7 @@ class ApplicationTests {
 
 
     @Test /** POST /api/auth/login */
-    fun `Successful login`() {
+    fun `Unauthorized login`() {
 
         /* crafting the request  */
         val credentials = UserCredentialsDTO("customer-test-10", "test")
