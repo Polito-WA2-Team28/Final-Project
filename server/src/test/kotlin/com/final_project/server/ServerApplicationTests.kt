@@ -1,6 +1,5 @@
 package com.final_project.server
 
-import com.final_project.security.dto.UserCredentialsDTO
 import com.final_project.server.config.GlobalConfig
 import com.final_project.server.repository.*
 import com.final_project.ticketing.repository.TicketRepository
@@ -10,25 +9,21 @@ import org.junit.runner.RunWith
 import org.junit.runners.Suite
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.SpringBootConfiguration
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.*
 import org.springframework.http.*
 import org.springframework.test.context.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
 import org.testcontainers.junit.jupiter.*
 
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(Suite::class)
-@ContextConfiguration(classes = [TestConfig::class])
 @Suite.SuiteClasses(
-        CustomerProductTest::class,
-        CustomerTicketTest::class
+        //CustomerProductTest::class,
+        TestCases::class
 )
 class ApplicationTests {
     @Autowired
@@ -43,6 +38,21 @@ class ApplicationTests {
         @Container
         val keycloak = KeycloakContainer("quay.io/keycloak/keycloak:latest")
             .withRealmImportFile("keycloak/realm.json")
+
+
+        /*@BeforeAll
+        fun setUpAll() {
+            println("****************EXECUTED STARTUP**********************")
+            postgres.start() // Start PostgreSQL container
+            keycloak.start() // Start Keycloak container
+        }
+
+        @AfterAll
+        fun tearDown() {
+            println("****************EXECUTED TEARDOWN**********************")
+            postgres.stop() // Close PostgreSQL container
+            keycloak.stop() // Close Keycloak container
+        }*/
 
         @JvmStatic
         @DynamicPropertySource
@@ -95,6 +105,10 @@ class ApplicationTests {
         globalConfig.keycloakPort = keycloakMappedPort
         globalConfig.keycloakURL = keycloakHost
     }
+
+
+
+
 
 
     /*
