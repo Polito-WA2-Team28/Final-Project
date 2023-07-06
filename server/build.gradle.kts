@@ -42,6 +42,7 @@ dependencies {
 	testImplementation("org.testcontainers:postgresql:1.17.6")
 
 	testImplementation("com.github.dasniko:testcontainers-keycloak:2.5.0")
+	testImplementation("org.springframework.boot:spring-boot-starter-web")
 
 
 	// using new @Observed on class and enaabled @ObservedAspect
@@ -92,3 +93,11 @@ jib {
 
 jib.from.image = "amazoncorretto:17-alpine"
 jib.to.image = "runcor3/ticketing-service:final-project"
+
+
+sourceSets {
+	test {
+		kotlin.srcDirs("src/test/kotlin") // Add the appropriate directory
+	}
+}
+

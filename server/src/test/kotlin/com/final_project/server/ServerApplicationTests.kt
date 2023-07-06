@@ -6,7 +6,11 @@ import com.final_project.server.repository.*
 import com.final_project.ticketing.repository.TicketRepository
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.junit.jupiter.api.*
+import org.junit.runner.RunWith
+import org.junit.runners.Suite
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.SpringBootConfiguration
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.*
@@ -14,11 +18,18 @@ import org.springframework.http.*
 import org.springframework.test.context.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.testcontainers.junit.jupiter.*
+
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@RunWith(Suite::class)
+@ContextConfiguration(classes = [TestConfig::class])
+@Suite.SuiteClasses(
+        CustomerProductTest::class,
+        CustomerTicketTest::class
+)
 class ApplicationTests {
     @Autowired
     lateinit var utilityFunctions: UtilityFunctions
@@ -40,12 +51,17 @@ class ApplicationTests {
             registry.add("spring.datasource.username", postgres::getUsername)
             registry.add("spring.datasource.password", postgres::getPassword)
             registry.add("spring.jpa.hibernate.ddl-auto") { "create-drop" }
+            registry.add("POSTGRES_URL", postgres::getJdbcUrl)
+            println(postgres::getJdbcUrl)
+
 
             /* keycloak container */
             val keycloakBaseUrl = keycloak.authServerUrl
             registry.add("keycloakBaseUrl") { keycloakBaseUrl }
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") { keycloakBaseUrl + "realms/TicketingServiceRealm" }
             registry.add("spring.security.oauth2.resourceserver.jwt.jwk-set-uri") { keycloakBaseUrl + "realms/TicketingServiceRealm/protocol/openid-connect/certs" }
+            registry.add("keycloakMappedPort") { (keycloak.getMappedPort(8080)).toString() }
+            registry.add("keycloakHost") { keycloak.host }
         }
     }
 
@@ -63,6 +79,10 @@ class ApplicationTests {
     lateinit var expertRepository: ExpertRepository
     @Autowired
     lateinit var managerRepository: ManagerRepository
+    @Value("\${keycloakMappedPort}")
+    lateinit var keycloakMappedPort:String
+    @Value("\${keycloakHost}")
+    lateinit var keycloakHost:String
 
     @BeforeEach
     fun setUp() {
@@ -71,30 +91,11 @@ class ApplicationTests {
         customerRepository.deleteAll()
         managerRepository.deleteAll()
         expertRepository.deleteAll()
-        val allocatedPort = keycloak.getMappedPort(8080)
-        globalConfig.keycloakPort = allocatedPort.toString()
-        globalConfig.keycloakURL = keycloak.host
+
+        globalConfig.keycloakPort = keycloakMappedPort
+        globalConfig.keycloakURL = keycloakHost
     }
 
-    // TESTS
-
-
-    @Test /** POST /api/auth/login */
-    fun `Unauthorized login`() {
-
-        /* crafting the request  */
-        val credentials = UserCredentialsDTO("customer-test-10", "test")
-        val body = HttpEntity(credentials)
-        //* login *//*
-        val response = utilityFunctions.restTemplate.postForEntity<String>(
-            "/api/auth/login",
-            body,
-            HttpMethod.POST
-        )
-
-        /* Assertions */
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
-    }
 
     /*
 

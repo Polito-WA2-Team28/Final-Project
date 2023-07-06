@@ -13,22 +13,22 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit4.SpringRunner
-import org.testcontainers.junit.jupiter.Testcontainers
-
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class CustomerProductTest {
+@ContextConfiguration(classes = [TestConfig::class])
+@Import(TestConfig::class)
+class CustomerTicketTest {
     @Autowired
     lateinit var utilityFunctions:UtilityFunctions
-    @Test /** POST /api/auth/login */
-    fun `Unauthorized Customer Login`() {
+
+    @Test /** POST /api/auth/login Success */
+    fun `Successful Customer Login`() {
 
         /* crafting the request  */
-        val credentials = UserCredentialsDTO("customer-test-10", "test")
+        val credentials = UserCredentialsDTO("customer-test-1", "test")
         val body = HttpEntity(credentials)
         //* login *//*
         val response = utilityFunctions.restTemplate.postForEntity<String>(
@@ -37,8 +37,9 @@ class CustomerProductTest {
             HttpMethod.POST
         )
 
+        println(response.statusCode)
 
         /* Assertions */
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
     }
 }
