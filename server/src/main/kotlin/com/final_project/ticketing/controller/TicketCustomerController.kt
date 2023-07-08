@@ -122,6 +122,7 @@ class TicketCustomerController @Autowired constructor(
         return nexus.ticket
     }
 
+    //Receive a String that represents a Survey and patch it in the ticket entry (OneToOne or embedded)
     @PatchMapping("/api/customers/tickets/{ticketId}/compileSurvey")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun compileTicketSurvey(

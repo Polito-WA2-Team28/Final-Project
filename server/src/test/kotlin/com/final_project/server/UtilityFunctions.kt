@@ -40,23 +40,29 @@ class UtilityFunctions {
     fun createTestExpert(): Expert {
         return Expert(
             UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687"),
-            "expert01@mail.com", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+            "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
     }
     fun createTestProduct(customer: Customer): Product {
         return Product(1, UUID.randomUUID(),"Iphone", "15", true, customer)
     }
-    fun createTestTicket(customer: Customer, product: Product, expert: Expert): Ticket {
+    fun createTestTicket(customer: Customer, product: Product, expert: Expert?, state: TicketState): Ticket {
         return Ticket(
-            TicketState.OPEN, customer, expert, "Description", product, mutableSetOf(),
+            state, customer, expert, "Description", product, mutableSetOf(),
             myDate(2020, 1, 1), myDate(2020, 1, 1)
         )
     }
+
+
+
     fun createTestManager(): Manager {
         return Manager(UUID.fromString("3eb963ee-1404-45e1-bef2-9583d4b6243f"),"manager@ticketingservice.it")
     }
     fun customerLogin():String{return login("customer-test-1", "test")}
-    fun expertLogin():String{return login("expert-1", "test")}
-    fun managerLogin():String{return login("manager-1","test")}
+
+    fun expertLogin():String{return login("expert-1", "password1")}
+
+    fun managerLogin():String{return login("manager-1","password")}
+
     fun login(username: String, password: String): String {
 
         /* crafting the request */
@@ -69,6 +75,7 @@ class UtilityFunctions {
             body,
             HttpMethod.POST
         )
+        println("**********${response.statusCode}**********")
 
         /* retrieving the access token */
         return JSONObject(response.body)["accessToken"].toString()

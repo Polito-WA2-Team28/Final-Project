@@ -140,6 +140,28 @@ class TicketManagerController @Autowired constructor(
         return nexus.ticket
     }
 
+
+    @PatchMapping("/api/managers/tickets/{ticketId}/resolve")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun resolveTicket(
+        @PathVariable("ticketId") ticketId: Long
+    ): TicketDTO? {
+
+        val nexus: Nexus = Nexus(managerService, expertService, ticketService)
+
+        /* running checks... */
+        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED, TicketState.IN_PROGRESS)
+        val managerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        nexus
+            .setEndpointForLogger("/api/managers/tickets/$ticketId/resolve")
+            .assertManagerExists(managerId)
+            .assertTicketExists(ticketId)
+            .assertTicketStatus(allowedStates)
+            .resolveTicket(ticketId)
+
+        return nexus.ticket
+    }
+
     @PatchMapping("/api/managers/tickets/{ticketId}/resumeProgress")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun resumeTicketProgress (

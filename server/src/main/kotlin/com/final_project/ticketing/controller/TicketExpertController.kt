@@ -82,7 +82,7 @@ class TicketExpertController @Autowired constructor(
         val nexus: Nexus = Nexus(expertService, ticketService)
 
         /* running checks... */
-        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED, TicketState.IN_PROGRESS)
+        val allowedStates = mutableSetOf(TicketState.REOPENED, TicketState.IN_PROGRESS)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/resolve")
@@ -104,7 +104,7 @@ class TicketExpertController @Autowired constructor(
         val nexus: Nexus = Nexus(expertService, ticketService)
 
         /* running checks... */
-        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED)
+        val allowedStates = mutableSetOf(TicketState.REOPENED)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
