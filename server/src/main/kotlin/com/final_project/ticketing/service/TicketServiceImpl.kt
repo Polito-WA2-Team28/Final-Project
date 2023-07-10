@@ -43,6 +43,7 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
         return ticketRepository.findByExpertId(expertId).map{it.toDTO()}
     }
 
+    @Transactional
     override fun changeTicketStatus(ticketId: Long, newState: TicketState) {
         return ticketRepository.updateTicketState(ticketId, newState)
     }

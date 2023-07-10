@@ -20,7 +20,6 @@ import org.springframework.util.MultiValueMap
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Transactional
 class TestCases : ApplicationTests(){
 
     //AUTHENTICATION TESTS
@@ -74,8 +73,9 @@ class TestCases : ApplicationTests(){
         val customer = utilityFunctions.createTestCustomer()
         val customerId = customerRepository.save(customer).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        println(productRepository.save(product).getId())
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
 
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
@@ -126,8 +126,9 @@ class TestCases : ApplicationTests(){
         val customer = utilityFunctions.createTestCustomer()
         val customerId = customerRepository.save(customer).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
 
         val jsonRequest = JSONObject()
@@ -172,8 +173,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer, product, null, TicketState.OPEN)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -188,7 +190,7 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            "http://localhost:$port/api/customers/tickets/${ticketId}",
+            "/api/customers/tickets/${ticketId}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -200,7 +202,6 @@ class TestCases : ApplicationTests(){
         val resTicket = JSONObject(body)
         Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
         Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
         Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
@@ -254,8 +255,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -263,12 +265,18 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.customerLogin()
+
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         //Where is the ticket being closed?
 
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticketId}/reopen",
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
 
@@ -287,8 +295,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -296,10 +305,16 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.customerLogin()
+
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticketId}/reopen",
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
 
@@ -318,8 +333,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, null, TicketState.OPEN)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -327,11 +343,17 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.managerLogin()
+
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         val url = "/api/managers/tickets/${ticketId}/relieveExpert"
         val response = utilityFunctions.restTemplate.exchange(
             url,
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
@@ -350,8 +372,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -359,10 +382,16 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.customerLogin()
+
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticketId}/compileSurvey",
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
@@ -379,8 +408,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -392,6 +422,10 @@ class TestCases : ApplicationTests(){
         headers.contentType = MediaType.APPLICATION_JSON
         val requestObject = JSONObject()
         requestObject.put("expertId", expert.id)
+
+        val accessToken = utilityFunctions.customerLogin()
+        headers.add("Authorization", "Bearer $accessToken")
+
 
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticketId}/compileSurvey",
@@ -420,8 +454,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -447,12 +482,12 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(HttpStatus.OK, response.statusCode)
         val body = response.body
         val resTicket = JSONObject(body).getJSONArray("content").getJSONObject(0)
-        Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
+        Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
         Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
         Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
-        Assertions.assertEquals(formatter.format(ticket.lastModified.toString()), resTicket.getString("lastModified"))
+        Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
         Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
         Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
     }
@@ -476,15 +511,16 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         val ticketId = ticketRepository.save(ticket).getId()
 
 
         /* customer login */
-        val accessToken = utilityFunctions.customerLogin()
+        val accessToken = utilityFunctions.expertLogin()
 
         /* crafting the request */
         val headers: MultiValueMap<String, String> = HttpHeaders().apply {
@@ -493,14 +529,15 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            "http://localhost:$port/api/experts/tickets/${ticketId}",
+            "/api/experts/tickets/${ticketId}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
         )
         val body = response.body
         val resTicket = JSONObject(body)
-        Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
+
+        Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
         Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
         Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
@@ -561,7 +598,8 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
 
         try {
-            expertRepository.save(expert)
+            println("[!] saving into repository")
+            println(expertRepository.save(expert).id)
             transactionManager.commit(transactionStatus)
         } catch (e: Exception) {
             transactionManager.rollback(transactionStatus)
@@ -570,11 +608,12 @@ class TestCases : ApplicationTests(){
 
 
         println("******EXPERTIDS**********")
-        expertRepository.findAll().map { it -> println(it.id) }
+        expertRepository.findAll().map { println(it.id) }
         println("end")
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.IN_PROGRESS)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -613,8 +652,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -622,10 +662,17 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.expertLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         val response = utilityFunctions.restTemplate.exchange(
             "/api/experts/tickets/${ticketId}/resolve",
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
 
@@ -645,8 +692,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.REOPENED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -654,10 +702,17 @@ class TestCases : ApplicationTests(){
         val manager = utilityFunctions.createTestManager()
         val managerId = managerRepository.save(manager).id
 
+        val accessToken = utilityFunctions.expertLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
         val response = utilityFunctions.restTemplate.exchange(
             "/api/experts/tickets/${ticketId}/close",
             HttpMethod.PATCH,
-            null,
+            HttpEntity(null, headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
@@ -674,8 +729,9 @@ class TestCases : ApplicationTests(){
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
 
-        val product = utilityFunctions.createTestProduct(customer)
-        productRepository.save(product).getId()
+        var product = utilityFunctions.createTestProduct(customer)
+        val realProductId = productRepository.save(product).id
+        product = utilityFunctions.updateTestProduct(product, realProductId)
 
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
         val ticketId = ticketRepository.save(ticket).getId()
@@ -687,6 +743,9 @@ class TestCases : ApplicationTests(){
         headers.contentType = MediaType.APPLICATION_JSON
         val requestObject = JSONObject()
         requestObject.put("expertId", expert.id)
+
+        val accessToken = utilityFunctions.expertLogin()
+        headers.add("Authorization", "Bearer $accessToken")
 
         val response = utilityFunctions.restTemplate.exchange(
             "/api/experts/tickets/${ticketId}/close",

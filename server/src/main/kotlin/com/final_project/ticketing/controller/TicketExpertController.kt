@@ -80,10 +80,16 @@ class TicketExpertController @Autowired constructor(
     ): TicketDTO? {
 
         val nexus: Nexus = Nexus(expertService, ticketService)
+        println("[!] TicketExpertController:resolveTicket: getAllExperts")
+        expertService.getAllExperts().map { println(it.id) }
+        println("[!] ---")
 
         /* running checks... */
         val allowedStates = mutableSetOf(TicketState.REOPENED, TicketState.IN_PROGRESS)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        println("[!] TicketExpertController:resolveTicket: expertId from securityConfig")
+        println(expertId)
+        println("[!] ---")
 
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/resolve")

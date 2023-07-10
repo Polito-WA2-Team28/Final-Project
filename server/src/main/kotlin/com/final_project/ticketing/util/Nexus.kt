@@ -75,15 +75,15 @@ class Nexus () {
 
 
     fun assertExpertExists(expertId: UUID): Nexus {
-        logger.warn("EXPERTS?")
-        val result = expertService.getAllExperts()
-        result.forEach{
-                e -> logger.warn("****DEBUG**** ${e.id}")
-        }
-        logger.warn("EXPERTS????")
+        println("[!] Nexus:assertExpertExists: expertId from param")
+        println(expertId)
+        println("[!] ---")
+
+        println("[!] Nexus:assertExpertExists: expertId from service")
+        println(expertService.getAllExperts())
+        println("[!] ---")
+
         this.expert = expertService.getExpertById(expertId) ?: run {
-
-
             logger.error("Endpoint: ${endpointHolder.get()} Error: No expert profile found with this UUID.")
             throw Exception.ExpertNotFoundException("No expert profile found with this UUID.")
         }

@@ -42,8 +42,14 @@ class UtilityFunctions {
         return Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
     }
     fun createTestProduct(customer: Customer): Product {
-        return Product(1, UUID.randomUUID(),"Iphone", "15", true, customer)
+        return Product(0, UUID.randomUUID(),"Iphone", "15", true, customer)
     }
+
+    fun updateTestProduct(product: Product, id: Long): Product {
+        product.id = id
+        return product
+    }
+
     fun createTestTicket(customer: Customer, product: Product, expert: Expert?, state: TicketState): Ticket {
         return Ticket(
             state, customer, expert, "Description", product, mutableSetOf(),
