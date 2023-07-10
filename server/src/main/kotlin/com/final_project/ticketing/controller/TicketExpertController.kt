@@ -84,6 +84,7 @@ class TicketExpertController @Autowired constructor(
         /* running checks... */
         val allowedStates = mutableSetOf(TicketState.REOPENED, TicketState.IN_PROGRESS)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/resolve")
             .assertExpertExists(expertId)

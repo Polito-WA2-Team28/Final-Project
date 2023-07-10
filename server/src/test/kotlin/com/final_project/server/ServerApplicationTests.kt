@@ -4,6 +4,7 @@ import com.final_project.server.config.GlobalConfig
 import com.final_project.server.repository.*
 import com.final_project.ticketing.repository.TicketRepository
 import dasniko.testcontainers.keycloak.KeycloakContainer
+import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.*
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
@@ -15,6 +16,7 @@ import org.springframework.http.*
 import org.springframework.test.context.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.transaction.PlatformTransactionManager
 import org.testcontainers.junit.jupiter.*
 import java.text.SimpleDateFormat
 
@@ -81,6 +83,10 @@ class ApplicationTests {
     @Value("\${keycloakHost}")
     lateinit var keycloakHost:String
     var formatter = SimpleDateFormat("yyyy-MM-dd")
+    @Autowired
+    lateinit var entityManager: EntityManager
+    @Autowired
+    lateinit var transactionManager: PlatformTransactionManager
 
     @BeforeEach
     fun setUp() {

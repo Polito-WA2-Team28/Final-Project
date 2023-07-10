@@ -38,9 +38,8 @@ class UtilityFunctions {
         )
     }
     fun createTestExpert(): Expert {
-        return Expert(
-            UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687"),
-            "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
+        return Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
     }
     fun createTestProduct(customer: Customer): Product {
         return Product(1, UUID.randomUUID(),"Iphone", "15", true, customer)

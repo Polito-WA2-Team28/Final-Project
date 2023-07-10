@@ -5,6 +5,8 @@ import com.final_project.server.dto.ExpertDTO
 import com.final_project.server.dto.ManagerDTO
 import com.final_project.server.dto.ProductDTO
 import com.final_project.server.exception.Exception
+import com.final_project.server.repository.ExpertRepository
+import com.final_project.server.repository.ProductRepository
 import java.util.UUID
 import com.final_project.server.service.*
 import com.final_project.ticketing.dto.TicketDTO
@@ -12,7 +14,11 @@ import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Configuration
+import org.springframework.transaction.annotation.Transactional
 
+@Configuration
 class Nexus () {
 
     /* services */
@@ -67,8 +73,17 @@ class Nexus () {
         return this
     }
 
+
     fun assertExpertExists(expertId: UUID): Nexus {
+        logger.warn("EXPERTS?")
+        val result = expertService.getAllExperts()
+        result.forEach{
+                e -> logger.warn("****DEBUG**** ${e.id}")
+        }
+        logger.warn("EXPERTS????")
         this.expert = expertService.getExpertById(expertId) ?: run {
+
+
             logger.error("Endpoint: ${endpointHolder.get()} Error: No expert profile found with this UUID.")
             throw Exception.ExpertNotFoundException("No expert profile found with this UUID.")
         }

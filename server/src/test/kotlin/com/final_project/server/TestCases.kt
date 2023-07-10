@@ -12,7 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.http.*
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.DefaultTransactionDefinition
 import org.springframework.util.MultiValueMap
 
 @RunWith(SpringRunner::class)
@@ -552,9 +554,24 @@ class TestCases : ApplicationTests(){
         val customer = utilityFunctions.createTestCustomer()
         val customerId = customerRepository.save(customer).id
 
+        val transactionDefinition = DefaultTransactionDefinition()
+        val transactionStatus: TransactionStatus = transactionManager.getTransaction(transactionDefinition)
+
+
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-        println(expertId)
+
+        try {
+            expertRepository.save(expert)
+            transactionManager.commit(transactionStatus)
+        } catch (e: Exception) {
+            transactionManager.rollback(transactionStatus)
+            throw e
+        }
+
+
+        println("******EXPERTIDS**********")
+        expertRepository.findAll().map { it -> println(it.id) }
+        println("end")
 
         val product = utilityFunctions.createTestProduct(customer)
         productRepository.save(product).getId()
