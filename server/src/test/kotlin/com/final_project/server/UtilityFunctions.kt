@@ -5,7 +5,12 @@ import com.final_project.server.model.Customer
 import com.final_project.server.model.Expert
 import com.final_project.server.model.Manager
 import com.final_project.server.model.Product
+import com.final_project.server.repository.CustomerRepository
+import com.final_project.server.repository.ExpertRepository
+import com.final_project.server.repository.ManagerRepository
+import com.final_project.server.repository.ProductRepository
 import com.final_project.ticketing.model.Ticket
+import com.final_project.ticketing.repository.TicketRepository
 import com.final_project.ticketing.util.ExpertiseFieldEnum
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
@@ -20,49 +25,98 @@ import java.util.*
 
 @Configuration
 class UtilityFunctions {
+
     @Autowired
     lateinit var restTemplate: TestRestTemplate
+    @Autowired
+    private lateinit var customerRepository: CustomerRepository
+    @Autowired
+    private lateinit var productRepository: ProductRepository
+    @Autowired
+    private lateinit var expertRepository: ExpertRepository
+    @Autowired
+    private lateinit var ticketRepository: TicketRepository
+    @Autowired
+    private lateinit var managerRepository: ManagerRepository
 
-    fun myDate(year: Int, month: Int, day: Int): Date {
+    private fun myDate(year: Int, month: Int, day: Int): Date {
         return Date(year - 1900, month - 1, day)
     }
-    fun Date.formatDate(): String {
+    private fun Date.formatDate(): String {
         return SimpleDateFormat("yyyy-MM-dd").format(this)
     }
-    fun createTestCustomer(): Customer {
-        return Customer(
+
+    private fun createFirstCustomer(): Customer {
+        val customer = Customer(
             UUID.fromString("0ae24126-7590-4e62-9f05-199f61824ed6"),
-            "Mario", "Rossi", "mariorossi",
-            myDate(2022, 1, 1), myDate(1990, 1, 1),
-            "mario.rossi@mail.com", "0123456789"
+            "Mario",
+            "Rossi",
+            "mariorossi",
+            myDate(2022, 1, 1),
+            myDate(1990, 1, 1),
+            "mario.rossi@mail.com",
+            "0123456789"
         )
-    }
-    fun createTestExpert(): Expert {
-        val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
-        return Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
-    }
-    fun createTestProduct(customer: Customer): Product {
-        return Product(0, UUID.randomUUID(),"Iphone", "15", true, customer)
+        customerRepository.save(customer)
+        return customer
     }
 
-    fun updateTestProduct(product: Product, id: Long): Product {
-        product.id = id
+    private fun createSecondCustomer(): Customer {
+        val customer = Customer(
+            UUID.fromString("b73f15f3-31fb-49a8-9369-b0a2e334226c"),
+            "John",
+            "Doe",
+            "johndoe",
+            myDate(2022, 2, 2),
+            myDate(1991, 2, 2),
+            "johndoe@example.com",
+            "9876543210"
+        )
+        customerRepository.save(customer)
+        return customer
+    }
+
+    fun createTestExpert(): Expert {
+        val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
+        val expert: Expert =  Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        expertRepository.save(expert)
+        return expert
+    }
+
+
+    fun createTestCustomer(name: String, surname: String): Customer? {
+        val key = "$name $surname"
+        return when (key) {
+            "John Doe" -> createFirstCustomer()
+            "Mario Rossi" -> createSecondCustomer()
+            else -> null
+        }
+    }
+
+    fun createTestProduct(customer: Customer): Product {
+        val product: Product = Product(0, UUID.randomUUID(),"Iphone", "15", true, customer)
+        val productId = productRepository.save(product).id
+        product.id = productId
         return product
     }
 
     fun createTestTicket(customer: Customer, product: Product, expert: Expert?, state: TicketState): Ticket {
-        return Ticket(
+        val ticket: Ticket = Ticket(
             state, customer, expert, "Description", product, mutableSetOf(),
             myDate(2020, 1, 1), myDate(2020, 1, 1)
         )
+        ticketRepository.save(ticket)
+        return ticket
     }
-
-
 
     fun createTestManager(): Manager {
-        return Manager(UUID.fromString("3eb963ee-1404-45e1-bef2-9583d4b6243f"),"manager@ticketingservice.it")
+        val manager: Manager = Manager(UUID.fromString("3eb963ee-1404-45e1-bef2-9583d4b6243f"),"manager@ticketingservice.it")
+        managerRepository.save(manager)
+        return manager
     }
     fun customerLogin():String{return login("customer-test-1", "test")}
+
+    fun customer2Login(): String { return login("customer-test-2", "test") }
 
     fun expertLogin():String{return login("expert-1", "password1")}
 

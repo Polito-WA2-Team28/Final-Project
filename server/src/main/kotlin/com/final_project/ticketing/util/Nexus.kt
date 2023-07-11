@@ -75,14 +75,6 @@ class Nexus () {
 
 
     fun assertExpertExists(expertId: UUID): Nexus {
-        println("[!] Nexus:assertExpertExists: expertId from param")
-        println(expertId)
-        println("[!] ---")
-
-        println("[!] Nexus:assertExpertExists: expertId from service")
-        println(expertService.getAllExperts())
-        println("[!] ---")
-
         this.expert = expertService.getExpertById(expertId) ?: run {
             logger.error("Endpoint: ${endpointHolder.get()} Error: No expert profile found with this UUID.")
             throw Exception.ExpertNotFoundException("No expert profile found with this UUID.")
@@ -116,8 +108,8 @@ class Nexus () {
 
     fun assertTicketOwnership(): Nexus {
         if (this.ticket!!.customerId != this.customer!!.id) {
-            logger.error("Endpoint: ${endpointHolder.get()} Error: Forbidden.")
-            throw TicketException.TicketForbiddenException("Forbidden.")
+            logger.error("Endpoint: ${endpointHolder.get()} Error: This ticket belongs to another customer.")
+            throw TicketException.TicketForbiddenException("This ticket belongs to another customer.")
         }
         return this
     }
