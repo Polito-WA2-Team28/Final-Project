@@ -209,7 +209,7 @@ class TicketCustomerController @Autowired constructor(
         @PathVariable ticketId: Long
     ): ResponseEntity<ByteArray> {
 
-        val nexus: Nexus = Nexus(customerService, ticketService, productService)
+        val nexus: Nexus = Nexus(customerService, ticketService, productService, fileStorageService)
 
         /* running checks... */
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
@@ -218,7 +218,7 @@ class TicketCustomerController @Autowired constructor(
             .assertCustomerExists(customerId)
             .assertTicketExists(ticketId)
             .assertTicketOwnership()
-            //.assertFileExists() /* TODO: need to assert that the uniqueFileName corresponds to a file that exists */
+            //.assertFileExists(attachmentUniqueName)
 
         return fileStorageService.getAttachmentFile(attachmentUniqueName)
     }

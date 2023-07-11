@@ -9,17 +9,30 @@ import com.final_project.server.repository.CustomerRepository
 import com.final_project.server.repository.ExpertRepository
 import com.final_project.server.repository.ManagerRepository
 import com.final_project.server.repository.ProductRepository
+import com.final_project.ticketing.dto.MessageObject
+import com.final_project.ticketing.dto.toDTO
+import com.final_project.ticketing.model.Attachment
+import com.final_project.ticketing.model.Message
 import com.final_project.ticketing.model.Ticket
+import com.final_project.ticketing.model.toModel
+import com.final_project.ticketing.repository.AttachmentRepository
+import com.final_project.ticketing.repository.MessageRepository
 import com.final_project.ticketing.repository.TicketRepository
 import com.final_project.ticketing.util.ExpertiseFieldEnum
 import com.final_project.ticketing.util.TicketState
+import org.apache.http.entity.ContentType
 import org.json.JSONObject
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
+import org.springframework.util.MimeType
+import org.springframework.web.multipart.MultipartFile
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +51,10 @@ class UtilityFunctions {
     private lateinit var ticketRepository: TicketRepository
     @Autowired
     private lateinit var managerRepository: ManagerRepository
+    @Autowired
+    private lateinit var messageRepository: MessageRepository
+    @Autowired
+    private lateinit var attachmentRepository: AttachmentRepository
 
     private fun myDate(year: Int, month: Int, day: Int): Date {
         return Date(year - 1900, month - 1, day)
@@ -87,8 +104,8 @@ class UtilityFunctions {
     fun createTestCustomer(name: String, surname: String): Customer? {
         val key = "$name $surname"
         return when (key) {
-            "John Doe" -> createFirstCustomer()
-            "Mario Rossi" -> createSecondCustomer()
+            "Mario Rossi" -> createFirstCustomer()
+            "John Doe" -> createSecondCustomer()
             else -> null
         }
     }
@@ -114,6 +131,24 @@ class UtilityFunctions {
         managerRepository.save(manager)
         return manager
     }
+
+    fun createAttachments(): MutableSet<Attachment> {
+        val attachments: MutableSet<Attachment> = mutableSetOf<Attachment>().apply {
+            add(Attachment("PoliTo", ContentType.WILDCARD.mimeType, "44d34d89-1bdd-4942-963b-6777090fc6be_attach2"))
+        }
+        return attachments
+    }
+
+    fun addMessage(ticket: Ticket, customer: Customer, text: String, files: MutableSet<Attachment>?): String? {
+        val attachments: MutableSet<Attachment> = files ?: mutableSetOf()
+        val message: Message = Message(text, myDate(2023, 1, 1), customer.username, attachments, ticket)
+        val ticket = ticketRepository.findByIdOrNull(ticket.getId() ?: 0)
+            ?: fail("Test failed because no ticket was created in the database (sending messages).")
+        messageRepository.save(message)
+        return files?.first()?.fileUniqueName
+    }
+
+
     fun customerLogin():String{return login("customer-test-1", "test")}
 
     fun customer2Login(): String { return login("customer-test-2", "test") }
