@@ -665,8 +665,10 @@ class TestCases : ApplicationTests(){
     @Test /** GET /api/managers/tickets*/
 
     fun successGetAllTicketsOfAManager() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customer.id
+
 
         val expert = utilityFunctions.createTestExpert()
         val expertId = expertRepository.save(expert).id
@@ -700,7 +702,7 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(HttpStatus.OK, response.statusCode)
         val body = response.body
         val resTicket = JSONObject(body).getJSONArray("content").getJSONObject(0)
-        Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
+        Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
         Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
         Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))

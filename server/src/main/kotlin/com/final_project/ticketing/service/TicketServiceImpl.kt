@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import com.final_project.ticketing.dto.TicketCreationData
 import com.final_project.ticketing.dto.TicketDTO
 import com.final_project.ticketing.dto.toDTO
+import com.final_project.ticketing.exception.TicketException
+import com.final_project.ticketing.model.TicketStateEvolution
+import com.final_project.ticketing.repository.TicketStateEvolutionRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -25,7 +28,8 @@ import java.util.*
 @Service
 class TicketServiceImpl @Autowired constructor(private val ticketRepository: TicketRepository,
                                                private val messageRepository: MessageRepository,
-                                               private val fileStorageService: FileStorageService) : TicketService{
+                                               private val fileStorageService: FileStorageService,
+                                               private val ticketStateEvolutionRepository: TicketStateEvolutionRepository) : TicketService{
 
 
 
@@ -33,10 +37,15 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
         return ticketRepository.findByIdOrNull(id)?.toDTO()
     }
 
+    @Transactional
     override fun createTicket(ticketDTO: TicketCreationData, customerDTO: CustomerDTO, productDTO: ProductDTO): TicketDTO? {
         val customer = customerDTO.toModel()
         val product = productDTO.toModel(customer)
-        return ticketRepository.save(ticketDTO.toModel(customer, product)).toDTO()
+        val ticket = ticketDTO.toModel(customer, product)
+        val timestamp = Date()
+
+        ticketStateEvolutionRepository.save(TicketStateEvolution(ticket, TicketState.OPEN, timestamp))
+        return ticketRepository.save(ticket).toDTO()
     }
 
     override fun getAllExpertTickets(expertId: UUID): List<TicketDTO> {
@@ -45,9 +54,16 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
 
     @Transactional
     override fun changeTicketStatus(ticketId: Long, newState: TicketState) {
+        val ticket = ticketRepository.findByIdOrNull(ticketId) ?: run {
+            throw TicketException.TicketNotFoundException("Ticket not found")
+        }
+        val timestamp = Date()
+
+        ticketStateEvolutionRepository.save(TicketStateEvolution(ticket, newState, timestamp))
         return ticketRepository.updateTicketState(ticketId, newState)
     }
 
+    @Transactional
     override fun assignTicketToExpert(ticketId: Long, expertId: UUID) {
         return ticketRepository.assignTicketToExpert(ticketId, expertId)
     }
@@ -61,10 +77,11 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
     }
 
     @Transactional(readOnly=true)
-    override fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketDTO> {
+    override fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketManagerDTO> {
         return ticketRepository.findAll(pageable)
             .map {
-                it.toDTO()
+                val ticketStateLifecycle = it.getId()?.let { ticketId -> this.retrieveTicketStateLifecycle(ticketId) }
+                it.toDTO().toManagerDTO(ticketStateLifecycle)
             }
     }
 
@@ -116,6 +133,10 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
             .map {
                 it.toDTO()
             };
+    }
+
+    override fun retrieveTicketStateLifecycle(ticketId: Long): List<TicketStateEvolutionDTO> {
+        return ticketStateEvolutionRepository.findAllByTicketId(ticketId).map { tse -> tse.toDTO() }
     }
 
 }

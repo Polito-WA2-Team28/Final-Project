@@ -11,6 +11,7 @@ import com.final_project.server.repository.ProductRepository
 import java.util.UUID
 import com.final_project.server.service.*
 import com.final_project.ticketing.dto.TicketDTO
+import com.final_project.ticketing.dto.TicketStateEvolutionDTO
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import org.slf4j.Logger
@@ -70,6 +71,7 @@ class Nexus () {
     var manager: ManagerDTO? = null
     var ticket: TicketDTO? = null
     var product: ProductDTO? = null
+    var ticketStatusLifecycle: List<TicketStateEvolutionDTO> = emptyList()
 
     fun setEndpointForLogger(endpoint: String): Nexus {
         endpointHolder.set(endpoint)
@@ -199,6 +201,11 @@ class Nexus () {
     fun reopenTicket(ticketId: Long): Nexus {
         this.ticket!!.changeState(TicketState.REOPENED)
         ticketService.changeTicketStatus(ticketId, TicketState.REOPENED)
+        return this
+    }
+
+    fun retrieveTicketStateLifecycle(ticketId: Long): Nexus {
+        this.ticketStatusLifecycle = ticketService.retrieveTicketStateLifecycle(ticketId)
         return this
     }
 

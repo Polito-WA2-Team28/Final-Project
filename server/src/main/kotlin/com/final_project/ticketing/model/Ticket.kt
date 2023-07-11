@@ -13,6 +13,7 @@ import java.util.*
 @Entity
 @Table
 class Ticket(
+    @Enumerated(EnumType.STRING)
     var state: TicketState,
     @ManyToOne(fetch = FetchType.LAZY) var customer: Customer,
     @ManyToOne(fetch = FetchType.LAZY) var expert:Expert?,
