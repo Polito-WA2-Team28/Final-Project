@@ -9,15 +9,23 @@ import com.final_project.server.repository.CustomerRepository
 import com.final_project.server.repository.ExpertRepository
 import com.final_project.server.repository.ManagerRepository
 import com.final_project.server.repository.ProductRepository
+import com.final_project.ticketing.dto.MessageObject
+import com.final_project.ticketing.dto.toDTO
+import com.final_project.ticketing.model.Attachment
+import com.final_project.ticketing.model.Message
 import com.final_project.ticketing.model.Ticket
+import com.final_project.ticketing.model.toModel
+import com.final_project.ticketing.repository.MessageRepository
 import com.final_project.ticketing.repository.TicketRepository
 import com.final_project.ticketing.util.ExpertiseFieldEnum
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
+import org.junit.jupiter.api.fail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import java.text.SimpleDateFormat
@@ -38,6 +46,8 @@ class UtilityFunctions {
     private lateinit var ticketRepository: TicketRepository
     @Autowired
     private lateinit var managerRepository: ManagerRepository
+    @Autowired
+    private lateinit var messageRepository: MessageRepository
 
     private fun myDate(year: Int, month: Int, day: Int): Date {
         return Date(year - 1900, month - 1, day)
@@ -87,8 +97,8 @@ class UtilityFunctions {
     fun createTestCustomer(name: String, surname: String): Customer? {
         val key = "$name $surname"
         return when (key) {
-            "John Doe" -> createFirstCustomer()
-            "Mario Rossi" -> createSecondCustomer()
+            "Mario Rossi" -> createFirstCustomer()
+            "John Doe" -> createSecondCustomer()
             else -> null
         }
     }
@@ -114,6 +124,25 @@ class UtilityFunctions {
         managerRepository.save(manager)
         return manager
     }
+
+
+    fun sendCustomerMessage(ticketId: Long, text: String) {
+        val message: MessageObject = MessageObject(text, listOf())
+        val ticket = ticketRepository.findByIdOrNull(ticketId)
+            ?: fail("Test failed because no ticket was created in the database (sending messages).")
+        messageRepository.save(message.toModel(mutableSetOf<Attachment>(), "Customer", ticket)).toDTO()
+    }
+
+    fun sendExpertMessage(ticketId: Long, text: String) {
+        val message: MessageObject = MessageObject(text, listOf())
+        val ticket = ticketRepository.findByIdOrNull(ticketId)
+            ?: fail("Test failed because no ticket was created in the database (sending messages).")
+        messageRepository.save(message.toModel(mutableSetOf<Attachment>(), "Expert", ticket)).toDTO()
+    }
+
+
+
+
     fun customerLogin():String{return login("customer-test-1", "test")}
 
     fun customer2Login(): String { return login("customer-test-2", "test") }

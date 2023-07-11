@@ -71,7 +71,7 @@ class TestCases : ApplicationTests(){
         /* adding data to database */
         val expert = utilityFunctions.createTestExpert()
 
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         var product = utilityFunctions.createTestProduct(customer)
@@ -118,7 +118,7 @@ class TestCases : ApplicationTests(){
     //@Ignore
     @Test /** POST /api/customers/tickets POST*/
     fun `Successful creation of a new ticket`() {
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         var product = utilityFunctions.createTestProduct(customer)
@@ -159,7 +159,7 @@ class TestCases : ApplicationTests(){
 
     @Test /** GET /api/customers/tickets/:ticketId */
     fun successGetASingleTicketsOfACustomer() {
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
@@ -235,7 +235,7 @@ class TestCases : ApplicationTests(){
 
     @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
     fun successReopenClosedTicket(){
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
@@ -267,7 +267,7 @@ class TestCases : ApplicationTests(){
 
     @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
     fun successReopenResolvedTicket(){
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
@@ -328,7 +328,7 @@ class TestCases : ApplicationTests(){
     //FIX
     @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun successCompileSurvey(){
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
@@ -356,7 +356,7 @@ class TestCases : ApplicationTests(){
 
     @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun failCompileSurveyTicketAlreadyClosed() {
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
