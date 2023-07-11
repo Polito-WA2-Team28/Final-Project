@@ -1,5 +1,6 @@
 package com.final_project.ticketing.util
 
+import com.final_project.server.config.GlobalConfig
 import com.final_project.server.dto.CustomerDTO
 import com.final_project.server.dto.ExpertDTO
 import com.final_project.server.dto.ManagerDTO
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.transaction.annotation.Transactional
+import java.io.File
 
 @Configuration
 class Nexus () {
@@ -27,6 +29,7 @@ class Nexus () {
     private lateinit var managerService: ManagerService
     private lateinit var ticketService: TicketService
     private lateinit var productService: ProductService
+    private lateinit var fileStorageService: FileStorageService
 
     constructor(customerService: CustomerService): this() {
         this.customerService = customerService
@@ -36,6 +39,13 @@ class Nexus () {
         this.customerService = customerService
         this.ticketService = ticketService
         this.productService = productService
+    }
+
+    constructor(customerService: CustomerService, ticketService: TicketService, productService: ProductService, fileStorageService: FileStorageService) : this() {
+        this.customerService = customerService
+        this.ticketService = ticketService
+        this.productService = productService
+        this.fileStorageService = fileStorageService
     }
 
     constructor(expertService: ExpertService, ticketService: TicketService) : this() {
@@ -48,6 +58,7 @@ class Nexus () {
         this.expertService = expertService
         this.ticketService = ticketService
     }
+
 
     /* logging */
     private val endpointHolder: ThreadLocal<String> = ThreadLocal()
@@ -145,6 +156,16 @@ class Nexus () {
         }
         return this
     }
+
+//    fun assertFileExists(filename: String): Nexus {
+//        try {
+//            fileStorageService.getAttachmentFile(filename)
+//        } catch (e: Exception) {
+//            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
+//            throw Exception.FileNotExistException("This attachment does not exist.")
+//        }
+//        return this
+//    }
 
     /* operations */
     fun assignTicketToExpert(ticketId: Long, expertId: UUID): Nexus {

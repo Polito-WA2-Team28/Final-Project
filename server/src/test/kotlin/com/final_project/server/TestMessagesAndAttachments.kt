@@ -190,9 +190,9 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val expert: Expert = utilityFunctions.createTestExpert()
         val product: Product = utilityFunctions.createTestProduct(customer)
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        utilityFunctions.sendCustomerMessage(ticket.getId()!!, "Hello, I need help!")
-        utilityFunctions.sendExpertMessage(ticket.getId()!!, "Hi, how can I help you?")
-        utilityFunctions.sendCustomerMessage(ticket.getId()!!, "Windows keeps freezing...")
+        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
+        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
+        utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", null)
 
 
         /* customer login */
@@ -434,4 +434,241 @@ class TestMessagesAndAttachments: ApplicationTests() {
     }
 
 
+    @Test
+    fun `Customer wants to retrieve an attachment but does not exist in the database`() {
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+
+        /* sending the messages */
+        val anyValueDoesntMatter: Int = 0
+        val anyNameDoesntMatter: String = "filename"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$anyValueDoesntMatter/attachments/$anyNameDoesntMatter",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("No customer profile found with this UUID.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to retrieve attachment for a non-existing ticket`() {
+
+        /* preparing database */
+        utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+
+        /* sending the messages */
+        val nonExistingTicketId: Int = 0
+        val anyNameDoesntMatter: String = "filename"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$nonExistingTicketId/attachments/$anyNameDoesntMatter",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("Ticket not found.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer retrieving an attachment is unauthorized to access this set of tickets`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
+        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
+        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
+        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
+            ?: fail("Test failed because no uniqueFileName was created in the database.")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/experts/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("Forbidden", JSONObject(response.body).get("error"))
+    }
+
+
+    @Test
+    fun `Customer retrieving an attachment is forbidden to access tickets he did not created`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customer2: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
+        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
+        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
+        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
+            ?: fail("Test failed because no uniqueFileName was created in the database.")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customer2Login()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("This ticket belongs to another customer.", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer retrieving an attachment makes a request with wrong format`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
+        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
+        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
+        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
+            ?: fail("Test failed because no uniqueFileName was created in the database.")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val wrongTicketId = "BadRequest"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$wrongTicketId/attachments/$uniqueFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to retrieve attachment for a non-existing attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val wrongFileName = "BadRequest"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/$wrongFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("This attachment does not exist.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer retrieves the attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
+        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
+        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
+        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
+            ?: fail("Test failed because no uniqueFileName was created in the database.")
+
+
+        println(uniqueFileName)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+    }
 }
