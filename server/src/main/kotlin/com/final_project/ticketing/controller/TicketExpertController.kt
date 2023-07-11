@@ -137,7 +137,7 @@ class TicketExpertController @Autowired constructor(
         val allowedStates = mutableSetOf(TicketState.IN_PROGRESS, TicketState.RESOLVED)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
-            .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/messages")
             .assertExpertExists(expertId)
             .assertTicketExists(ticketId)
             .assertTicketAssignment()
@@ -163,7 +163,7 @@ class TicketExpertController @Autowired constructor(
         /* running checks... */
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
-            .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/messagges")
             .assertExpertExists(expertId)
             .assertTicketExists(ticketId)
             .assertTicketAssignment()

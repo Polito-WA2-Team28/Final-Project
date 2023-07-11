@@ -1,11 +1,13 @@
 package com.final_project.server
 
 import com.final_project.security.dto.UserCredentialsDTO
+import com.final_project.server.model.Customer
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
 import org.junit.Ignore
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import org.junit.runner.RunWith
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
@@ -68,18 +70,12 @@ class TestCases : ApplicationTests(){
     fun `Customer retrieve all the tickets`() {
         /* adding data to database */
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
 
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
-
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val ticketId = ticketRepository.save(ticket).getId()
 
         /* customer login */
         val accessToken = utilityFunctions.customerLogin()
@@ -91,7 +87,6 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            //"http://localhost:$port/api/customers/tickets",
             "/api/customers/tickets",
             HttpMethod.GET,
             HttpEntity(null, headers),
@@ -102,12 +97,12 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(HttpStatus.OK, response.statusCode)
         Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
+        Assertions.assertEquals(expert.id.toString(), resTicket.getString("expertId"))
+        Assertions.assertEquals(customer.id.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
         Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
         Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
+        Assertions.assertEquals(ticket.getId()!!.toLong(), resTicket.getLong("ticketId"))
     }
 
 
@@ -123,13 +118,10 @@ class TestCases : ApplicationTests(){
     //@Ignore
     @Test /** POST /api/customers/tickets POST*/
     fun `Successful creation of a new ticket`() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
 
         val jsonRequest = JSONObject()
         jsonRequest.put("description", "myDescription")
@@ -146,7 +138,7 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            "http://localhost:$port/api/customers/tickets",
+            "/api/customers/tickets",
             HttpMethod.POST,
             HttpEntity(jsonRequest.toString(), headers),
             String::class.java
@@ -159,7 +151,7 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals("OPEN", body.getString("ticketState"))
         Assertions.assertEquals("myDescription",body.getString("description"))
         Assertions.assertEquals(product.serialNumber.toString(), body.getString("serialNumber"))
-        Assertions.assertEquals(customerId.toString(), body.getString("customerId"))
+        Assertions.assertEquals(customer.id.toString(), body.getString("customerId"))
         Assertions.assertEquals(0,body.optInt("expertId"))
 
     }
@@ -167,18 +159,12 @@ class TestCases : ApplicationTests(){
 
     @Test /** GET /api/customers/tickets/:ticketId */
     fun successGetASingleTicketsOfACustomer() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer, product, null, TicketState.OPEN)
-        val ticketId = ticketRepository.save(ticket).getId()
 
         /* customer login */
         val accessToken = utilityFunctions.customerLogin()
@@ -190,7 +176,7 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticketId}",
+            "/api/customers/tickets/${ticket.getId()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -202,11 +188,11 @@ class TestCases : ApplicationTests(){
         val resTicket = JSONObject(body)
         Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
+        Assertions.assertEquals(customer.id.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
         Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
         Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
+        Assertions.assertEquals(ticket.getId()!!.toLong(), resTicket.getLong("ticketId"))
     }
 
     @Test
@@ -223,8 +209,8 @@ class TestCases : ApplicationTests(){
     @Test
     /** GET /api/customers/tickets/:ticketId */
     fun failGetANonExistentTicketOfACustomer(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         /* customer login */
         val accessToken = utilityFunctions.customerLogin()
@@ -249,21 +235,13 @@ class TestCases : ApplicationTests(){
 
     @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
     fun successReopenClosedTicket(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.customerLogin()
 
@@ -274,7 +252,7 @@ class TestCases : ApplicationTests(){
         //Where is the ticket being closed?
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticketId}/reopen",
+            "/api/customers/tickets/${ticket.getId()}/reopen",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
@@ -283,27 +261,19 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.REOPENED, actualTicket.state)
     }
 
     @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
     fun successReopenResolvedTicket(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.customerLogin()
 
@@ -312,7 +282,7 @@ class TestCases : ApplicationTests(){
         }
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticketId}/reopen",
+            "/api/customers/tickets/${ticket.getId()}/reopen",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
@@ -321,27 +291,19 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.REOPENED, actualTicket.state)
     }
 
     @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
     fun failReopenAlreadyOpenTicket(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, null, TicketState.OPEN)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.managerLogin()
 
@@ -349,7 +311,7 @@ class TestCases : ApplicationTests(){
             add("Authorization", "Bearer $accessToken")
         }
 
-        val url = "/api/managers/tickets/${ticketId}/relieveExpert"
+        val url = "/api/managers/tickets/${ticket.getId()}/relieveExpert"
         val response = utilityFunctions.restTemplate.exchange(
             url,
             HttpMethod.PATCH,
@@ -359,28 +321,20 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.CONFLICT, response?.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.OPEN, actualTicket.state)
     }
 
     //FIX
     @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun successCompileSurvey(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.customerLogin()
 
@@ -389,34 +343,26 @@ class TestCases : ApplicationTests(){
         }
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticketId}/compileSurvey",
+            "/api/customers/tickets/${ticket.getId()}/compileSurvey",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(actualTicket.state, TicketState.CLOSED)
     }
 
     @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun failCompileSurveyTicketAlreadyClosed() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -428,7 +374,7 @@ class TestCases : ApplicationTests(){
 
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticketId}/compileSurvey",
+            "/api/customers/tickets/${ticket.getId()}/compileSurvey",
             HttpMethod.PATCH,
             HttpEntity(requestObject.toString(), headers),
             String::class.java
@@ -437,7 +383,7 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
     }
 
@@ -448,18 +394,12 @@ class TestCases : ApplicationTests(){
 
     @Test /** GET /api/experts/tickets*/
     fun successGetAllTicketsOfAnExpert() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val ticketId = ticketRepository.save(ticket).getId()
 
         /* expert login */
         val accessToken = utilityFunctions.expertLogin()
@@ -484,12 +424,12 @@ class TestCases : ApplicationTests(){
         val resTicket = JSONObject(body).getJSONArray("content").getJSONObject(0)
         Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
+        Assertions.assertEquals(expert.id.toString(), resTicket.getString("expertId"))
+        Assertions.assertEquals(customer.id.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
         Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
         Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
+        Assertions.assertEquals(ticket.getId()!!.toLong(), resTicket.getLong("ticketId"))
     }
 
 
@@ -505,19 +445,12 @@ class TestCases : ApplicationTests(){
     @Ignore
     @Test /** GET /api/experts/tickets/:ticketId */
     fun successGetASingleTicketsOfAnExpert() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val ticketId = ticketRepository.save(ticket).getId()
-
 
         /* customer login */
         val accessToken = utilityFunctions.expertLogin()
@@ -529,7 +462,7 @@ class TestCases : ApplicationTests(){
 
         /* retrieving all the tickets */
         val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticketId}",
+            "/api/experts/tickets/${ticket.getId()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -539,12 +472,12 @@ class TestCases : ApplicationTests(){
 
         Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
         Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
+        Assertions.assertEquals(expert.id.toString(), resTicket.getString("expertId"))
+        Assertions.assertEquals(customer.id.toString(), resTicket.getString("customerId"))
         Assertions.assertEquals(ticket.description, resTicket.getString("description"))
         Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
         Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
+        Assertions.assertEquals(ticket.getId()!!.toLong(), resTicket.getLong("ticketId"))
 
     }
 
@@ -588,8 +521,8 @@ class TestCases : ApplicationTests(){
 
     @Test /** PATCH /api/experts/tickets/:ticketId/resolve */
     fun successResolveInProgressTicket(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val transactionDefinition = DefaultTransactionDefinition()
         val transactionStatus: TransactionStatus = transactionManager.getTransaction(transactionDefinition)
@@ -606,20 +539,9 @@ class TestCases : ApplicationTests(){
             throw e
         }
 
-
-        println("******EXPERTIDS**********")
-        expertRepository.findAll().map { println(it.id) }
-        println("end")
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.IN_PROGRESS)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         /* expert login */
         val accessToken = utilityFunctions.expertLogin()
@@ -631,7 +553,7 @@ class TestCases : ApplicationTests(){
 
         // 404 no expert found by UUID but it was actually inserted in the db
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticketId}/resolve",
+            "/api/experts/tickets/${ticket.getId()}/resolve",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
@@ -640,27 +562,19 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.RESOLVED, actualTicket.state)
     }
 
     @Test /** PATCH /api/experts/tickets/:ticketId/resolve */
     fun failResolveClosedTicket(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.expertLogin()
 
@@ -670,7 +584,7 @@ class TestCases : ApplicationTests(){
         }
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticketId}/resolve",
+            "/api/experts/tickets/${ticket.getId()}/resolve",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
@@ -679,28 +593,20 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
     }
 
 
     @Test /** PATCH '/api/experts/tickets/:ticketId/close' */
     fun successCloseReopenedTicketByExpert(){
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.REOPENED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val accessToken = utilityFunctions.expertLogin()
 
@@ -710,34 +616,26 @@ class TestCases : ApplicationTests(){
         }
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticketId}/close",
+            "/api/experts/tickets/${ticket.getId()}/close",
             HttpMethod.PATCH,
             HttpEntity(null, headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(actualTicket.state, TicketState.CLOSED)
     }
 
     @Test /** PATCH '/api/experts/tickets/:ticketId/close' */
     fun failCloseAlreadyClosedTicketByExpert() {
-        val customer = utilityFunctions.createTestCustomer()
-        val customerId = customerRepository.save(customer).id
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
         var product = utilityFunctions.createTestProduct(customer)
-        val realProductId = productRepository.save(product).id
-        product = utilityFunctions.updateTestProduct(product, realProductId)
-
         val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
-        val ticketId = ticketRepository.save(ticket).getId()
-
         val manager = utilityFunctions.createTestManager()
-        val managerId = managerRepository.save(manager).id
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
@@ -748,7 +646,7 @@ class TestCases : ApplicationTests(){
         headers.add("Authorization", "Bearer $accessToken")
 
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticketId}/close",
+            "/api/experts/tickets/${ticket.getId()}/close",
             HttpMethod.PATCH,
             HttpEntity(requestObject.toString(), headers),
             String::class.java
@@ -757,7 +655,7 @@ class TestCases : ApplicationTests(){
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
 
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        val actualTicket = ticketRepository.getReferenceById(ticket.getId()!!)
         Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
     }
 
