@@ -26,7 +26,10 @@ import java.text.SimpleDateFormat
 
 
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = [ "user.dir=/opt" ]
+)
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
         //CustomerProductTest::class,

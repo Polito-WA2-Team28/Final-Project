@@ -10,6 +10,7 @@ import com.final_project.server.repository.ExpertRepository
 import com.final_project.server.repository.ProductRepository
 import java.util.UUID
 import com.final_project.server.service.*
+import com.final_project.ticketing.dto.AttachmentDTO
 import com.final_project.ticketing.dto.TicketDTO
 import com.final_project.ticketing.dto.TicketStateEvolutionDTO
 import com.final_project.ticketing.exception.TicketException
@@ -18,6 +19,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 
@@ -71,6 +73,7 @@ class Nexus () {
     var manager: ManagerDTO? = null
     var ticket: TicketDTO? = null
     var product: ProductDTO? = null
+    var attachment: ResponseEntity<ByteArray>? = null
     var ticketStatusLifecycle: List<TicketStateEvolutionDTO> = emptyList()
 
     fun setEndpointForLogger(endpoint: String): Nexus {
@@ -159,15 +162,15 @@ class Nexus () {
         return this
     }
 
-//    fun assertFileExists(filename: String): Nexus {
-//        try {
-//            fileStorageService.getAttachmentFile(filename)
-//        } catch (e: Exception) {
-//            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
-//            throw Exception.FileNotExistException("This attachment does not exist.")
-//        }
-//        return this
-//    }
+    fun assertFileExists(filename: String): Nexus {
+        try {
+            this.attachment = fileStorageService.getAttachmentFile(filename)
+        } catch (e: Exception) {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
+            throw Exception.FileNotExistException("This attachment does not exist.")
+        }
+        return this
+    }
 
     /* operations */
     fun assignTicketToExpert(ticketId: Long, expertId: UUID): Nexus {

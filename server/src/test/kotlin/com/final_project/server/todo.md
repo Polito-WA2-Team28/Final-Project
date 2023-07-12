@@ -10,6 +10,7 @@
 - Customer sending a message makes a request with wrong format ✅
 - Customer creates a message for a ticket in an invalid state ✅
 - Customer send a message ✅
+- Customer send a message with an attachment ✅
 
 ### Retrieve the messages ✅
 
@@ -27,8 +28,8 @@
 - Customer retrieving an attachment is unauthorized to access this set of tickets ✅
 - Customer retrieving an attachment is forbidden to access tickets he did not create ✅
 - Customer retrieving an attachment makes a request with wrong format ✅
-- Customer fails to retrieve attachment for a non-existing attachment ❌
-- Customer retrieves the attachment ❌
+- Customer fails to retrieve attachment for a non-existing attachment ✅
+- Customer retrieves the attachment ✅
 
 
 ## Expert

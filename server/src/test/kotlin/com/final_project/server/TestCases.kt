@@ -2,6 +2,9 @@ package com.final_project.server
 
 import com.final_project.security.dto.UserCredentialsDTO
 import com.final_project.server.model.Customer
+import com.final_project.server.model.Expert
+import com.final_project.server.model.Product
+import com.final_project.ticketing.model.Ticket
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
 import org.junit.Ignore
@@ -17,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.DefaultTransactionDefinition
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 
 @RunWith(SpringRunner::class)
@@ -46,6 +50,7 @@ class TestCases : ApplicationTests(){
 
 
 
+    @Test
     fun `Unauthorized Customer Login`() {
 
         /* crafting the request  */
