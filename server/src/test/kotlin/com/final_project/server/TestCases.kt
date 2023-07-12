@@ -26,10 +26,11 @@ import org.springframework.util.MultiValueMap
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class TestCases : ApplicationTests(){
+class TestCases : ApplicationTests() {
 
     //AUTHENTICATION TESTS
-    @Test /** POST /api/auth/login Success */
+    @Test
+            /** POST /api/auth/login Success */
     fun `Successful Customer Login`() {
 
         /* crafting the request  */
@@ -47,7 +48,6 @@ class TestCases : ApplicationTests(){
         /* Assertions */
         Assertions.assertEquals(HttpStatus.OK, response.statusCode)
     }
-
 
 
     @Test
@@ -71,7 +71,8 @@ class TestCases : ApplicationTests(){
 
     //CUSTOMERS
 
-    @Test /** GET /api/customers/tickets */
+    @Test
+            /** GET /api/customers/tickets */
     fun `Customer retrieve all the tickets`() {
         /* adding data to database */
         val expert = utilityFunctions.createTestExpert()
@@ -111,7 +112,8 @@ class TestCases : ApplicationTests(){
     }
 
 
-    @Test /** GET /api/customers/tickets */
+    @Test
+            /** GET /api/customers/tickets */
     fun `Fail get all tickets without login`() {
         val url = "/api/customers/tickets"
         val response = utilityFunctions.restTemplate.getForEntity(url, String::class.java)
@@ -121,7 +123,8 @@ class TestCases : ApplicationTests(){
 
 
     //@Ignore
-    @Test /** POST /api/customers/tickets POST*/
+    @Test
+            /** POST /api/customers/tickets POST*/
     fun `Successful creation of a new ticket`() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
@@ -151,18 +154,19 @@ class TestCases : ApplicationTests(){
 
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.CREATED,response.statusCode)
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode)
         val body = JSONObject(response.body)
         Assertions.assertEquals("OPEN", body.getString("ticketState"))
-        Assertions.assertEquals("myDescription",body.getString("description"))
+        Assertions.assertEquals("myDescription", body.getString("description"))
         Assertions.assertEquals(product.serialNumber.toString(), body.getString("serialNumber"))
         Assertions.assertEquals(customer.id.toString(), body.getString("customerId"))
-        Assertions.assertEquals(0,body.optInt("expertId"))
+        Assertions.assertEquals(0, body.optInt("expertId"))
 
     }
 
 
-    @Test /** GET /api/customers/tickets/:ticketId */
+    @Test
+            /** GET /api/customers/tickets/:ticketId */
     fun successGetASingleTicketsOfACustomer() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
@@ -201,8 +205,8 @@ class TestCases : ApplicationTests(){
     }
 
     @Test
-    /** GET /api/customers/tickets/:ticketId */
-    fun failGetASingleTicketOfANonExistentCustomer(){
+            /** GET /api/customers/tickets/:ticketId */
+    fun failGetASingleTicketOfANonExistentCustomer() {
         val ticketId = (1000..2000).random()
         val url = "/api/customers/tickets/${ticketId}"
         val response = utilityFunctions.restTemplate
@@ -212,8 +216,8 @@ class TestCases : ApplicationTests(){
     }
 
     @Test
-    /** GET /api/customers/tickets/:ticketId */
-    fun failGetANonExistentTicketOfACustomer(){
+            /** GET /api/customers/tickets/:ticketId */
+    fun failGetANonExistentTicketOfACustomer() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
@@ -238,14 +242,15 @@ class TestCases : ApplicationTests(){
     }
 
 
-    @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
-    fun successReopenClosedTicket(){
+    @Test
+            /** PATCH /api/customers/tickets/:ticketId/reopen */
+    fun successReopenClosedTicket() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.customerLogin()
@@ -270,14 +275,15 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(TicketState.REOPENED, actualTicket.state)
     }
 
-    @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
-    fun successReopenResolvedTicket(){
+    @Test
+            /** PATCH /api/customers/tickets/:ticketId/reopen */
+    fun successReopenResolvedTicket() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.RESOLVED)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.customerLogin()
@@ -300,14 +306,15 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(TicketState.REOPENED, actualTicket.state)
     }
 
-    @Test /** PATCH /api/customers/tickets/:ticketId/reopen */
-    fun failReopenAlreadyOpenTicket(){
+    @Test
+            /** PATCH /api/customers/tickets/:ticketId/reopen */
+    fun failReopenAlreadyOpenTicket() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, null, TicketState.OPEN)
+        val ticket = utilityFunctions.createTestTicket(customer, product, null, TicketState.OPEN)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.managerLogin()
@@ -331,14 +338,15 @@ class TestCases : ApplicationTests(){
     }
 
     //FIX
-    @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
-    fun successCompileSurvey(){
+    @Test
+            /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
+    fun successCompileSurvey() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.RESOLVED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.RESOLVED)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.customerLogin()
@@ -359,14 +367,15 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(actualTicket.state, TicketState.CLOSED)
     }
 
-    @Test /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
+    @Test
+            /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun failCompileSurveyTicketAlreadyClosed() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
         val manager = utilityFunctions.createTestManager()
 
         val headers = HttpHeaders()
@@ -393,11 +402,10 @@ class TestCases : ApplicationTests(){
     }
 
 
-
-
     //EXPERTS
 
-    @Test /** GET /api/experts/tickets*/
+    @Test
+            /** GET /api/experts/tickets*/
     fun successGetAllTicketsOfAnExpert() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
@@ -438,7 +446,8 @@ class TestCases : ApplicationTests(){
     }
 
 
-    @Test /** GET /api/experts/tickets */
+    @Test
+            /** GET /api/experts/tickets */
     fun failGetAllTicketsOfANonExistentExpert() {
         val url = "/api/experts/tickets"
         val response = utilityFunctions.restTemplate.getForEntity(url, String::class.java)
@@ -448,7 +457,8 @@ class TestCases : ApplicationTests(){
 
 
     @Ignore
-    @Test /** GET /api/experts/tickets/:ticketId */
+    @Test
+            /** GET /api/experts/tickets/:ticketId */
     fun successGetASingleTicketsOfAnExpert() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
@@ -486,8 +496,9 @@ class TestCases : ApplicationTests(){
 
     }
 
-    @Test /** GET /api/experts/tickets/:ticketId */
-    fun failGetASingleTicketOfAnExpertWithoutLogin(){
+    @Test
+            /** GET /api/experts/tickets/:ticketId */
+    fun failGetASingleTicketOfAnExpertWithoutLogin() {
         val ticketId = (1000..2000).random()
         val url = "/api/experts/tickets/${ticketId}"
         val response = utilityFunctions.restTemplate
@@ -496,8 +507,9 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response?.statusCode)
     }
 
-    @Test /** GET /api/experts/tickets/:ticketId */
-    fun failGetANonExistentTicketOfAnExpert(){
+    @Test
+            /** GET /api/experts/tickets/:ticketId */
+    fun failGetANonExistentTicketOfAnExpert() {
         val expert = utilityFunctions.createTestExpert()
         expertRepository.save(expert).id
         val ticketId = (1000..2000).random()
@@ -523,9 +535,9 @@ class TestCases : ApplicationTests(){
     }
 
 
-
-    @Test /** PATCH /api/experts/tickets/:ticketId/resolve */
-    fun successResolveInProgressTicket(){
+    @Test
+            /** PATCH /api/experts/tickets/:ticketId/resolve */
+    fun successResolveInProgressTicket() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
@@ -545,7 +557,7 @@ class TestCases : ApplicationTests(){
         }
 
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.IN_PROGRESS)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         val manager = utilityFunctions.createTestManager()
 
         /* expert login */
@@ -571,14 +583,15 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(TicketState.RESOLVED, actualTicket.state)
     }
 
-    @Test /** PATCH /api/experts/tickets/:ticketId/resolve */
-    fun failResolveClosedTicket(){
+    @Test
+            /** PATCH /api/experts/tickets/:ticketId/resolve */
+    fun failResolveClosedTicket() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.expertLogin()
@@ -603,14 +616,15 @@ class TestCases : ApplicationTests(){
     }
 
 
-    @Test /** PATCH '/api/experts/tickets/:ticketId/close' */
-    fun successCloseReopenedTicketByExpert(){
+    @Test
+            /** PATCH '/api/experts/tickets/:ticketId/close' */
+    fun successCloseReopenedTicketByExpert() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.REOPENED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.REOPENED)
         val manager = utilityFunctions.createTestManager()
 
         val accessToken = utilityFunctions.expertLogin()
@@ -632,14 +646,15 @@ class TestCases : ApplicationTests(){
         Assertions.assertEquals(actualTicket.state, TicketState.CLOSED)
     }
 
-    @Test /** PATCH '/api/experts/tickets/:ticketId/close' */
+    @Test
+            /** PATCH '/api/experts/tickets/:ticketId/close' */
     fun failCloseAlreadyClosedTicketByExpert() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
 
         val expert = utilityFunctions.createTestExpert()
         var product = utilityFunctions.createTestProduct(customer)
-        val ticket = utilityFunctions.createTestTicket(customer,product, expert, TicketState.CLOSED)
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
         val manager = utilityFunctions.createTestManager()
 
         val headers = HttpHeaders()
@@ -667,7 +682,8 @@ class TestCases : ApplicationTests(){
 
     //MANAGERS
 
-    @Test /** GET /api/managers/tickets*/
+    @Test
+            /** GET /api/managers/tickets*/
 
     fun successGetAllTicketsOfAManager() {
         val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
@@ -718,7 +734,8 @@ class TestCases : ApplicationTests(){
     }
 
 
-    @Test /** GET /api/managers/tickets*/
+    @Test
+            /** GET /api/managers/tickets*/
     fun failGetAllTicketsOfANonExistentManager() {
         val url = "/api/managers/tickets"
         val response = utilityFunctions.restTemplate
@@ -728,5 +745,1012 @@ class TestCases : ApplicationTests(){
     }
 
 
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/assign */
+    fun successAssignmentOfATicket() {
 
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, null, TicketState.OPEN)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
+        }
+
+        val requestObject = JSONObject()
+        requestObject.put("expertId", expertId.toString())
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/assign",
+            HttpMethod.PATCH,
+            HttpEntity(requestObject.toString(), headers),
+            String::class.java
+        )
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertNotNull(actualTicket.expert)
+        Assertions.assertEquals(actualTicket.expert!!.id, expertId)
+        Assertions.assertEquals(actualTicket.state, TicketState.IN_PROGRESS)
+
+    }
+
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/relieveExpert */
+    fun successRelieveExpert() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
+        }
+
+        val requestObject = JSONObject()
+        requestObject.put("expertId", expertId.toString())
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/relieveExpert",
+            HttpMethod.PATCH,
+            HttpEntity(requestObject.toString(), headers),
+            String::class.java
+        )
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertNull(actualTicket.expert)
+        Assertions.assertEquals(actualTicket.state, TicketState.OPEN)
+    }
+
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/relieveExpert */
+    fun failRelieveExpertWithNonExistentIds() {
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        val ticketId = (10000..20000).random()
+        val url = "/api/managers/tickets/${ticketId}/relieveExpert"
+        val response = utilityFunctions.restTemplate.exchange(
+            url,
+            HttpMethod.PATCH,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response?.statusCode)
+    }
+
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/close */
+    fun successCloseResolvedTicketByManager() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.RESOLVED)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/close",
+            HttpMethod.PATCH,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertEquals(actualTicket.state, TicketState.CLOSED)
+    }
+
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/close */
+    fun failCloseAlreadyClosedTicketByManager() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/close",
+            HttpMethod.PATCH,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
+
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
+    }
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/resumeProgress */
+    fun succeedResumeProgress() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.REOPENED)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
+        }
+
+        val requestObject = JSONObject()
+        requestObject.put("expertId", expert.id)
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/resumeProgress",
+            HttpMethod.PATCH,
+            HttpEntity(requestObject.toString(), headers),
+            String::class.java
+        )
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertEquals(TicketState.IN_PROGRESS, actualTicket.state)
+
+    }
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/resumeProgress */
+    fun failResumeProgressAlreadyClosedTicket() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
+        }
+
+        val requestObject = JSONObject()
+        requestObject.put("expertId", expert.id)
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/resumeProgress",
+            HttpMethod.PATCH,
+            HttpEntity(requestObject.toString(), headers),
+            String::class.java
+        )
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
+
+        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
+        Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
+    }
+
+
+    @Test
+            /** PATCH /api/managers/tickets/:ticketId/remove*/
+    fun successRemoveTicket() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        customerRepository.save(customer).id
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        val managerId = managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets/${ticketId}/remove",
+            HttpMethod.DELETE,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
+    }
+
+
+// MESSAGING AND ATTACHMENTS TEST CASES
+
+    @Test
+    fun `Customer wants to get all messages but does not exist in the database`() {
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val anyValueDoesntMatter: Int = 0
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${anyValueDoesntMatter}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("No customer profile found with this UUID.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to retrieve messages for a non-existing ticket`() {
+
+        /* preparing database */
+        utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val nonExistingTicketId: Int = 0
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${nonExistingTicketId}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("Ticket not found.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer is unauthorized to access this set of tickets`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/experts/tickets/${ticket.getId()}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("Forbidden", JSONObject(response.body).get("error"))
+
+    }
+
+
+    @Test
+    fun `Customer is forbidden to access tickets he did not created`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        val customer2: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customer2Login()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("This ticket belongs to another customer.", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer makes a request with wrong format`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val wrongTicketId = "BadRequest"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${wrongTicketId}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer retrieves all the messages`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        utilityFunctions.createMessage(ticket, customer, "Windows keeps freezing...")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
+        Assertions.assertEquals(3, JSONObject(response.body).get("totalElements"))
+    }
+
+
+    @Test
+    fun `Customer wants to send a message but does not exist in the database`() {
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val anyValueDoesntMatter: Int = 0
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$anyValueDoesntMatter/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("No customer profile found with this UUID.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to send a message for a non-existing ticket`() {
+
+        /* preparing database */
+        utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val nonExistingTicketId: Int = 0
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$nonExistingTicketId/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("Ticket not found.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer sending the message is unauthorized to access this set of tickets`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/experts/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("Forbidden", JSONObject(response.body).get("error"))
+
+    }
+
+
+    @Test
+    fun `Customer sending a message is forbidden to access tickets he did not created`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        val customer2: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customer2Login()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("This ticket belongs to another customer.", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer sending a message makes a request with wrong format`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("wrongAttribute", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer sends a message`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode)
+        Assertions.assertEquals("customer-test-1", JSONObject(response.body).get("sender"))
+        Assertions.assertEquals("Hello sir, I need help.", JSONObject(response.body).get("messageText"))
+    }
+
+    @Test
+    fun `Customer sends a message with an attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, Any> = LinkedMultiValueMap<String, Any>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", utilityFunctions.createTestAttachment().resource)
+        }
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode)
+        Assertions.assertEquals("customer-test-1", JSONObject(response.body).get("sender"))
+        Assertions.assertEquals("Hello sir, I need help.", JSONObject(response.body).get("messageText"))
+    }
+
+    @Test
+    fun `Customer wants to retrieve an attachment but does not exist in the database`() {
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+
+        /* sending the messages */
+        val anyValueDoesntMatter: Int = 0
+        val anyNameDoesntMatter: String = "filename"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$anyValueDoesntMatter/attachments/$anyNameDoesntMatter",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("No customer profile found with this UUID.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to retrieve attachment for a non-existing ticket`() {
+
+        /* preparing database */
+        utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+
+        /* sending the messages */
+        val nonExistingTicketId: Int = 0
+        val anyNameDoesntMatter: String = "filename"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$nonExistingTicketId/attachments/$anyNameDoesntMatter",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("Ticket not found.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer retrieving an attachment is unauthorized to access this set of tickets`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> =
+            utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/experts/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("Forbidden", JSONObject(response.body).get("error"))
+    }
+
+
+    @Test
+    fun `Customer retrieving an attachment is forbidden to access tickets he did not created`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customer2: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> =
+            utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customer2Login()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
+        Assertions.assertEquals("This ticket belongs to another customer.", JSONObject(response.body).get("error"))
+
+    }
+
+    @Test
+    fun `Customer retrieving an attachment makes a request with wrong format`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> =
+            utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val wrongTicketId = "BadRequest"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/$wrongTicketId/attachments/${uniqueFileNameList.first()}",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer fails to retrieve attachment for a non-existing attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val wrongFileName = "BadRequest"
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/$wrongFileName",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        Assertions.assertEquals("This attachment does not exist.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
+    fun `Customer retrieves the attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> =
+            utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
+
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* sending the messages */
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
+        Assertions.assertEquals("application/octet-stream", response.headers.contentType.toString())
+        Assertions.assertEquals(
+            "attachment; filename=\"${uniqueFileNameList.first()}\"",
+            response.headers.getFirst("Content-Disposition")
+        )
+        response.body
+            ?: fail("Response body is null")
+
+    }
 }

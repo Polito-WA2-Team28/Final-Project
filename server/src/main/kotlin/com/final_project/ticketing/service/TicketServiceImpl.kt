@@ -68,6 +68,7 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
         return ticketRepository.assignTicketToExpert(ticketId, expertId)
     }
 
+    @Transactional
     override fun relieveExpertFromTicket(ticketId: Long) {
         return ticketRepository.relieveExpertFromTicket(ticketId)
     }
