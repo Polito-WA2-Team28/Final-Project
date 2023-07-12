@@ -3,6 +3,7 @@ package com.final_project.server
 import com.final_project.server.config.GlobalConfig
 import com.final_project.server.repository.*
 import com.final_project.ticketing.repository.TicketRepository
+import com.final_project.ticketing.repository.TicketStateEvolutionRepository
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.*
@@ -86,6 +87,8 @@ class ApplicationTests {
     lateinit var expertRepository: ExpertRepository
     @Autowired
     lateinit var managerRepository: ManagerRepository
+    @Autowired
+    lateinit var ticketStateEvolutionRepository: TicketStateEvolutionRepository
     @Value("\${keycloakMappedPort}")
     lateinit var keycloakMappedPort:String
     @Value("\${keycloakHost}")
@@ -99,6 +102,7 @@ class ApplicationTests {
     @BeforeEach
     @Modifying
     fun setUp() {
+        ticketStateEvolutionRepository.deleteAll()
         ticketRepository.deleteAll()
         productRepository.deleteAll()
         customerRepository.deleteAll()
