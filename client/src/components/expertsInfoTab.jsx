@@ -43,7 +43,7 @@ function CreateExpertModal(props) {
                 <Modal.Title>Create a new Expert</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form onSubmit={e => e.preventDefault()}>
                     <Form.Group>
                         <Form.Label>Expert Name</Form.Label>
                         <Form.Control type="text" placeholder="Enter expert name" />

@@ -40,6 +40,7 @@ function App() {
         setRole(newRole)
         setToken(data);
         setLoggedIn(true);
+        localStorage.setItem("token", data);
         successToast("Logged in successfully")
       })
   };
@@ -185,8 +186,21 @@ function App() {
 
   }, [loggedIn, token, role, dirty])
 
-  const customerCloseTicket = async (ticketId) => {
-    await customerAPI.compileSurvey(token, ticketId)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      var decoded = jwt_decode(token);
+      const newRole = decoded.resource_access["ticketing-service-client"].roles[0]
+      if (decoded.exp > (Date.now() / 1000)) {
+        setRole(newRole)
+        setToken(token);
+        setLoggedIn(true);
+      }
+    }
+  }, []);
+    
+  const customerCompileSurvey = async (ticketId, survey) => {
+    await customerAPI.compileSurvey(token, ticketId, survey)
       .then(() => {
         setTickets((prev) => prev.filter((ticket) => ticket.ticketId !== ticketId))
         setDirty(true)
@@ -286,7 +300,7 @@ function App() {
     handleCreateTicket: handleCreateTicket,
     getTicketByID: getTicketByID,
     getProductByID: getProductByID,
-    customerCloseTicket: customerCloseTicket,
+    customerCompileSurvey: customerCompileSurvey,
     customerReopenTicket: customerReopenTicket,
     managerAssignExpert: managerAssignExpert,
     managerHandleCloseTicket: managerHandleCloseTicket,
