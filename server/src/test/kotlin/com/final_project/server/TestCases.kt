@@ -2,6 +2,9 @@ package com.final_project.server
 
 import com.final_project.security.dto.UserCredentialsDTO
 import com.final_project.server.model.Customer
+import com.final_project.server.model.Expert
+import com.final_project.server.model.Product
+import com.final_project.ticketing.model.Ticket
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
 import org.junit.Ignore
@@ -17,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.DefaultTransactionDefinition
+import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 
 @RunWith(SpringRunner::class)
@@ -46,6 +50,7 @@ class TestCases : ApplicationTests(){
 
 
 
+    @Test
     fun `Unauthorized Customer Login`() {
 
         /* crafting the request  */
@@ -661,4 +666,67 @@ class TestCases : ApplicationTests(){
 
 
     //MANAGERS
+
+    @Test /** GET /api/managers/tickets*/
+
+    fun successGetAllTicketsOfAManager() {
+        val customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val customerId = customer.id
+
+
+        val expert = utilityFunctions.createTestExpert()
+        val expertId = expertRepository.save(expert).id
+
+        val product = utilityFunctions.createTestProduct(customer)
+        productRepository.save(product).getId()
+
+        val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+        val ticketId = ticketRepository.save(ticket).getId()
+
+        val manager = utilityFunctions.createTestManager()
+        managerRepository.save(manager).id
+
+        /* manager login */
+        val accessToken = utilityFunctions.managerLogin()
+
+        /* crafting the request */
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+        }
+
+        /* retrieving all the tickets */
+        val response: ResponseEntity<String> = utilityFunctions.restTemplate.exchange(
+            "/api/managers/tickets",
+            HttpMethod.GET,
+            HttpEntity(null, headers),
+            String::class.java
+        )
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
+        val body = response.body
+        val resTicket = JSONObject(body).getJSONArray("content").getJSONObject(0)
+        Assertions.assertEquals("IN_PROGRESS", resTicket.getString("ticketState"))
+        Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
+        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
+        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
+        Assertions.assertEquals(ticket.description, resTicket.getString("description"))
+        Assertions.assertEquals(formatter.format(ticket.lastModified), resTicket.getString("lastModified"))
+        Assertions.assertEquals(formatter.format(ticket.creationDate), resTicket.getString("creationDate"))
+        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
+    }
+
+
+    @Test /** GET /api/managers/tickets*/
+    fun failGetAllTicketsOfANonExistentManager() {
+        val url = "/api/managers/tickets"
+        val response = utilityFunctions.restTemplate
+            .getForEntity(url, String::class.java)
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response?.statusCode)
+    }
+
+
+
 }

@@ -38,7 +38,7 @@ class TicketManagerController @Autowired constructor(
     @ResponseStatus(HttpStatus.OK)
     fun getTickets(
         @RequestParam("pageNo", defaultValue = "1") pageNo: Int
-    ): PageResponseDTO<TicketDTO> {
+    ): PageResponseDTO<TicketManagerDTO> {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
 
@@ -49,7 +49,7 @@ class TicketManagerController @Autowired constructor(
             .assertManagerExists(managerId)
 
         /* crafting pageable request */
-        var result: PageResponseDTO<TicketDTO> = PageResponseDTO()
+        var result: PageResponseDTO<TicketManagerDTO> = PageResponseDTO()
         var page: Pageable = PageRequest.of(pageNo-1, result.computePageSize())
 
         /* return result to client */
@@ -61,7 +61,7 @@ class TicketManagerController @Autowired constructor(
     @ResponseStatus(HttpStatus.OK)
     fun getSingleTicket(
         @PathVariable("ticketId") ticketId: Long
-    ): TicketDTO? {
+    ): TicketManagerDTO? {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
 
@@ -71,8 +71,9 @@ class TicketManagerController @Autowired constructor(
             .setEndpointForLogger("/api/managers/tickets/$ticketId")
             .assertManagerExists(managerId)
             .assertTicketExists(ticketId)
+            .retrieveTicketStateLifecycle(ticketId)
 
-        return nexus.ticket
+        return nexus.ticket?.toManagerDTO(nexus.ticketStatusLifecycle)
     }
 
     @PatchMapping("/api/managers/tickets/{ticketId}/assign")
@@ -229,6 +230,12 @@ class TicketManagerController @Autowired constructor(
         /* return result to client */
         result = ticketService.getAllMessagesWithPagingByTicketId(ticketId, page).toDTO()
         return result
+
+    }
+
+    @GetMapping("/api/managers/tickets/{ticketId}/lifecycle")
+    @ResponseStatus(HttpStatus.OK)
+    fun getTicketStateLifecycle(@PathVariable ticketId: Long){
 
     }
 }

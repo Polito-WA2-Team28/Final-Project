@@ -3,6 +3,7 @@ package com.final_project.server
 import com.final_project.server.config.GlobalConfig
 import com.final_project.server.repository.*
 import com.final_project.ticketing.repository.TicketRepository
+import com.final_project.ticketing.repository.TicketStateEvolutionRepository
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.*
@@ -26,7 +27,10 @@ import java.text.SimpleDateFormat
 
 
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = [ "user.dir=/opt" ]
+)
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
         //CustomerProductTest::class,
@@ -83,6 +87,8 @@ class ApplicationTests {
     lateinit var expertRepository: ExpertRepository
     @Autowired
     lateinit var managerRepository: ManagerRepository
+    @Autowired
+    lateinit var ticketStateEvolutionRepository: TicketStateEvolutionRepository
     @Value("\${keycloakMappedPort}")
     lateinit var keycloakMappedPort:String
     @Value("\${keycloakHost}")
@@ -96,6 +102,7 @@ class ApplicationTests {
     @BeforeEach
     @Modifying
     fun setUp() {
+        ticketStateEvolutionRepository.deleteAll()
         ticketRepository.deleteAll()
         productRepository.deleteAll()
         customerRepository.deleteAll()
@@ -110,102 +117,14 @@ class ApplicationTests {
 
     /*
 
-    @Test *//** GET /api/managers/tickets*//*
-
-    fun successGetAllTicketsOfAManager() {
-        val customer = createTestCustomer()
-        val customerId = customerRepository.save(customer).id
-
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
-
-        val ticket =createTestTicket(customer, product, expert)
-        val ticketId = ticketRepository.save(ticket).getId()
-
-        val manager = createTestManager()
-        managerRepository.save(manager).id
-
-        *//* manager login *//*
-        val accessToken = managerLogin()
-
-        *//* crafting the request *//*
-        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
-            add("Authorization", "Bearer $accessToken")
-        }
-
-        *//* retrieving all the tickets *//*
-        val response: ResponseEntity<String> = restTemplate.exchange(
-            "http://localhost:$port/api/managers/tickets",
-            HttpMethod.GET,
-            HttpEntity(null, headers),
-            String::class.java
-        )
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
-        val body = response.body
-        val resTicket = JSONObject(body).getJSONArray("content").getJSONObject(0)
-        Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
-        Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
-        Assertions.assertEquals(ticket.description, resTicket.getString("description"))
-        Assertions.assertEquals(ticket.lastModified.formatDate(), resTicket.getString("lastModified"))
-        Assertions.assertEquals(ticket.creationDate.formatDate(), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
-    }
-
-    @Test *//** GET /api/managers/tickets*//*
-    fun failGetAllTicketsOfANonExistentManager() {
-
-        val url = "/api/managers/tickets"
-        val response = restTemplate
-            .getForEntity(url, String::class.java)
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response?.statusCode)
-    }
 
 
 
 
-    @Test
-    *//** GET /api/managers/:managerId/tickets/:ticketId *//*
-    fun successGetASingleTicketsOfAManager() {
-        val customer = createTestCustomer()
-        val customerId = customerRepository.save(customer).id
 
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
 
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
 
-        val ticket = createTestTicket(customer,product, expert)
-        val ticketId = ticketRepository.save(ticket).getId()
 
-        val manager = createTestManager()
-        val managerId = managerRepository.save(manager).id
-
-        val url = "/api/managers/${managerId}/tickets/${ticketId}"
-        val response = restTemplate
-            .getForEntity(url, String::class.java)
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.OK, response?.statusCode)
-        val body = response.body
-        val resTicket = JSONObject(body)
-        Assertions.assertEquals("OPEN", resTicket.getString("ticketState"))
-        Assertions.assertEquals(product.serialNumber.toString(), resTicket.getString("serialNumber"))
-        Assertions.assertEquals(expertId.toString(), resTicket.getString("expertId"))
-        Assertions.assertEquals(customerId.toString(), resTicket.getString("customerId"))
-        Assertions.assertEquals(ticket.description, resTicket.getString("description"))
-        Assertions.assertEquals(ticket.lastModified.formatDate(), resTicket.getString("lastModified"))
-        Assertions.assertEquals(ticket.creationDate.formatDate(), resTicket.getString("creationDate"))
-        Assertions.assertEquals(ticketId!!.toLong(), resTicket.getLong("ticketId"))
-    }
 
 	@Test
     *//** PATCH /api/managers/:managerId/tickets/:ticketId/assign *//*

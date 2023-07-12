@@ -22,6 +22,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
+import org.springframework.web.multipart.MultipartFile
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -190,9 +191,9 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val expert: Expert = utilityFunctions.createTestExpert()
         val product: Product = utilityFunctions.createTestProduct(customer)
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
-        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
-        utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", null)
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        utilityFunctions.createMessage(ticket, customer, "Windows keeps freezing...")
 
 
         /* customer login */
@@ -433,6 +434,42 @@ class TestMessagesAndAttachments: ApplicationTests() {
         Assertions.assertEquals("Hello sir, I need help.", JSONObject(response.body).get("messageText"))
     }
 
+    @Test
+    fun `Customer sends a message with an attachment`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val expert: Expert = utilityFunctions.createTestExpert()
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, Any> = LinkedMultiValueMap<String, Any>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", utilityFunctions.createTestAttachment().resource)
+        }
+
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CREATED, response.statusCode)
+        Assertions.assertEquals("customer-test-1", JSONObject(response.body).get("sender"))
+        Assertions.assertEquals("Hello sir, I need help.", JSONObject(response.body).get("messageText"))
+    }
 
     @Test
     fun `Customer wants to retrieve an attachment but does not exist in the database`() {
@@ -499,11 +536,9 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val product: Product = utilityFunctions.createTestProduct(customer)
         val expert: Expert = utilityFunctions.createTestExpert()
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
-        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
-        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
-        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
-            ?: fail("Test failed because no uniqueFileName was created in the database.")
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> = utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
 
 
         /* customer login */
@@ -514,7 +549,7 @@ class TestMessagesAndAttachments: ApplicationTests() {
 
         /* sending the messages */
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/experts/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            "/api/experts/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -538,12 +573,9 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val product: Product = utilityFunctions.createTestProduct(customer)
         val expert: Expert = utilityFunctions.createTestExpert()
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
-        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
-        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
-        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
-            ?: fail("Test failed because no uniqueFileName was created in the database.")
-
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> = utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
 
         /* customer login */
         val accessToken: String = utilityFunctions.customer2Login()
@@ -553,7 +585,7 @@ class TestMessagesAndAttachments: ApplicationTests() {
 
         /* sending the messages */
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            "/api/customers/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -575,11 +607,9 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val product: Product = utilityFunctions.createTestProduct(customer)
         val expert: Expert = utilityFunctions.createTestExpert()
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
-        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
-        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
-        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
-            ?: fail("Test failed because no uniqueFileName was created in the database.")
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> = utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
 
 
         /* customer login */
@@ -591,7 +621,7 @@ class TestMessagesAndAttachments: ApplicationTests() {
         /* sending the messages */
         val wrongTicketId = "BadRequest"
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/$wrongTicketId/attachments/$uniqueFileName",
+            "/api/customers/tickets/$wrongTicketId/attachments/${uniqueFileNameList.first()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -643,14 +673,10 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val product: Product = utilityFunctions.createTestProduct(customer)
         val expert: Expert = utilityFunctions.createTestExpert()
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
-        val attachments: MutableSet<Attachment> = utilityFunctions.createAttachments()
-        utilityFunctions.addMessage(ticket, customer, "Hello, I need help!", null)
-        utilityFunctions.addMessage(ticket, customer, "Hi, how can I help you?", null)
-        val uniqueFileName: String = utilityFunctions.addMessage(ticket, customer, "Windows keeps freezing...", attachments)
-            ?: fail("Test failed because no uniqueFileName was created in the database.")
+        utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
+        utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
+        val uniqueFileNameList: List<String> = utilityFunctions.createMessageWithAttachment(ticket, customer, "Windows keeps freezing...")
 
-
-        println(uniqueFileName)
 
         /* customer login */
         val accessToken: String = utilityFunctions.customerLogin()
@@ -660,7 +686,7 @@ class TestMessagesAndAttachments: ApplicationTests() {
 
         /* sending the messages */
         val response = utilityFunctions.restTemplate.exchange(
-            "/api/customers/tickets/${ticket.getId()}/attachments/$uniqueFileName",
+            "/api/customers/tickets/${ticket.getId()}/attachments/${uniqueFileNameList.first()}",
             HttpMethod.GET,
             HttpEntity(null, headers),
             String::class.java
@@ -668,7 +694,12 @@ class TestMessagesAndAttachments: ApplicationTests() {
 
         /* assertions */
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
-        Assertions.assertEquals("Bad Request", JSONObject(response.body).get("error"))
+        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
+        Assertions.assertEquals("application/octet-stream", response.headers.contentType.toString())
+        Assertions.assertEquals("attachment; filename=\"${uniqueFileNameList.first()}\"", response.headers.getFirst("Content-Disposition"))
+        response.body
+            ?: fail("Response body is null")
+
     }
+
 }

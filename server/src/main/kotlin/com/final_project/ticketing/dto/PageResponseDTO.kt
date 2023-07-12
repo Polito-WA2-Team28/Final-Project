@@ -45,6 +45,7 @@ inline fun <reified T> PageResponseDTO<T>.computePageSize(): Int {
     return when (T::class.java) {
         MessageDTO::class.java -> 30
         TicketDTO::class.java -> 5
+        TicketManagerDTO::class.java -> 5
         ExpertDTO::class.java -> 5
         /* add here if needed (e.g. productDTO )*/
         else -> throw IllegalArgumentException("Unsupported class: ${T::class.java}")

@@ -47,6 +47,9 @@ class FileStorageService @Autowired constructor(private val globalConfig: Global
         try {
             val filePath = System.getProperty("user.dir") + File.separator + globalConfig.attachmentsDirectory + File.separator + fileUniqueName
             val file = File(filePath)
+            if (!file.exists()) {
+                throw Exception.FileNotExistException("File does not exists")
+            }
             val content:ByteArray = FileUtils.readFileToByteArray(file)
 
             val headers = HttpHeaders()

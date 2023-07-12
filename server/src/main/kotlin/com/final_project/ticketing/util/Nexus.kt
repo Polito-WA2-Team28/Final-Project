@@ -10,13 +10,16 @@ import com.final_project.server.repository.ExpertRepository
 import com.final_project.server.repository.ProductRepository
 import java.util.UUID
 import com.final_project.server.service.*
+import com.final_project.ticketing.dto.AttachmentDTO
 import com.final_project.ticketing.dto.TicketDTO
+import com.final_project.ticketing.dto.TicketStateEvolutionDTO
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 
@@ -70,6 +73,8 @@ class Nexus () {
     var manager: ManagerDTO? = null
     var ticket: TicketDTO? = null
     var product: ProductDTO? = null
+    var attachment: ResponseEntity<ByteArray>? = null
+    var ticketStatusLifecycle: List<TicketStateEvolutionDTO> = emptyList()
 
     fun setEndpointForLogger(endpoint: String): Nexus {
         endpointHolder.set(endpoint)
@@ -157,15 +162,15 @@ class Nexus () {
         return this
     }
 
-//    fun assertFileExists(filename: String): Nexus {
-//        try {
-//            fileStorageService.getAttachmentFile(filename)
-//        } catch (e: Exception) {
-//            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
-//            throw Exception.FileNotExistException("This attachment does not exist.")
-//        }
-//        return this
-//    }
+    fun assertFileExists(filename: String): Nexus {
+        try {
+            this.attachment = fileStorageService.getAttachmentFile(filename)
+        } catch (e: Exception) {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
+            throw Exception.FileNotExistException("This attachment does not exist.")
+        }
+        return this
+    }
 
     /* operations */
     fun assignTicketToExpert(ticketId: Long, expertId: UUID): Nexus {
@@ -199,6 +204,11 @@ class Nexus () {
     fun reopenTicket(ticketId: Long): Nexus {
         this.ticket!!.changeState(TicketState.REOPENED)
         ticketService.changeTicketStatus(ticketId, TicketState.REOPENED)
+        return this
+    }
+
+    fun retrieveTicketStateLifecycle(ticketId: Long): Nexus {
+        this.ticketStatusLifecycle = ticketService.retrieveTicketStateLifecycle(ticketId)
         return this
     }
 

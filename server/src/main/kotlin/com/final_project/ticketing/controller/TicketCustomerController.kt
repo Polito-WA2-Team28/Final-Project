@@ -207,7 +207,7 @@ class TicketCustomerController @Autowired constructor(
     fun getMessageAttachment(
         @PathVariable attachmentUniqueName: String,
         @PathVariable ticketId: Long
-    ): ResponseEntity<ByteArray> {
+    ): ResponseEntity<ByteArray>? {
 
         val nexus: Nexus = Nexus(customerService, ticketService, productService, fileStorageService)
 
@@ -218,9 +218,9 @@ class TicketCustomerController @Autowired constructor(
             .assertCustomerExists(customerId)
             .assertTicketExists(ticketId)
             .assertTicketOwnership()
-            //.assertFileExists(attachmentUniqueName)
+            .assertFileExists(attachmentUniqueName)
 
-        return fileStorageService.getAttachmentFile(attachmentUniqueName)
+        return nexus.attachment
     }
 
 }
