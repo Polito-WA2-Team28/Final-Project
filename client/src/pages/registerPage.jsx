@@ -89,7 +89,7 @@ function RegistrationForm() {
   }
 
   return (
-    <Form>
+    <Form onSubmit={e => e.preventDefault()}>
       {message && (
         <Alert variant="danger" onClose={() => setMessage('')} dismissible>
           {message}
