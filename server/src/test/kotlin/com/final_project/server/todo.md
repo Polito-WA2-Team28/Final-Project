@@ -1,67 +1,67 @@
 
-## Customer
+## Customer ✅
 
 ### Create the message ✅
-
-- Customer wants to send a message but does not exist in the database ✅
-- Customer fails to send a message for a non-existing ticket ✅
-- Customer sending the message is unauthorized to access this set of tickets ✅
-- Customer sending a message is forbidden to access tickets he did not create ✅
-- Customer sending a message makes a request with wrong format ✅
-- Customer creates a message for a ticket in an invalid state ✅
-- Customer send a message ✅
-- Customer send a message with an attachment ✅
+1. Customer wants to send a message but does not exist in the database ✅
+2. Customer fails to send a message for a non-existing ticket ✅
+3. Customer sending the message is unauthorized to access this set of tickets ✅
+4. Customer sending a message is forbidden to access tickets he did not create ✅
+5. Customer sending a message makes a request with wrong format ✅
+6. Customer creates a message for a ticket in an invalid state ✅
+7. Customer send a message ✅
+8. Customer send a message with an attachment ✅
 
 ### Retrieve the messages ✅
 
-- Customer wants to get all messages but does not exist in the database ✅
-- Customer fails to retrieve messages for a non-existing ticket ✅
-- Customer is unauthorized to access this set of tickets ✅
-- Customer is forbidden to access tickets he did not create ✅
-- Customer makes a request with wrong format ✅
-- Customer retrieves all the messages ✅
+1. Customer wants to get all messages but does not exist in the database ✅
+2. Customer fails to retrieve messages for a non-existing ticket ✅
+3. Customer is unauthorized to access this set of tickets ✅
+4. Customer is forbidden to access tickets he did not create ✅
+5. Customer makes a request with wrong format ✅
+6. Customer retrieves all the messages ✅
 
-### Retrieve an attachment
+### Retrieve an attachment ✅
 
-- Customer wants to retrieve an attachment but does not exist in the database ✅
-- Customer fails to retrieve attachment for a non-existing ticket ✅
-- Customer retrieving an attachment is unauthorized to access this set of tickets ✅
-- Customer retrieving an attachment is forbidden to access tickets he did not create ✅
-- Customer retrieving an attachment makes a request with wrong format ✅
-- Customer fails to retrieve attachment for a non-existing attachment ✅
-- Customer retrieves the attachment ✅
+1. Customer wants to retrieve an attachment but does not exist in the database ✅
+2. Customer fails to retrieve attachment for a non-existing ticket ✅
+3. Customer retrieving an attachment is unauthorized to access this set of tickets ✅
+4. Customer retrieving an attachment is forbidden to access tickets he did not create ✅
+5. Customer retrieving an attachment makes a request with wrong format ✅
+6. Customer fails to retrieve attachment for a non-existing attachment ✅
+7. Customer retrieves the attachment ✅
 
 
 ## Expert
 
-### Create the message
+### Create the message ✅
 
-- Expert does not exist in the database ()
-- Expert fails to send a message for a non-existing ticket ()
-- Expert is unauthorized to access this set of tickets ()
-- Expert is forbidden to access tickets he is not assigned to ()
-- Expert makes a request with wrong format ()
-- Expert creates a message for a ticket in an invalid state ()
-- Expert send a message ()
+1. Expert wants to send a message but does not exist in the database ✅
+2. Expert fails to send a message for a non-existing ticket ✅
+3. Expert sending the message is unauthorized to access this set of tickets ✅
+4. Expert sending the message is forbidden to access tickets he is not assigned to ✅
+5. Expert sending the message makes a request with wrong format ✅
+6. Expert creates a message for a ticket in an invalid state ✅
+7. Expert send a message ✅
+8. Expert send a message with an attachment ✅
 
-### Retrieve the messages
+### Retrieve the messages ✅
 
-- Expert does not exist in the database ()
-- Expert fails to retrieve messages for a non-existing ticket ()
-- Expert is unauthorized to access this set of tickets ()
-- Expert is forbidden to access tickets he is not assigned to ()
-- Expert makes a request with wrong format ()
-- Expert retrieves all the messages ()
+1. Expert wants to get all messages but does not exist in the database ✅
+2. Expert fails to retrieve messages for a non-existing ticket ✅
+3. Expert wants to get all messages but is unauthorized to access this set of tickets ✅
+4. Expert wants to get all messages but is forbidden to access tickets he is not assigned to ✅
+5. Expert retrieving the message makes a request with wrong format ✅
+6. Expert retrieves all the messages ✅
 
-### Retrieve an attachment
+### Retrieve an attachment ✅
 
-- Expert does not exist in the database ()
-- Expert fails to retrieve attachment for a non-existing ticket ()
-- Expert is unauthorized to access this set of tickets ()
-- Expert is forbidden to access tickets  he is not assigned to ()
-- Expert makes a request with wrong format ()
-- Expert fails to retrieve attachment for a non-existing attachment ()
-- Expert retrieves the attachment ()
+1. Expert wants to retrieve an attachment but does not exist in the database ✅
+2. Expert fails to retrieve attachment for a non-existing ticket ✅
+3. Expert retrieving an attachment is unauthorized to access this set of tickets ✅
+4. Expert retrieving an attachment is forbidden to access tickets he is not assigned to ✅
+5. Expert retrieving an attachment makes a request with wrong format ✅
+6. Expert fails to retrieve attachment for a non-existing attachment ✅
+7. Expert retrieves the attachment ✅
 
 
 
@@ -69,7 +69,7 @@
 
 ### Retrieve the messages
 
-- Manager does not exist in the database ()
-- Manager fails to retrieve messages for a non-existing ticket ()
-- Manager makes a request with wrong format ()
-- Manager retrieves all the messages ()
+1. Manager does not exist in the database ()
+2. Manager fails to retrieve messages for a non-existing ticket ()
+3. Manager makes a request with wrong format ()
+4. Manager retrieves all the messages ()

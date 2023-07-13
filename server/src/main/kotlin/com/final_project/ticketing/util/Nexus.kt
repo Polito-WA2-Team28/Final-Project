@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.File
 
 @Configuration
-class Nexus () {
+class Nexus (vararg services: Any) {
 
     /* services */
     private lateinit var customerService: CustomerService
@@ -34,32 +34,17 @@ class Nexus () {
     private lateinit var productService: ProductService
     private lateinit var fileStorageService: FileStorageService
 
-    constructor(customerService: CustomerService): this() {
-        this.customerService = customerService
-    }
-
-    constructor(customerService: CustomerService, ticketService: TicketService, productService: ProductService) : this() {
-        this.customerService = customerService
-        this.ticketService = ticketService
-        this.productService = productService
-    }
-
-    constructor(customerService: CustomerService, ticketService: TicketService, productService: ProductService, fileStorageService: FileStorageService) : this() {
-        this.customerService = customerService
-        this.ticketService = ticketService
-        this.productService = productService
-        this.fileStorageService = fileStorageService
-    }
-
-    constructor(expertService: ExpertService, ticketService: TicketService) : this() {
-        this.expertService = expertService
-        this.ticketService = ticketService
-    }
-
-    constructor(managerService: ManagerService, expertService: ExpertService, ticketService: TicketService) : this() {
-        this.managerService = managerService
-        this.expertService = expertService
-        this.ticketService = ticketService
+    init {
+        for (service in services) {
+            when (service) {
+                is CustomerService -> customerService = service
+                is ExpertService -> expertService = service
+                is ManagerService -> managerService = service
+                is TicketService -> ticketService = service
+                is ProductService -> productService = service
+                is FileStorageService -> fileStorageService = service
+            }
+        }
     }
 
 
