@@ -208,15 +208,15 @@ class UtilityFunctions {
         messageRepository.save(message)
     }
 
-    fun customerLogin():String{return login("customer-test-1", "test")}
+    fun customerLogin():String{return login("customer-test-1", "customer-test-1")}
 
-    fun customer2Login(): String { return login("customer-test-2", "test") }
+    fun customer2Login(): String { return login("customer-test-2", "customer-test-2") }
 
-    fun expertLogin():String{return login("expert-1", "password1")}
+    fun expertLogin():String{return login("expert-1", "expert-1")}
 
-    fun expert2Login():String{return login("expert-2", "test")}
+    fun expert2Login():String{return login("expert-2", "expert-2")}
 
-    fun managerLogin():String{return login("manager-1","password")}
+    fun managerLogin():String{return login("manager-1","manager-1")}
 
     fun login(username: String, password: String): String {
 
@@ -230,7 +230,6 @@ class UtilityFunctions {
             body,
             HttpMethod.POST
         )
-        println("**********${response.statusCode}**********")
 
         /* retrieving the access token */
         return JSONObject(response.body)["accessToken"].toString()

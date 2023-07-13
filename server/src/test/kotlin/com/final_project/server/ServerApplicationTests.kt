@@ -49,7 +49,7 @@ class ApplicationTests {
 
         @Container
         val keycloak = KeycloakContainer("quay.io/keycloak/keycloak:latest")
-            .withRealmImportFile("keycloak/realm_v2.json")
+            .withRealmImportFile("keycloak/realm_v3.json")
 
 
         @JvmStatic

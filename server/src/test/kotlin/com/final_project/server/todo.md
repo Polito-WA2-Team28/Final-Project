@@ -67,9 +67,17 @@
 
 ## Manager
 
-### Retrieve the messages
+### Retrieve the messages ✅
 
-1. Manager does not exist in the database ()
-2. Manager fails to retrieve messages for a non-existing ticket ()
-3. Manager makes a request with wrong format ()
-4. Manager retrieves all the messages ()
+1. Manager wants to get all messages but does not exist in the database ✅
+2. Manager fails to retrieve messages for a non-existing ticket ✅
+3. Manager retrieving the message makes a request with wrong format ✅
+4. Manager retrieves all the messages ✅
+
+### Retrieve an attachment ✅
+
+1. Manager wants to retrieve an attachment but does not exist in the database ✅
+2. Manager fails to retrieve attachment for a non-existing ticket ✅
+3. Manager retrieving an attachment makes a request with wrong format ✅
+4. Manager fails to retrieve attachment for a non-existing attachment ✅
+5. Manager retrieves the attachment ✅
