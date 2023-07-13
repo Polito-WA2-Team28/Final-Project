@@ -165,7 +165,8 @@ class UtilityFunctions {
     fun createTestTicket(customer: Customer, product: Product, expert: Expert?, state: TicketState): Ticket {
         val ticket: Ticket = Ticket(
             state, customer, expert, "Description", product, mutableSetOf(),
-            myDate(2020, 1, 1), myDate(2020, 1, 1)
+            myDate(2020, 1, 1), myDate(2020, 1, 1),
+            null
         )
         ticketRepository.save(ticket)
         return ticket
