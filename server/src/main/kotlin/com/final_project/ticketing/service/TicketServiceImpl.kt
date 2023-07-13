@@ -17,6 +17,8 @@ import com.final_project.ticketing.dto.toDTO
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.model.TicketStateEvolution
 import com.final_project.ticketing.repository.TicketStateEvolutionRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -30,6 +32,7 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
                                                private val messageRepository: MessageRepository,
                                                private val fileStorageService: FileStorageService,
                                                private val ticketStateEvolutionRepository: TicketStateEvolutionRepository) : TicketService{
+
 
 
 
@@ -114,6 +117,7 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
         }
 
         if (message.attachments != null) {
+
             message.attachments.stream()
                 .map { att -> fileStorageService.persistAttachmentFile(att) }
                 .filter { attStored -> attStored != null }
@@ -138,6 +142,11 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
 
     override fun retrieveTicketStateLifecycle(ticketId: Long): List<TicketStateEvolutionDTO> {
         return ticketStateEvolutionRepository.findAllByTicketId(ticketId).map { tse -> tse.toDTO() }
+    }
+
+    @Transactional
+    override fun updateTicketSurvey(ticketId: Long, ticketSurveyDTO: TicketSurveyDTO) {
+        return ticketRepository.updateTicketSurvey(ticketId, ticketSurveyDTO.survey)
     }
 
 }

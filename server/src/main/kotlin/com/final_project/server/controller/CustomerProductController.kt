@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import com.final_project.server.exception.Exception
 import com.final_project.server.dto.RegisterProductDTO
-import com.final_project.server.dto.toDTO
-import com.final_project.server.model.Product
 import io.micrometer.observation.annotation.Observed
 import jakarta.validation.Valid
 import org.slf4j.Logger

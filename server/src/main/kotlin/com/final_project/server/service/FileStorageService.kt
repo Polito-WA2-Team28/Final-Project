@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory
 
 @Service
 class FileStorageService @Autowired constructor(private val globalConfig: GlobalConfig) {
-    val logger: Logger = LoggerFactory.getLogger(TicketCustomerController::class.java)
 
     init {
         createAttachmentsDirectoryIfNotExists()
@@ -37,7 +36,7 @@ class FileStorageService @Autowired constructor(private val globalConfig: Global
         var uniqueFilename = UUID.randomUUID().toString() + "_" + attachment.originalFilename
         val filePath = File.separator + globalConfig.attachmentsDirectory + File.separator + uniqueFilename
         val completePath = System.getProperty("user.dir") + filePath
-        logger.error("***********$completePath***********")
+
         attachment.transferTo(File(completePath))
 
 

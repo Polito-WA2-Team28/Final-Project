@@ -13,7 +13,8 @@ data class TicketDTO(
     val customerId: UUID?,
     var expertId: UUID?,
     val creationDate: Date,
-    val lastModified:Date
+    val lastModified:Date,
+    var survey:String?
 ) {
 
     fun assignExpert(expertId: UUID?) {
@@ -27,10 +28,14 @@ data class TicketDTO(
     fun changeState(newState: TicketState) {
         this.ticketState = newState
     }
+
+    fun updateSurvey(survey: String) {
+        this.survey = survey
+    }
 }
 
 
 fun Ticket.toDTO() : TicketDTO {
     return TicketDTO(this.getId(), state, description, this.product.serialNumber,
-                     this.customer.id, this.expert?.id, this.creationDate, this.lastModified)
+                     this.customer.id, this.expert?.id, this.creationDate, this.lastModified, this.survey)
 }
