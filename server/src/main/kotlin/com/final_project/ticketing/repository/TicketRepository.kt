@@ -35,4 +35,9 @@ interface TicketRepository : CrudRepository<Ticket, Long>, JpaRepository<Ticket,
 
     fun findAllByExpertId(expertId: UUID, pageable: Pageable): Page<Ticket>
 
+
+    @Modifying
+    @Query("UPDATE Ticket t SET t.survey = :survey WHERE t.id = :ticketId")
+    fun updateTicketSurvey(ticketId: Long, survey:String)
+
 }

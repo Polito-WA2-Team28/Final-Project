@@ -5,6 +5,7 @@ import com.final_project.server.exception.Exception
 import com.final_project.ticketing.exception.TicketErrorDetails
 import com.final_project.ticketing.exception.TicketException
 import org.springframework.http.HttpStatus
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
@@ -19,6 +20,15 @@ class TicketAdvice {
     fun validationError(e: TicketException.ValidationException): TicketErrorDetails {
         return TicketErrorDetails(
             e.error()
+        )
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun missingFieldError(e: HttpMessageNotReadableException): TicketErrorDetails {
+        return TicketErrorDetails(
+            "One or more mandatory fields are missing: ${e.message}"
         )
     }
 

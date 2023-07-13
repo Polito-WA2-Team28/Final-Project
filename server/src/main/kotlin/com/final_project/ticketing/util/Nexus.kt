@@ -13,6 +13,7 @@ import com.final_project.server.service.*
 import com.final_project.ticketing.dto.AttachmentDTO
 import com.final_project.ticketing.dto.TicketDTO
 import com.final_project.ticketing.dto.TicketStateEvolutionDTO
+import com.final_project.ticketing.dto.TicketSurveyDTO
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import org.slf4j.Logger
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.BindingResult
+import org.springframework.validation.FieldError
 import java.io.File
 
 @Configuration
@@ -60,6 +63,7 @@ class Nexus (vararg services: Any) {
     var product: ProductDTO? = null
     var attachment: ResponseEntity<ByteArray>? = null
     var ticketStatusLifecycle: List<TicketStateEvolutionDTO> = emptyList()
+    var validationErrors: List<FieldError> = emptyList()
 
     fun setEndpointForLogger(endpoint: String): Nexus {
         endpointHolder.set(endpoint)
@@ -157,6 +161,17 @@ class Nexus (vararg services: Any) {
         return this
     }
 
+    fun assertValidationResult(br: BindingResult): Nexus {
+        println("${br.hasErrors()} ${br.fieldErrors}")
+        if(br.hasErrors()){
+            println("error")
+            val invalidFields = br.fieldErrors.map { it.field }
+            throw Exception.ValidationException("", invalidFields)
+        }
+
+        return this
+    }
+
     /* operations */
     fun assignTicketToExpert(ticketId: Long, expertId: UUID): Nexus {
         this.ticket!!.assignExpert(expertId)
@@ -177,6 +192,12 @@ class Nexus (vararg services: Any) {
     fun closeTicket(ticketId: Long): Nexus {
         this.ticket!!.changeState(TicketState.CLOSED)
         ticketService.changeTicketStatus(ticketId, TicketState.CLOSED)
+        return this
+    }
+
+    fun updateTicketSurvey(ticketId: Long, ticketSurvey:TicketSurveyDTO): Nexus {
+        this.ticket!!.updateSurvey(ticketSurvey.survey)
+        ticketService.updateTicketSurvey(ticketId, ticketSurvey)
         return this
     }
 

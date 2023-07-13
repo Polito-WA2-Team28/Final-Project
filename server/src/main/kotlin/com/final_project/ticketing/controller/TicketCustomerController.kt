@@ -30,7 +30,6 @@ class TicketCustomerController @Autowired constructor(
     val fileStorageService: FileStorageService
 ) {
 
-    val logger: Logger = LoggerFactory.getLogger(TicketCustomerController::class.java)
 
     @PostMapping("/api/customers/tickets")
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,6 +44,7 @@ class TicketCustomerController @Autowired constructor(
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/customers/tickets")
+            .assertValidationResult(br)
             .assertCustomerExists(customerId)
             .assertProductExists(ticket.serialNumber)
             .assertProductOwnership()
@@ -126,6 +126,8 @@ class TicketCustomerController @Autowired constructor(
     @PatchMapping("/api/customers/tickets/{ticketId}/compileSurvey")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun compileTicketSurvey(
+        @RequestBody @Valid ticketSurvey: TicketSurveyDTO,
+        br: BindingResult,
         @PathVariable("ticketId") ticketId: Long
     ): TicketDTO? {
 
@@ -140,6 +142,7 @@ class TicketCustomerController @Autowired constructor(
             .assertTicketExists(ticketId)
             .assertTicketOwnership()
             .assertTicketStatus(allowedStates)
+            .updateTicketSurvey(ticketId, ticketSurvey)
             .closeTicket(ticketId)
 
         return nexus.ticket

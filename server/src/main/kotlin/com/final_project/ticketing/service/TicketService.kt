@@ -44,4 +44,6 @@ interface TicketService {
 
     fun retrieveTicketStateLifecycle(ticketId: Long): List<TicketStateEvolutionDTO>
 
+    fun updateTicketSurvey(ticketId: Long, ticketSurveyDTO: TicketSurveyDTO)
+
 }

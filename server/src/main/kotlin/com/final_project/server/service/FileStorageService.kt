@@ -13,6 +13,9 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 import com.final_project.server.exception.Exception
+import com.final_project.ticketing.controller.TicketCustomerController
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @Service
 class FileStorageService @Autowired constructor(private val globalConfig: GlobalConfig) {
@@ -32,8 +35,11 @@ class FileStorageService @Autowired constructor(private val globalConfig: Global
     fun persistAttachmentFile(attachment:MultipartFile): Attachment? {
         var uniqueFilename = UUID.randomUUID().toString() + "_" + attachment.originalFilename
         val filePath = File.separator + globalConfig.attachmentsDirectory + File.separator + uniqueFilename
+        val completePath = System.getProperty("user.dir") + filePath
 
-        attachment.transferTo(File(System.getProperty("user.dir") + filePath))
+        attachment.transferTo(File(completePath))
+
+
 
         return if (attachment.originalFilename != null && attachment.contentType != null) {
             attachment.toModel(uniqueFilename)
