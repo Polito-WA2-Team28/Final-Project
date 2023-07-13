@@ -337,7 +337,7 @@ class TestCases : ApplicationTests() {
         Assertions.assertEquals(TicketState.OPEN, actualTicket.state)
     }
 
-    //FIX
+
     @Test
             /** PATCH /api/customers/tickets/:ticketId/compileSurvey */
     fun successCompileSurvey() {
@@ -351,14 +351,18 @@ class TestCases : ApplicationTests() {
 
         val accessToken = utilityFunctions.customerLogin()
 
+        val jsonRequest = JSONObject()
+        jsonRequest.put("survey", "survey for the ticket")
+
         val headers: MultiValueMap<String, String> = HttpHeaders().apply {
             add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
         }
 
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticket.getId()}/compileSurvey",
             HttpMethod.PATCH,
-            HttpEntity(null, headers),
+            HttpEntity(jsonRequest.toString(), headers),
             String::class.java
         )
         Assertions.assertNotNull(response)
@@ -378,19 +382,23 @@ class TestCases : ApplicationTests() {
         val ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.CLOSED)
         val manager = utilityFunctions.createTestManager()
 
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        val requestObject = JSONObject()
-        requestObject.put("expertId", expert.id)
+
+
+        val jsonRequest = JSONObject()
+        jsonRequest.put("survey", "survey for the ticket")
 
         val accessToken = utilityFunctions.customerLogin()
-        headers.add("Authorization", "Bearer $accessToken")
+
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            add("content-type", "application/json")
+        }
 
 
         val response = utilityFunctions.restTemplate.exchange(
             "/api/customers/tickets/${ticket.getId()}/compileSurvey",
             HttpMethod.PATCH,
-            HttpEntity(requestObject.toString(), headers),
+            HttpEntity(jsonRequest.toString(), headers),
             String::class.java
         )
 
