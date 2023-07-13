@@ -3,8 +3,6 @@ package com.final_project.server
 import com.final_project.server.model.Customer
 import com.final_project.server.model.Expert
 import com.final_project.server.model.Product
-import com.final_project.ticketing.dto.MessageObject
-import com.final_project.ticketing.model.Attachment
 import com.final_project.ticketing.model.Ticket
 import com.final_project.ticketing.util.TicketState
 import org.json.JSONObject
@@ -22,12 +20,11 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.multipart.MultipartFile
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class TestMessagesAndAttachments: ApplicationTests() {
+class CustomerTests: ApplicationTests() {
 
     /*** --- Messages and attachments related tests --- ***/
 
@@ -92,7 +89,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
         /* customer login */
@@ -128,7 +126,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
             ?: fail("Test failed because no customer was created in the database.")
 
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
         /* customer login */
@@ -188,7 +187,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         /* preparing database */
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
@@ -289,7 +289,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
         /* customer login */
@@ -316,7 +317,6 @@ class TestMessagesAndAttachments: ApplicationTests() {
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.FORBIDDEN, response.statusCode)
         Assertions.assertEquals("Forbidden", JSONObject(response.body).get("error"))
-
     }
 
 
@@ -331,7 +331,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
             ?: fail("Test failed because no customer was created in the database.")
 
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
         /* customer login */
@@ -367,7 +368,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
 
@@ -398,12 +400,50 @@ class TestMessagesAndAttachments: ApplicationTests() {
     }
 
     @Test
+    fun `Customer creates a message for a ticket in an invalid state`() {
+
+        /* preparing database */
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
+            ?: fail("Test failed because no customer was created in the database.")
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
+        val product: Product = utilityFunctions.createTestProduct(customer)
+        val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, null, TicketState.CLOSED)
+
+        /* customer login */
+        val accessToken: String = utilityFunctions.customerLogin()
+        val headers: MultiValueMap<String, String> = HttpHeaders().apply {
+            add("Authorization", "Bearer $accessToken")
+            contentType = MediaType.MULTIPART_FORM_DATA
+        }
+
+
+        /* sending the messages */
+        val formData: MultiValueMap<String, String> = LinkedMultiValueMap<String, String>().apply {
+            add("messageText", "Hello sir, I need help.")
+            add("attachments", null)
+        }
+        val response = utilityFunctions.restTemplate.exchange(
+            "/api/customers/tickets/${ticket.getId()}/messages",
+            HttpMethod.POST,
+            HttpEntity(formData, headers),
+            String::class.java
+        )
+
+        /* assertions */
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
+        Assertions.assertEquals("Invalid ticket status for this operation.", JSONObject(response.body).get("error"))
+    }
+
+    @Test
     fun `Customer sends a message`() {
 
         /* preparing database */
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
@@ -440,7 +480,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         /* preparing database */
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
@@ -534,7 +575,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
         utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
@@ -571,7 +613,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer2: Customer = utilityFunctions.createTestCustomer("John", "Doe")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
         utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
@@ -605,7 +648,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
         utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")
@@ -640,7 +684,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
 
         /* customer login */
@@ -671,7 +716,8 @@ class TestMessagesAndAttachments: ApplicationTests() {
         val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
         val product: Product = utilityFunctions.createTestProduct(customer)
-        val expert: Expert = utilityFunctions.createTestExpert()
+        val expert: Expert = utilityFunctions.createTestExpert("expert-1")
+            ?: fail("Test failed because no expert was created in the database.")
         val ticket: Ticket = utilityFunctions.createTestTicket(customer, product, expert, TicketState.IN_PROGRESS)
         utilityFunctions.createMessage(ticket, customer, "Hello, I need help!")
         utilityFunctions.createMessage(ticket, customer, "Hi, how can I help you?")

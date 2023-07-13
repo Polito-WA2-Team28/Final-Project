@@ -4,7 +4,9 @@ import com.final_project.security.config.SecurityConfig
 import com.final_project.server.exception.Exception
 import com.final_project.server.model.Expert
 import com.final_project.server.service.ExpertService
+import com.final_project.server.service.FileStorageService
 import com.final_project.server.service.ManagerService
+import com.final_project.server.service.ProductService
 import com.final_project.ticketing.dto.*
 import com.final_project.ticketing.dto.PageResponseDTO.Companion.toDTO
 import com.final_project.ticketing.service.TicketService
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
@@ -29,6 +32,8 @@ class TicketManagerController @Autowired constructor(
     val ticketService: TicketService,
     val managerService: ManagerService,
     val expertService: ExpertService,
+    val productService: ProductService,
+    val fileStorageService: FileStorageService,
     val securityConfig: SecurityConfig
 ) {
 
@@ -233,9 +238,24 @@ class TicketManagerController @Autowired constructor(
 
     }
 
-    @GetMapping("/api/managers/tickets/{ticketId}/lifecycle")
+    @GetMapping("/api/managers/tickets/{ticketId}/attachments/{attachmentUniqueName}")
     @ResponseStatus(HttpStatus.OK)
-    fun getTicketStateLifecycle(@PathVariable ticketId: Long){
+    fun getMessageAttachment(
+        @PathVariable attachmentUniqueName: String,
+        @PathVariable ticketId: Long
+    ): ResponseEntity<ByteArray>? {
 
+        val nexus: Nexus = Nexus(managerService, ticketService, productService, fileStorageService)
+
+        /* running checks... */
+        val managerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        nexus
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/attachments/$attachmentUniqueName")
+            .assertManagerExists(managerId)
+            .assertTicketExists(ticketId)
+            .assertFileExists(attachmentUniqueName)
+
+        return nexus.attachment
     }
+
 }

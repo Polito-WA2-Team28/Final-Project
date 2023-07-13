@@ -65,6 +65,9 @@ class UtilityFunctions {
         return SimpleDateFormat("yyyy-MM-dd").format(this)
     }
 
+
+    /* --- PRIVATE FUNCTIONS --- */
+
     private fun createFirstCustomer(): Customer {
         val customer = Customer(
             UUID.fromString("0ae24126-7590-4e62-9f05-199f61824ed6"),
@@ -95,6 +98,20 @@ class UtilityFunctions {
         return customer
     }
 
+    private fun createFirstExpert(): Expert {
+        val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
+        val expert: Expert =  Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        expertRepository.save(expert)
+        return expert
+    }
+
+    private fun createSecondExpert(): Expert {
+        val uuid = UUID.fromString("5b960e3c-d068-4e57-9640-87e8ebb55b78")
+        val expert: Expert =  Expert(uuid, "expert-2@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        expertRepository.save(expert)
+        return expert
+    }
+
     private fun createAttachments(): List<MultipartFile> {
         val mockFile: MultipartFile = MockMultipartFile(
             "file",
@@ -107,6 +124,7 @@ class UtilityFunctions {
     private fun persistAttachment(attachment: MultipartFile): Attachment? {
         var uniqueFilename = UUID.randomUUID().toString() + "_" + attachment.originalFilename
         val filePath = File.separator + globalConfig.attachmentsDirectory + File.separator + uniqueFilename
+        println(System.getProperty("user.dir"))
         attachment.transferTo(File(System.getProperty("user.dir") + filePath))
         return if (attachment.originalFilename != null && attachment.contentType != null) {
             attachment.toModel(uniqueFilename)
@@ -115,13 +133,18 @@ class UtilityFunctions {
         }
     }
 
-    fun createTestExpert(): Expert {
-        val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
-        val expert: Expert =  Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
-        expertRepository.save(expert)
-        return expert
-    }
 
+    /* --- GENERATOR OF ENTITIES FUNCTIONS --- */
+
+
+
+    fun createTestExpert(username: String): Expert? {
+        return when (username) {
+            "expert-1" -> createFirstExpert()
+            "expert-2" -> createSecondExpert()
+            else -> null
+        }
+    }
 
     fun createTestCustomer(name: String, surname: String): Customer? {
         val key = "$name $surname"
@@ -142,7 +165,8 @@ class UtilityFunctions {
     fun createTestTicket(customer: Customer, product: Product, expert: Expert?, state: TicketState): Ticket {
         val ticket: Ticket = Ticket(
             state, customer, expert, "Description", product, mutableSetOf(),
-            myDate(2020, 1, 1), myDate(2020, 1, 1), null
+            myDate(2020, 1, 1), myDate(2020, 1, 1),
+            null
         )
         ticketRepository.save(ticket)
         return ticket
@@ -174,20 +198,27 @@ class UtilityFunctions {
         return resultList
     }
 
-    fun createMessage(ticket: Ticket, customer: Customer, text: String) {
+    fun createMessage(ticket: Ticket, sender: Any, text: String) {
         val messageObject: MessageObject = MessageObject(text, null)
         val attachmentSet = mutableSetOf<Attachment>()
-        val message: Message = messageObject.toModel(attachmentSet, customer.username, ticket)
+        val username = when (sender) {
+            is Customer -> sender.username
+            is Expert -> sender.email
+            else -> fail("Test failed because a wrong message has attempted to be created.")
+        }
+        val message: Message = messageObject.toModel(attachmentSet, username, ticket)
         messageRepository.save(message)
     }
 
-    fun customerLogin():String{return login("customer-test-1", "test")}
+    fun customerLogin():String{return login("customer-test-1", "customer-test-1")}
 
-    fun customer2Login(): String { return login("customer-test-2", "test") }
+    fun customer2Login(): String { return login("customer-test-2", "customer-test-2") }
 
-    fun expertLogin():String{return login("expert-1", "password1")}
+    fun expertLogin():String{return login("expert-1", "expert-1")}
 
-    fun managerLogin():String{return login("manager-1","password")}
+    fun expert2Login():String{return login("expert-2", "expert-2")}
+
+    fun managerLogin():String{return login("manager-1","manager-1")}
 
     fun login(username: String, password: String): String {
 
@@ -201,7 +232,6 @@ class UtilityFunctions {
             body,
             HttpMethod.POST
         )
-        println("**********${response.statusCode}**********")
 
         /* retrieving the access token */
         return JSONObject(response.body)["accessToken"].toString()

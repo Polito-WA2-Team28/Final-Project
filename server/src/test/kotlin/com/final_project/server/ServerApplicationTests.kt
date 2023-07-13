@@ -19,10 +19,12 @@ import org.springframework.test.context.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.data.jpa.repository.Modifying
+import org.springframework.test.context.event.annotation.AfterTestClass
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import org.testcontainers.junit.jupiter.*
+import java.io.File
 import java.text.SimpleDateFormat
 
 
@@ -48,8 +50,8 @@ class ApplicationTests {
         val postgres = PostgreSQLContainer("postgres:latest")
 
         @Container
-        val keycloak = KeycloakContainer("quay.io/keycloak/keycloak:latest")
-            .withRealmImportFile("keycloak/realm_v2.json")
+        val keycloak: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:latest")
+            .withRealmImportFile("keycloak/realm_v3.json")
 
 
         @JvmStatic
@@ -113,8 +115,12 @@ class ApplicationTests {
         globalConfig.keycloakURL = keycloakHost
     }
 
+//    @AfterTestClass
+//    fun clearFiles() {
+//        val attachmentsDir = File(System.getProperty("user.dir") + File.separator + globalConfig.attachmentsDirectory)
+//        if (attachmentsDir.exists()) {
+//            attachmentsDir.deleteRecursively()
+//        }
+//    }
 
-
-
-    // Resolve Open ticket (manager)
 }
