@@ -1,4 +1,4 @@
-# LAB05 - Team28
+# Final Project - Team28
 
 ## The web application
 
@@ -67,3 +67,34 @@ To run the application:
     ```
 
 2. Access the web application with any browser by reaching `localhost:8081`.
+
+
+
+
+## Credentials for customers, experts and managers
+### Customers
+Username          Password
+customer-test-1   customer-test-1
+customer-test-2   customer-test-2
+customer-test-3   customer-test-3
+customer-test-4   customer-test-4
+customer-test-5   customer-test-5
+
+### Experts
+Username          Password
+expert-1          expert-1
+expert-2          expert-2
+expert-3          expert-3
+expert-4          expert-4
+expert-5          expert-5
+expert-6          expert-6
+expert-7          expert-7
+expert-8          expert-8
+expert-9          expert-9
+expert-10         expert-10
+expert-11         expert-11
+expert-12         expert-12
+
+### Managers
+Username          Password
+manager-1         manager-1
