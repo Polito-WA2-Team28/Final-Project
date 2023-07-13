@@ -19,10 +19,12 @@ import org.springframework.test.context.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.data.jpa.repository.Modifying
+import org.springframework.test.context.event.annotation.AfterTestClass
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import org.testcontainers.junit.jupiter.*
+import java.io.File
 import java.text.SimpleDateFormat
 
 
@@ -48,7 +50,7 @@ class ApplicationTests {
         val postgres = PostgreSQLContainer("postgres:latest")
 
         @Container
-        val keycloak = KeycloakContainer("quay.io/keycloak/keycloak:latest")
+        val keycloak: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:latest")
             .withRealmImportFile("keycloak/realm_v3.json")
 
 
@@ -113,164 +115,12 @@ class ApplicationTests {
         globalConfig.keycloakURL = keycloakHost
     }
 
+//    @AfterTestClass
+//    fun clearFiles() {
+//        val attachmentsDir = File(System.getProperty("user.dir") + File.separator + globalConfig.attachmentsDirectory)
+//        if (attachmentsDir.exists()) {
+//            attachmentsDir.deleteRecursively()
+//        }
+//    }
 
-
-    /*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @Test *//** PATCH /api/managers/:managerId/tickets/:ticketId/close *//*
-    fun failCloseAlreadyClosedTicketByManager() {
-        val customer = createTestCustomer()
-        val customerId = customerRepository.save(customer).id
-
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
-
-        val ticket = createTestTicket(customer,product, expert)
-        val ticketId = ticketRepository.save(ticket).getId()
-
-        val manager = createTestManager()
-        val managerId = managerRepository.save(manager).id
-
-        val response = restTemplate.exchange(
-            "/api/managers/${managerId}/tickets/${ticketId}/close",
-            HttpMethod.PATCH,
-            null,
-            String::class.java
-        )
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
-
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
-        Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
-    }
-
-    @Test *//** PATCH /api/managers/:managerId/tickets/:ticketId/resumeProgress *//*
-    fun succeedResumeProgress() {
-        val customer = createTestCustomer()
-        val customerId = customerRepository.save(customer).id
-
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
-
-        val ticket = createTestTicket(customer,product, expert)
-        val ticketId = ticketRepository.save(ticket).getId()
-
-        val manager = createTestManager()
-        val managerId = managerRepository.save(manager).id
-
-
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        val requestObject = JSONObject()
-        requestObject.put("expertId", expert.id)
-
-        val response = restTemplate.exchange(
-            "/api/managers/${managerId}/tickets/${ticketId}/resumeProgress",
-            HttpMethod.PATCH,
-            HttpEntity(requestObject.toString(), headers),
-            String::class.java
-        )
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
-        Assertions.assertEquals(TicketState.IN_PROGRESS, actualTicket.state)
-
-    }
-
-    @Test *//** PATCH /api/managers/:managerId/tickets/:ticketId/resumeProgress *//*
-    fun failResumeProgressAlreadyClosedTicket() {
-        val customer = createTestCustomer()
-        val customerId = customerRepository.save(customer).id
-
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
-
-        val ticket = createTestTicket(customer,product, expert)
-        val ticketId = ticketRepository.save(ticket).getId()
-
-        val manager = createTestManager()
-        val managerId = managerRepository.save(manager).id
-
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-        val requestObject = JSONObject()
-        requestObject.put("expertId", expert.id)
-
-        val response = restTemplate.exchange(
-            "/api/managers/${managerId}/tickets/${ticketId}/resumeProgress",
-            HttpMethod.PATCH,
-            HttpEntity(requestObject.toString(), headers),
-            String::class.java
-        )
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.CONFLICT, response.statusCode)
-
-        val actualTicket = ticketRepository.getReferenceById(ticketId!!)
-        Assertions.assertEquals(TicketState.CLOSED, actualTicket.state)
-    }
-
-
-
-
-
-    @Test
-    *//** PATCH /api/managers/tickets/:ticketId/remove*//*
-    fun successRemoveTicket(){
-        val customer = createTestCustomer()
-        customerRepository.save(customer).id
-
-        val expert = createTestExpert()
-        val expertId = expertRepository.save(expert).id
-
-        val product = createTestProduct(customer)
-        productRepository.save(product).getId()
-
-        val ticket = Ticket(
-            TicketState.RESOLVED, customer, expert, "Description", product, mutableSetOf(),
-            myDate(2020, 1, 1), myDate(2020, 1, 1)
-        )
-        val ticketId = ticketRepository.save(ticket).getId()!!
-
-        val manager = createTestManager()
-        val managerId = managerRepository.save(manager).id
-
-        val response = restTemplate.exchange(
-            "/api/managers/${managerId}/tickets/${ticketId}/remove",
-            HttpMethod.DELETE,
-            null,
-            String::class.java
-        )
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(HttpStatus.OK, response.statusCode)
-    }*/
-
-
-    // Resolve Open ticket (manager)
 }

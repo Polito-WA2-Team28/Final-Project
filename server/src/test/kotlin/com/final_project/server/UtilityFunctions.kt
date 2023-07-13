@@ -124,6 +124,7 @@ class UtilityFunctions {
     private fun persistAttachment(attachment: MultipartFile): Attachment? {
         var uniqueFilename = UUID.randomUUID().toString() + "_" + attachment.originalFilename
         val filePath = File.separator + globalConfig.attachmentsDirectory + File.separator + uniqueFilename
+        println(System.getProperty("user.dir"))
         attachment.transferTo(File(System.getProperty("user.dir") + filePath))
         return if (attachment.originalFilename != null && attachment.contentType != null) {
             attachment.toModel(uniqueFilename)
