@@ -7,28 +7,118 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icons";
 
-export function ProductsTab() {
+import { Pagination } from 'react-bootstrap';
+// import '../styles/Pagination.css'; 
 
-  const productsPage = useContext(UserContext).products;
-  const products = productsPage
-  //.content;
+////////////////////////////// DELETE THIS LATER///////////////////////////
 
-  const [show, setShow] = useState(false);
-
-  return <>
-    <Button onClick={() => setShow(true)}>Register a new product</Button>
-    <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-      handleCreate={() => { console.log("CREATE") }}
-    />
-    <CardGroup>
-      {(products === undefined || products.length === 0) ?
-        <EmptySearch /> :
-        products.map((product) => <ProductItem key={product.id} product={product} />)
-      }
-    </CardGroup>
-  </ >;
+function generateMockProducts(count) {
+  const products = [];
+  for (let i = 0; i < count; i++) {
+    const product = {
+      id: i + 1,
+      model: `Example-Model-${i+1}`,
+      deviceType: "Example-Name",
+      serialNumber: "Example-Id-123456789",
+    };
+    products.push(product);
+  }
+  return products;
 }
 
+const fakeProducts = generateMockProducts(1000);
+
+//////////////////////////////////////////////////////////////////////
+
+export function ProductsTab(props) {
+  const productsPage = useContext(UserContext).products;
+  //var products = fakeProducts// productsPage;
+  var products = productsPage;
+  if(products==null) products=[]
+  const [show, setShow] = useState(false);
+  const maxColumns = 4;
+  const productsPerPage = maxColumns*4;
+  const totalPages = Math.ceil(products.length / productsPerPage);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handlePageChange = (selectedPage) => {
+    setCurrentPage(selectedPage);
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+
+    // Calcula los límites de los elementos a mostrar
+    let startPage = Math.max(currentPage - 2, 0);
+    let endPage = Math.min(startPage + 4, totalPages - 1);
+    startPage = Math.max(endPage - 4, 0);
+
+    for (let page = startPage; page <= endPage; page++) {
+      items.push(
+        <Pagination.Item
+          key={page}
+          active={page === currentPage}
+          onClick={() => handlePageChange(page)}
+        >
+          {page + 1}
+        </Pagination.Item>
+      );
+    }
+
+    return items;
+  };
+
+  const offset = currentPage * productsPerPage;
+  const currentPageProducts = products.slice(offset, offset + productsPerPage);
+
+  return (
+    <>
+      <Button onClick={() => setShow(true)}>Register a new product</Button>
+      <RegisterNewProductModal
+        show={show}
+        handleClose={() => setShow(false)}
+        handleCreate={() => {
+          console.log('CREATE');
+        }}
+      />
+      <CardGroup>
+        {products === undefined || products.length === 0 ? (
+          <EmptySearch />
+        ) : (
+          <Row xs={1} md={2} lg={3} xl={maxColumns}>
+            {currentPageProducts.map((product) => (
+              <Col key={product.id}>
+                <ProductItem product={product} />
+              </Col>
+            ))}
+          </Row>
+        )}
+      </CardGroup>
+
+      <div className="d-flex justify-content-center">
+        <Pagination>
+          <Pagination.First
+            disabled={currentPage === 0}
+            onClick={() => handlePageChange(0)}
+          />
+          <Pagination.Prev
+            disabled={currentPage === 0}
+            onClick={() => handlePageChange(currentPage - 1)}
+          />
+          {renderPaginationItems()}
+          <Pagination.Next
+            disabled={currentPage === totalPages - 1 || products.length == 0}
+            onClick={() => handlePageChange(currentPage + 1)}
+          />
+          <Pagination.Last
+            disabled={currentPage === totalPages - 1 || products.length == 0}
+            onClick={() => handlePageChange(totalPages - 1)}
+          />
+        </Pagination>
+      </div>
+    </>
+  );
+}
 
 function ProductItem(props) {
 
