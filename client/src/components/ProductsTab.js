@@ -73,13 +73,9 @@ export function ProductsTab(props) {
 
   return (
     <>
-      <Button onClick={() => setShow(true)}>Register a new product</Button>
-      <RegisterNewProductModal
-        show={show}
-        handleClose={() => setShow(false)}
-        handleCreate={() => {
-          console.log('CREATE');
-        }}
+      <Button onClick={() => setShow(true)} style={{margin: "10px"}}>Register a new product</Button>
+      <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
+        handleCreate={() => { console.log("CREATE") }}
       />
       <CardGroup>
         {products === undefined || products.length === 0 ? (
@@ -160,7 +156,7 @@ function RegisterNewProductModal(props) {
       <Modal.Title>Register a new product</Modal.Title>
     </Modal.Header>
     <Modal.Body>
-      <Form>
+      <Form onSubmit={e => e.preventDefault()}>
         <Form.Group className="mb-3" controlId="productId">
           <Form.Label>Product ID</Form.Label>
           <Form.Control type="text" placeholder="Enter product ID" value={productId} onChange={ev => setProductId(ev.target.value)} className="custom-form-control" />

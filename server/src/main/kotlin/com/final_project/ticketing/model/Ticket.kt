@@ -13,6 +13,7 @@ import java.util.*
 @Entity
 @Table
 class Ticket(
+    @Enumerated(EnumType.STRING)
     var state: TicketState,
     @ManyToOne(fetch = FetchType.LAZY) var customer: Customer,
     @ManyToOne(fetch = FetchType.LAZY) var expert:Expert?,
@@ -26,7 +27,9 @@ class Ticket(
     var creationDate:Date,
 
     @Temporal(value = TemporalType.DATE)
-    var lastModified:Date
+    var lastModified:Date,
+
+    var survey:String?
 
 ): EntityBase<Long>() {
 
@@ -39,10 +42,12 @@ class Ticket(
         this.expert = null
         return this
     }
+
+
 }
 
 
 fun TicketCreationData.toModel(customer: Customer, product: Product): Ticket {
     val date = Date()
-    return Ticket(TicketState.OPEN, customer, null, description, product, mutableSetOf(), date, date)
+    return Ticket(TicketState.OPEN, customer, null, description, product, mutableSetOf(), date, date, null)
 }

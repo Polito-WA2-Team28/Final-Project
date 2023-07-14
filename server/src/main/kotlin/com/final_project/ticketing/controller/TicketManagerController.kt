@@ -4,7 +4,9 @@ import com.final_project.security.config.SecurityConfig
 import com.final_project.server.exception.Exception
 import com.final_project.server.model.Expert
 import com.final_project.server.service.ExpertService
+import com.final_project.server.service.FileStorageService
 import com.final_project.server.service.ManagerService
+import com.final_project.server.service.ProductService
 import com.final_project.ticketing.dto.*
 import com.final_project.ticketing.dto.PageResponseDTO.Companion.toDTO
 import com.final_project.ticketing.service.TicketService
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
@@ -29,6 +32,8 @@ class TicketManagerController @Autowired constructor(
     val ticketService: TicketService,
     val managerService: ManagerService,
     val expertService: ExpertService,
+    val productService: ProductService,
+    val fileStorageService: FileStorageService,
     val securityConfig: SecurityConfig
 ) {
 
@@ -38,7 +43,7 @@ class TicketManagerController @Autowired constructor(
     @ResponseStatus(HttpStatus.OK)
     fun getTickets(
         @RequestParam("pageNo", defaultValue = "1") pageNo: Int
-    ): PageResponseDTO<TicketDTO> {
+    ): PageResponseDTO<TicketManagerDTO> {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
 
@@ -49,7 +54,7 @@ class TicketManagerController @Autowired constructor(
             .assertManagerExists(managerId)
 
         /* crafting pageable request */
-        var result: PageResponseDTO<TicketDTO> = PageResponseDTO()
+        var result: PageResponseDTO<TicketManagerDTO> = PageResponseDTO()
         var page: Pageable = PageRequest.of(pageNo-1, result.computePageSize())
 
         /* return result to client */
@@ -61,7 +66,7 @@ class TicketManagerController @Autowired constructor(
     @ResponseStatus(HttpStatus.OK)
     fun getSingleTicket(
         @PathVariable("ticketId") ticketId: Long
-    ): TicketDTO? {
+    ): TicketManagerDTO? {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
 
@@ -71,8 +76,9 @@ class TicketManagerController @Autowired constructor(
             .setEndpointForLogger("/api/managers/tickets/$ticketId")
             .assertManagerExists(managerId)
             .assertTicketExists(ticketId)
+            .retrieveTicketStateLifecycle(ticketId)
 
-        return nexus.ticket
+        return nexus.ticket?.toManagerDTO(nexus.ticketStatusLifecycle)
     }
 
     @PatchMapping("/api/managers/tickets/{ticketId}/assign")
@@ -136,6 +142,28 @@ class TicketManagerController @Autowired constructor(
             .assertTicketExists(ticketId)
             .assertTicketStatus(allowedStates)
             .closeTicket(ticketId)
+
+        return nexus.ticket
+    }
+
+
+    @PatchMapping("/api/managers/tickets/{ticketId}/resolve")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun resolveTicket(
+        @PathVariable("ticketId") ticketId: Long
+    ): TicketDTO? {
+
+        val nexus: Nexus = Nexus(managerService, expertService, ticketService)
+
+        /* running checks... */
+        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED, TicketState.IN_PROGRESS)
+        val managerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        nexus
+            .setEndpointForLogger("/api/managers/tickets/$ticketId/resolve")
+            .assertManagerExists(managerId)
+            .assertTicketExists(ticketId)
+            .assertTicketStatus(allowedStates)
+            .resolveTicket(ticketId)
 
         return nexus.ticket
     }
@@ -209,4 +237,25 @@ class TicketManagerController @Autowired constructor(
         return result
 
     }
+
+    @GetMapping("/api/managers/tickets/{ticketId}/attachments/{attachmentUniqueName}")
+    @ResponseStatus(HttpStatus.OK)
+    fun getMessageAttachment(
+        @PathVariable attachmentUniqueName: String,
+        @PathVariable ticketId: Long
+    ): ResponseEntity<ByteArray>? {
+
+        val nexus: Nexus = Nexus(managerService, ticketService, productService, fileStorageService)
+
+        /* running checks... */
+        val managerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        nexus
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/attachments/$attachmentUniqueName")
+            .assertManagerExists(managerId)
+            .assertTicketExists(ticketId)
+            .assertFileExists(attachmentUniqueName)
+
+        return nexus.attachment
+    }
+
 }

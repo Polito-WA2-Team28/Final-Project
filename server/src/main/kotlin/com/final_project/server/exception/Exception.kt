@@ -28,4 +28,6 @@ open class Exception(override val message:String) : Throwable() {
     class CouldNotRegisterCustomer(message: String): Exception(message)
 
     class CreateExpertException(message: String): Exception(message)
+
+    class FileNotExistException(message: String): Exception(message)
 }

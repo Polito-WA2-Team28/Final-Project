@@ -3,6 +3,8 @@ package com.final_project.ticketing.controller
 import com.final_project.security.config.SecurityConfig
 import com.final_project.server.exception.Exception
 import com.final_project.server.service.ExpertService
+import com.final_project.server.service.FileStorageService
+import com.final_project.server.service.ProductService
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import com.final_project.ticketing.util.TicketState
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.*
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 import kotlin.math.exp
@@ -26,6 +29,8 @@ import kotlin.math.exp
 class TicketExpertController @Autowired constructor(
     val ticketService: TicketService,
     val expertService: ExpertService,
+    val productService: ProductService,
+    val fileStorageService: FileStorageService,
     val securityConfig: SecurityConfig
 ) {
 
@@ -80,10 +85,17 @@ class TicketExpertController @Autowired constructor(
     ): TicketDTO? {
 
         val nexus: Nexus = Nexus(expertService, ticketService)
+        println("[!] TicketExpertController:resolveTicket: getAllExperts")
+        expertService.getAllExperts().map { println(it.id) }
+        println("[!] ---")
 
         /* running checks... */
-        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED, TicketState.IN_PROGRESS)
+        val allowedStates = mutableSetOf(TicketState.REOPENED, TicketState.IN_PROGRESS)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        println("[!] TicketExpertController:resolveTicket: expertId from securityConfig")
+        println(expertId)
+        println("[!] ---")
+
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/resolve")
             .assertExpertExists(expertId)
@@ -104,7 +116,7 @@ class TicketExpertController @Autowired constructor(
         val nexus: Nexus = Nexus(expertService, ticketService)
 
         /* running checks... */
-        val allowedStates = mutableSetOf(TicketState.OPEN, TicketState.REOPENED)
+        val allowedStates = mutableSetOf(TicketState.REOPENED)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
@@ -130,7 +142,7 @@ class TicketExpertController @Autowired constructor(
         val allowedStates = mutableSetOf(TicketState.IN_PROGRESS, TicketState.RESOLVED)
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
-            .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/messages")
             .assertExpertExists(expertId)
             .assertTicketExists(ticketId)
             .assertTicketAssignment()
@@ -156,7 +168,7 @@ class TicketExpertController @Autowired constructor(
         /* running checks... */
         val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
-            .setEndpointForLogger("/api/experts/tickets/$ticketId/close")
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/messagges")
             .assertExpertExists(expertId)
             .assertTicketExists(ticketId)
             .assertTicketAssignment()
@@ -170,5 +182,26 @@ class TicketExpertController @Autowired constructor(
         result = ticketService.getAllMessagesWithPagingByTicketId(ticketId, page).toDTO()
         return result
 
+    }
+
+    @GetMapping("/api/experts/tickets/{ticketId}/attachments/{attachmentUniqueName}")
+    @ResponseStatus(HttpStatus.OK)
+    fun getMessageAttachment(
+        @PathVariable attachmentUniqueName: String,
+        @PathVariable ticketId: Long
+    ): ResponseEntity<ByteArray>? {
+
+        val nexus: Nexus = Nexus(expertService, ticketService, productService, fileStorageService)
+
+        /* running checks... */
+        val expertId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
+        nexus
+            .setEndpointForLogger("/api/experts/tickets/$ticketId/attachments/$attachmentUniqueName")
+            .assertExpertExists(expertId)
+            .assertTicketExists(ticketId)
+            .assertTicketAssignment()
+            .assertFileExists(attachmentUniqueName)
+
+        return nexus.attachment
     }
 }

@@ -1,11 +1,11 @@
 package com.final_project.ticketing.dto
 
 import com.final_project.ticketing.model.Ticket
+import com.final_project.ticketing.model.TicketStateEvolution
 import com.final_project.ticketing.util.TicketState
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
-data class TicketDTO(
+data class TicketManagerDTO(
     val ticketId: Long?,
     var ticketState: TicketState,
     val description: String,
@@ -13,8 +13,9 @@ data class TicketDTO(
     val customerId: UUID?,
     var expertId: UUID?,
     val creationDate: Date,
-    val lastModified:Date,
-    var survey:String?
+    val lastModified: Date,
+    val ticketStateLifecycle: List<TicketStateEvolutionDTO>,
+    val survey:String?
 ) {
 
     fun assignExpert(expertId: UUID?) {
@@ -28,14 +29,13 @@ data class TicketDTO(
     fun changeState(newState: TicketState) {
         this.ticketState = newState
     }
-
-    fun updateSurvey(survey: String) {
-        this.survey = survey
-    }
 }
 
 
-fun Ticket.toDTO() : TicketDTO {
-    return TicketDTO(this.getId(), state, description, this.product.serialNumber,
-                     this.customer.id, this.expert?.id, this.creationDate, this.lastModified, this.survey)
+fun TicketDTO.toManagerDTO(ticketStateLifecycle: List<TicketStateEvolutionDTO>?) : TicketManagerDTO? {
+    return ticketStateLifecycle?.let {
+        TicketManagerDTO(ticketId, ticketState, description, serialNumber,
+        customerId, expertId, this.creationDate, this.lastModified, it, this.survey
+        )
+    }
 }

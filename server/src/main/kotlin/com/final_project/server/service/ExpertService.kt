@@ -15,4 +15,7 @@ interface ExpertService {
 
     fun addProfile(profile: ExpertCompleteRegistration): ExpertDTO?
 
+    //to be removed
+    fun getAllExperts(): List<ExpertDTO>
+
 }

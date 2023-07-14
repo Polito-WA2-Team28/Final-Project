@@ -36,7 +36,8 @@ export default function TicketPage() {
 
   useEffect(() => {
     
-      getTicketByID(ticketId).then((ticket) => {
+    getTicketByID(ticketId).then((ticket) => {
+        console.log(ticket)
         setTicket(ticket)
       })
     
@@ -50,16 +51,6 @@ export default function TicketPage() {
       })
     setDirty(false)
   }, [ticket, dirty])
-
-  /* ticket == null &&
-    getTicketByID(ticketId).then((ticket) => {
-      setTicket(ticket)
-    })
-
-  ticket != null &&
-    getMessages(ticketId).then((messages) => {
-      if (messages && messages.content != null) setMessages(messages.content)
-    }) */
 
   return (
     <>
@@ -98,7 +89,15 @@ export default function TicketPage() {
                     />
                   )}
                 </Row>
-              </Col>
+                </Col>
+                
+                {role === Roles.MANAGER && 
+                  <Col>
+                    <Row><Card.Text> Chronology</Card.Text></Row>
+                    {ticket.ticketStateLifecycle.map((state, index) => 
+                       <p>{state.timestamp} - {state.state}</p> )}
+                  </Col>
+                }
               <Col style={{ position: 'relative' }}>
                 {messages != null && messages.length !== 0 ? (
                   <Col
@@ -128,7 +127,7 @@ export default function TicketPage() {
                     }}
                   >
                     <Col>
-                      <Form>
+                      <Form onSubmit={e => e.preventDefault()}>
                         <Form.Group controlId="formBasicEmail">
                           <Form.Control
                             type="text"
@@ -156,37 +155,41 @@ export default function TicketPage() {
 function CustomerButton(props) {
   const ticket = props.ticket
 
-  const { customerReopenTicket } = useContext(ActionContext)
+  const { customerReopenTicket, customerCompileSurvey } = useContext(ActionContext)
 
-  const handleClose = () => {
-    switch (ticket.ticketState) {
-      case TicketState.OPEN:
-        console.log('Customer close open ticket')
-        break
-      case TicketState.RESOLVED:
-        console.log('Customer close resolved ticket')
-        break
-      case TicketState.REOPENED:
-        console.log('Customer close reopened ticket')
-        break
-      default:
-        console.error('Invalid ticket state')
-    }
-  }
+  const [show, setShow] = useState(false)
+
+  const handleCloseModal = () => setShow(false)
 
   return (
     <>
+      <Modal show={show} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Survey</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>How would you rate the service?</Form.Label>
+              <Form.Control></Form.Control>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>Cancel</Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              customerCompileSurvey(ticket.ticketId, "survey")
+              props.setDirty(true)
+              handleCloseModal()}}>
+            Submit</Button>
+        </Modal.Footer></Modal>
       <Col>
         <Button
           variant="primary"
-          disabled={
-            ![
-              TicketState.OPEN,
-              TicketState.REOPENED,
-              TicketState.RESOLVED,
-            ].includes(ticket.ticketState)
-          }
-          onClick={handleClose}
+          disabled={ticket.ticketState !== TicketState.RESOLVED}
+          onClick={() => { setShow(true) }}
         >
           Close Ticket
         </Button>
@@ -302,7 +305,7 @@ function AssignExpertModal(props) {
         <Modal.Title>Assign Expert</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
+        <Form onSubmit={e => e.preventDefault()}>
           <Form.Group controlId="exampleForm.ControlSelect1">
             <Form.Label>Expert</Form.Label>
             <Form.Control

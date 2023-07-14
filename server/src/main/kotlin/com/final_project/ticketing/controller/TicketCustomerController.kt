@@ -30,7 +30,6 @@ class TicketCustomerController @Autowired constructor(
     val fileStorageService: FileStorageService
 ) {
 
-    val logger: Logger = LoggerFactory.getLogger(TicketCustomerController::class.java)
 
     @PostMapping("/api/customers/tickets")
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,6 +44,7 @@ class TicketCustomerController @Autowired constructor(
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/customers/tickets")
+            .assertValidationResult(br)
             .assertCustomerExists(customerId)
             .assertProductExists(ticket.serialNumber)
             .assertProductOwnership()
@@ -122,9 +122,12 @@ class TicketCustomerController @Autowired constructor(
         return nexus.ticket
     }
 
+    //Receive a String that represents a Survey and patch it in the ticket entry (OneToOne or embedded)
     @PatchMapping("/api/customers/tickets/{ticketId}/compileSurvey")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun compileTicketSurvey(
+        @RequestBody @Valid ticketSurvey: TicketSurveyDTO,
+        br: BindingResult,
         @PathVariable("ticketId") ticketId: Long
     ): TicketDTO? {
 
@@ -139,6 +142,7 @@ class TicketCustomerController @Autowired constructor(
             .assertTicketExists(ticketId)
             .assertTicketOwnership()
             .assertTicketStatus(allowedStates)
+            .updateTicketSurvey(ticketId, ticketSurvey)
             .closeTicket(ticketId)
 
         return nexus.ticket
@@ -206,9 +210,9 @@ class TicketCustomerController @Autowired constructor(
     fun getMessageAttachment(
         @PathVariable attachmentUniqueName: String,
         @PathVariable ticketId: Long
-    ): ResponseEntity<ByteArray> {
+    ): ResponseEntity<ByteArray>? {
 
-        val nexus: Nexus = Nexus(customerService, ticketService, productService)
+        val nexus: Nexus = Nexus(customerService, ticketService, productService, fileStorageService)
 
         /* running checks... */
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
@@ -217,9 +221,9 @@ class TicketCustomerController @Autowired constructor(
             .assertCustomerExists(customerId)
             .assertTicketExists(ticketId)
             .assertTicketOwnership()
-            //.assertFileExists() /* TODO: need to assert that the uniqueFileName corresponds to a file that exists */
+            .assertFileExists(attachmentUniqueName)
 
-        return fileStorageService.getAttachmentFile(attachmentUniqueName)
+        return nexus.attachment
     }
 
 }
