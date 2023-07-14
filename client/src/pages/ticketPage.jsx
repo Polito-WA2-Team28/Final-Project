@@ -36,7 +36,8 @@ export default function TicketPage() {
 
   useEffect(() => {
     
-      getTicketByID(ticketId).then((ticket) => {
+    getTicketByID(ticketId).then((ticket) => {
+        console.log(ticket)
         setTicket(ticket)
       })
     
@@ -88,7 +89,15 @@ export default function TicketPage() {
                     />
                   )}
                 </Row>
-              </Col>
+                </Col>
+                
+                {role === Roles.MANAGER && 
+                  <Col>
+                    <Row><Card.Text> Chronology</Card.Text></Row>
+                    {ticket.ticketStateLifecycle.map((state, index) => 
+                       <p>{state.timestamp} - {state.state}</p> )}
+                  </Col>
+                }
               <Col style={{ position: 'relative' }}>
                 {messages != null && messages.length !== 0 ? (
                   <Col
