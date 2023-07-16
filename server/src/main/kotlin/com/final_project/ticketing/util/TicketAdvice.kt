@@ -28,7 +28,7 @@ class TicketAdvice {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun missingFieldError(e: HttpMessageNotReadableException): TicketErrorDetails {
         return TicketErrorDetails(
-            "One or more mandatory fields are missing: ${e.message}"
+            "One or more mandatory fields are missing"
         )
     }
 

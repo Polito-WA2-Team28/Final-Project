@@ -44,7 +44,7 @@ class TicketCustomerController @Autowired constructor(
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
             .setEndpointForLogger("/api/customers/tickets")
-            .assertValidationResult(br)
+            .assertValidationResult("/api/customers/tickets/", br)
             .assertCustomerExists(customerId)
             .assertProductExists(ticket.serialNumber)
             .assertProductOwnership()

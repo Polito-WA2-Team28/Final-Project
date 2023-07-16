@@ -8,6 +8,7 @@ import com.final_project.server.dto.*
 import com.final_project.server.exception.Exception
 
 import com.final_project.security.exception.SecurityException
+import com.final_project.ticketing.util.Nexus
 import io.micrometer.observation.annotation.Observed
 import jakarta.validation.Valid
 import org.slf4j.*
@@ -30,7 +31,8 @@ class UserController(
     val logger: Logger = LoggerFactory.getLogger(UserController::class.java)
 
     @PostMapping("/api/auth/login")
-    fun authenticateUser(@RequestBody @Valid userCredentials: UserCredentialsDTO):TokenDTO?{
+    fun authenticateUser(@RequestBody @Valid userCredentials: UserCredentialsDTO,
+                         br: BindingResult):TokenDTO?{
         val restTemplate = RestTemplate()
         val headers = HttpHeaders()
 
@@ -65,12 +67,11 @@ class UserController(
     @PostMapping("/api/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     fun registerUser(@RequestBody @Valid profile: CustomerFormRegistration, br: BindingResult){
-        //add try catch
-        if(br.hasErrors()){
-            val invalidFields = br.fieldErrors.map { it.field }
-            logger.error("Endpoint: /api/auth/register Error: Invalid fields in the registration form: $invalidFields")
-            throw Exception.ValidationException("", invalidFields)
-        }
+
+        val nexus: Nexus = Nexus(keycloakService)
+
+        /* Checking errors */
+        nexus.assertValidationResult("/api/auth/register", br)
 
         val response = keycloakService.createUser(profile)
 
@@ -90,11 +91,10 @@ class UserController(
     ) {
 
         /* checking for invalid fields in the registration form */
-        if (br.hasErrors()) {
-            val invalidFields = br.fieldErrors.map { it.field }
-            logger.error("Endpoint: /api/auth/createExpert Error: Invalid fields in the registration form: $invalidFields")
-            throw Exception.ValidationException("", invalidFields)
-        }
+        val nexus: Nexus = Nexus(keycloakService)
+
+        /* Checking errors */
+        nexus.assertValidationResult("/api/auth/createExpert", br)
 
         /* create the expert */
         val response = keycloakService.createExpert(expert)

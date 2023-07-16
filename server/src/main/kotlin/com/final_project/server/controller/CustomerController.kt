@@ -57,11 +57,7 @@ class CustomerController @Autowired constructor(
         val nexus: Nexus = Nexus(customerService)
 
         /* Checking errors */
-        if (br.hasErrors()) {
-            val invalidFields = br.fieldErrors.map { it.field }
-            logger.error("Endpoint: /api/customers/editProfile Error: Invalid fields: $invalidFields")
-            throw Exception.ValidationException("", invalidFields)
-        }
+        nexus.assertValidationResult("/api/customers/editProfile", br)
 
         /* running checks... */
         val customerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))

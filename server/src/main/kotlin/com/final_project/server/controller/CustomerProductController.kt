@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import com.final_project.server.exception.Exception
 import com.final_project.server.dto.RegisterProductDTO
+import com.final_project.server.service.CustomerServiceImpl
+import com.final_project.ticketing.util.Nexus
 import io.micrometer.observation.annotation.Observed
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -19,6 +21,7 @@ import java.util.*
 @RestController
 @Observed
 class CustomerProductController @Autowired constructor(val productService: ProductServiceImpl,
+                                                       val customerService: CustomerServiceImpl,
                                                        val securityConfig: SecurityConfig){
 
     val logger: Logger = LoggerFactory.getLogger(CustomerProductController::class.java)
@@ -49,13 +52,15 @@ class CustomerProductController @Autowired constructor(val productService: Produ
     fun registerProduct(@RequestBody @Valid productIds: RegisterProductDTO,
                         br: BindingResult
     ){
-        if (br.hasErrors()) {
-            val invalidFields = br.fieldErrors.map { it.field }
-            logger.error("Endpoint: /api/customers/products/registerProduct Error: Invalid fields: $invalidFields")
-            throw Exception.ValidationException("", invalidFields)
-        }
-
+        val nexus: Nexus = Nexus(productService, customerService)
         val customerId = securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB)
+        /* Checking errors */
+        nexus
+            .assertValidationResult("/api/customers/products/registerProduct", br)
+            .assertCustomerExists(UUID.fromString(customerId))
+            .assertProductExists(productIds.serialNumber)
+
+
 
         return productService.registerProduct(UUID.fromString(customerId), productIds.productId, productIds.serialNumber)
     }
