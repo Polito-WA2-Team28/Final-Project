@@ -8,6 +8,7 @@ import TicketState from '../model/ticketState'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import dayjs from 'dayjs'
+import { errorToast } from '../components/toastHandler'
 
 export default function TicketPage() {
   const { ticketId } = useParams()
@@ -15,26 +16,64 @@ export default function TicketPage() {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [dirty, setDirty] = useState(false)
+  const [files, setFiles] = useState([])
+  const [filesLabel, setFilesLabel] = useState('')
 
-  const { sendMessage, getMessages, getTicketByID } = useContext(ActionContext)
+  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(ActionContext)
   const { role, experts, user } = useContext(UserContext)
 
+
+  const myGetMessages = () => {
+    getMessages(ticketId).then((messages) => {
+      if (messages && messages.content != null) {
+        for (let i = 0; i < messages.content.length; i++) {
+          if (messages.content[i].attachmentsNames.length !== 0) {
+            messages.content[i].attachments = []
+            for (let j = 0; j < messages.content[i].attachmentsNames.length; j++) {
+              getAttachment(ticketId, messages.content[i].attachmentsNames[j])
+                .then((attachment) => {
+                  //messages.content[i].attachments.push(attachment)
+                  console.log(attachment)
+                }
+                )
+            }
+          }
+       
+        }
+      }
+      setMessages(
+        messages.content.sort((a, b) =>
+          a.timestamp.localeCompare(b.timestamp),
+        ),
+      )
+    })
+  }
+
   const sendNewMessage = () => {
-    if (newMessage === '') return
-    sendMessage(ticketId, newMessage)
+    if (newMessage === '') {
+      errorToast('Message cannot be empty')
+      return
+    }
+
+    sendMessage(ticketId, newMessage, files)
       .then(() => {
         setNewMessage('')
-        getMessages(ticketId).then((messages) => {
-          messages &&
-            messages.content != null &&
-            setMessages(
-              messages.content.sort((a, b) =>
-                a.timestamp.localeCompare(b.timestamp),
-              ),
-            )
-        })
+        setFiles([])
+        setFilesLabel('')
+        myGetMessages()
       })
       .catch((error) => console.error(error))
+  }
+
+  const myUpload = (e) => {
+    const files = e.target.files
+    setFiles(files)
+    let label = ''
+    for (let i = 0; i < files.length; i++) {
+      label += files[i].name + ' '
+    }
+    setFilesLabel(label)
+    console.log(files)
   }
 
   useEffect(() => {
@@ -45,14 +84,7 @@ export default function TicketPage() {
   }, [dirty])
 
   useEffect(() => {
-    getMessages(ticketId).then((messages) => {
-      if (messages && messages.content != null)
-        setMessages(
-          messages.content.sort((a, b) =>
-            a.timestamp.localeCompare(b.timestamp),
-          ),
-        )
-    })
+    myGetMessages()
   }, [ticket])
   
   return (
@@ -132,8 +164,8 @@ export default function TicketPage() {
                          
                           <p><strong>{message.sender}</strong>
                             <p>{message.messageText}</p>
+                           
                             </p>
-                          
                         </div>
                         
                       )
@@ -158,7 +190,10 @@ export default function TicketPage() {
                             placeholder="Enter message"
                             value={newMessage}
                             onChange={(ev) => setNewMessage(ev.target.value)}
-                          />
+                            />
+                            <Form.Control name={filesLabel}
+                              type="file" multiple
+                            onChange={myUpload}/>
                         </Form.Group>
                       </Form>
                     </Col>

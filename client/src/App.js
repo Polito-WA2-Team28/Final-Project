@@ -231,16 +231,16 @@ function App() {
     }
   }
 
-  const sendMessage = async (ticketId, message) => {
-    console.log("Sending message", ticketId, message)
+  const sendMessage = async (ticketId, message, files) => {
+    console.log("Sending message", ticketId, message, files)
     switch (role) {
       case Roles.CUSTOMER:
-        await customerAPI.sendMessage(token, message, ticketId)
+        await customerAPI.sendMessage(token, message, ticketId, files)
           .then(() => setDirty(true))
           .catch((err) => errorToast(err));
         break;
       case Roles.EXPERT:
-        await expertAPI.sendMessage(token, message, ticketId)
+        await expertAPI.sendMessage(token, message, ticketId, files)
           .then(() => setDirty(true))
           .catch((err) => errorToast(err));
         break;
@@ -289,6 +289,23 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
+  const getAttachment = async (ticketId, attachmentName) => {
+    console.log("Getting attachment", ticketId, attachmentName)
+    switch (role) {
+      case Roles.CUSTOMER:
+        return await customerAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      case Roles.EXPERT:
+        return await expertAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      case Roles.MANAGER:
+        return await managerAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      default:
+        errorToast("You are not allowed to see messages")
+    }
+  }
+
 
   const actions = {
     getMessages: getMessages,
@@ -306,6 +323,7 @@ function App() {
     managerHandleCloseTicket: managerHandleCloseTicket,
     managerRelieveExpert: managerRelieveExpert,
     expertResolveTicket: expertResolveTicket,
+    getAttachment: getAttachment
   }
 
   const userValues = {

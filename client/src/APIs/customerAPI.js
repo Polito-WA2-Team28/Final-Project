@@ -95,17 +95,22 @@ async function compileSurvey(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function sendMessage(token, message, ticketId) {
+async function sendMessage(token, message, ticketId, files) {
 
     const formdata = new FormData();
     formdata.append("messageText", message);
-    //formdata.append("attachments", []);
+
+    if (files) {
+        for (let i = 0; i < files.length; i++) 
+            formdata.append("attachments", files.item(i));
+    } 
+
     formdata.forEach((value, key) => console.log(key + " " + value));
 
 
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
         {
-            method: "POST", headers: { "Authorization": "Bearer " + token },
+            method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data"  },
             body: formdata
         })
     if (!res.ok) throw res.statusText
@@ -150,9 +155,25 @@ async function getProduct(token, productId) {
     return data;
 }
 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function getAttachment(token, ticketId, attachmentName) {
+    console.log("GET ATTACHMENT", ticketId, attachmentName);
+    const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
+        { method: "GET", headers: authHeader(token) })
+    
+    console.log("RES", res);
+    if (!res.ok) throw res.statusText
+    const data = await res.json();
+    console.log("DATA", data);
+    return data;
+}
+
 const customerAPI = {
     getProfile, createTicket, getTickets, getTicket, patchProfile,
-    reopenTicket, compileSurvey, sendMessage, getMessages, getProducts, getProduct
+    reopenTicket, compileSurvey, sendMessage, getMessages, getProducts, getProduct, getAttachment
 }
 
 export default customerAPI
