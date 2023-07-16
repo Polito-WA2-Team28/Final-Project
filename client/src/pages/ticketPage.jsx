@@ -5,6 +5,9 @@ import '../styles/TicketPage.css'
 import { ActionContext, UserContext } from '../Context'
 import Roles from '../model/rolesEnum'
 import TicketState from '../model/ticketState'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck } from '@fortawesome/free-solid-svg-icons'
+import dayjs from 'dayjs'
 
 export default function TicketPage() {
   const { ticketId } = useParams()
@@ -14,14 +17,14 @@ export default function TicketPage() {
   const [dirty, setDirty] = useState(false)
 
   const { sendMessage, getMessages, getTicketByID } = useContext(ActionContext)
-  const { role, experts } = useContext(UserContext)
+  const { role, experts, user } = useContext(UserContext)
 
   const sendNewMessage = () => {
+    if (newMessage === '') return
     sendMessage(ticketId, newMessage)
       .then(() => {
         setNewMessage('')
         getMessages(ticketId).then((messages) => {
-          console.log(messages)
           messages &&
             messages.content != null &&
             setMessages(
@@ -35,23 +38,23 @@ export default function TicketPage() {
   }
 
   useEffect(() => {
-    
-    getTicketByID(ticketId).then((ticket) => {
-        console.log(ticket)
-        setTicket(ticket)
-      })
-    
-      getMessages(ticketId).then((messages) => {
-        if (messages && messages.content != null)
-          setMessages(
-            messages.content.sort((a, b) =>
-              a.timestamp.localeCompare(b.timestamp),
-            ),
-          )
-      })
-    setDirty(false)
-  }, [ticket, dirty])
+    console.log('useEffect')
+    getTicketByID(ticketId)
+      .then((ticket) => setTicket(ticket))
+      .then(() => setDirty(false))
+  }, [dirty])
 
+  useEffect(() => {
+    getMessages(ticketId).then((messages) => {
+      if (messages && messages.content != null)
+        setMessages(
+          messages.content.sort((a, b) =>
+            a.timestamp.localeCompare(b.timestamp),
+          ),
+        )
+    })
+  }, [ticket])
+  
   return (
     <>
       {ticket == null ? (
@@ -89,36 +92,57 @@ export default function TicketPage() {
                     />
                   )}
                 </Row>
+              </Col>
+
+              {role === Roles.MANAGER && (
+                <Col>
+                  <Row>
+                    <Card.Text> Chronology</Card.Text>
+                  </Row>
+                  <Row>
+                    <div style={{ height: '300px', overflowY: 'auto' }}>
+                      {ticket.ticketStateLifecycle.map((state, index) => (
+                        <p>
+                          {dayjs(state.timestamp).format('DD/MM/YYYY HH:mm:ss')}
+                          - {state.state}
+                        </p>
+                      ))}
+                    </div>
+                  </Row>
                 </Col>
-                
-                {role === Roles.MANAGER && 
-                  <Col>
-                    <Row><Card.Text> Chronology</Card.Text></Row>
-                    {ticket.ticketStateLifecycle.map((state, index) => 
-                       <p>{state.timestamp} - {state.state}</p> )}
-                  </Col>
-                }
+              )}
               <Col style={{ position: 'relative' }}>
-                {messages != null && messages.length !== 0 ? (
-                  <Col
-                    style={{
-                      overflowY: 'auto',
-                      height: '80%',
-                      marginBottom: '50px',
-                    }}
-                  >
-                    {messages.map((message, index) => {
+                <Col
+                  style={{
+                    overflowY: 'auto',
+                    height: '300px',
+                    marginBottom: '100px',
+                  }}
+                >
+                  {messages != null && messages.length !== 0 ? (
+                    messages.map((message, index) => {
                       return (
-                        <Card.Text key={index}>
-                          <strong>{message.sender}:</strong>
-                          {message.messageText}
-                        </Card.Text>
+                        <div key={index} style={
+                          role === Roles.MANAGER
+                            || role === Roles.EXPERT
+                            || message.sender === user.username ?
+                            { textAlign: 'right', paddingRight: '20px' }
+                            : { textAlign: 'left', paddingLeft: '20px' }
+                        }>
+                         
+                          <p><strong>{message.sender}</strong>
+                            <p>{message.messageText}</p>
+                            </p>
+                          
+                        </div>
+                        
                       )
-                    })}
-                  </Col>
-                ) : (
-                  <Card.Text>No messages yet</Card.Text>
-                )}
+                    })
+                  ) : (
+                    <Card.Text>No messages yet</Card.Text>
+                  )}
+                </Col>
+
                 {(role === Roles.CUSTOMER || role === Roles.EXPERT) && (
                   <Row
                     style={{
@@ -127,7 +151,7 @@ export default function TicketPage() {
                     }}
                   >
                     <Col>
-                      <Form onSubmit={e => e.preventDefault()}>
+                      <Form onSubmit={(e) => e.preventDefault()}>
                         <Form.Group controlId="formBasicEmail">
                           <Form.Control
                             type="text"
@@ -155,7 +179,9 @@ export default function TicketPage() {
 function CustomerButton(props) {
   const ticket = props.ticket
 
-  const { customerReopenTicket, customerCompileSurvey } = useContext(ActionContext)
+  const { customerReopenTicket, customerCompileSurvey } = useContext(
+    ActionContext,
+  )
 
   const [show, setShow] = useState(false)
 
@@ -176,20 +202,28 @@ function CustomerButton(props) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>Cancel</Button>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
           <Button
             variant="primary"
             onClick={() => {
-              customerCompileSurvey(ticket.ticketId, "survey")
+              customerCompileSurvey(ticket.ticketId, 'survey')
               props.setDirty(true)
-              handleCloseModal()}}>
-            Submit</Button>
-        </Modal.Footer></Modal>
+              handleCloseModal()
+            }}
+          >
+            Submit
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Col>
         <Button
-          variant="primary"
+          variant="success"
           disabled={ticket.ticketState !== TicketState.RESOLVED}
-          onClick={() => { setShow(true) }}
+          onClick={() => {
+            setShow(true)
+          }}
         >
           Close Ticket
         </Button>
@@ -197,9 +231,12 @@ function CustomerButton(props) {
 
       <Col>
         <Button
-          variant="primary"
+          variant="danger"
           disabled={ticket.ticketState !== TicketState.CLOSED}
-          onClick={() => { customerReopenTicket(ticket.ticketId); props.setDirty(true)}}
+          onClick={() => {
+            customerReopenTicket(ticket.ticketId)
+            props.setDirty(true)
+          }}
         >
           Reopen Ticket
         </Button>
@@ -216,9 +253,12 @@ function ExpertButton(props) {
   return (
     <Col>
       <Button
-        variant="primary"
+        variant="success"
         disabled={ticket.ticketState !== TicketState.IN_PROGRESS}
-        onClick={() => { expertResolveTicket(ticket.ticketId); props.setDirty(true)}}
+        onClick={() => {
+          expertResolveTicket(ticket.ticketId)
+          props.setDirty(true)
+        }}
       >
         Resolve Ticket
       </Button>
@@ -239,17 +279,53 @@ function ManagerButton(props) {
 
   return (
     <>
-      <AssignExpertModal
-        ticket={ticket}
-        experts={experts}
-        show={show}
-        handleClose={() => setShow(false)}
-        handleAssign={managerAssignExpert}
-        setDirty = {props.setDirty}
-      />
+      <Modal size="xl" show={show} onHide={() => setShow(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Assign Expert</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Row>
+            <Col lg={1}>
+              <Button>{'<'}</Button>
+            </Col>
+            <Col lg={10}>
+              {experts.content.map((expert, index) => {
+                return (
+                  <Row>
+                    <Card style={{ padding: '10px', margin: '10px' }}>
+                      <Row>
+                        <Col>
+                          {expert.email} - Expertise:{' '}
+                          {expert.expertiseFields.length === 0
+                            ? 'NONE'
+                            : expert.expertiseFields.toString()}
+                        </Col>
+                        <Col>
+                          <Button
+                            onClick={() => {
+                              managerAssignExpert(ticket.ticketId, expert.id)
+                              props.setDirty(true)
+                              setShow(false)
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faCheck} />
+                          </Button>
+                        </Col>
+                      </Row>
+                    </Card>
+                  </Row>
+                )
+              })}
+            </Col>
+            <Col lg={1}>
+              <Button>{'>'}</Button>
+            </Col>
+          </Row>
+        </Modal.Body>
+      </Modal>
       <Col>
         <Button
-          variant="primary"
+          variant="success"
           disabled={
             ![
               TicketState.OPEN,
@@ -257,7 +333,10 @@ function ManagerButton(props) {
               TicketState.REOPENED,
             ].includes(ticket.ticketState)
           }
-          onClick={() => { managerHandleCloseTicket(ticket); props.setDirty(true)}}
+          onClick={() => {
+            managerHandleCloseTicket(ticket)
+            props.setDirty(true)
+          }}
         >
           Close Ticket
         </Button>
@@ -275,62 +354,16 @@ function ManagerButton(props) {
 
       <Col>
         <Button
-          variant="primary"
+          variant="danger"
           disabled={ticket.ticketState !== TicketState.IN_PROGRESS}
-          onClick={() => { managerRelieveExpert(ticket.ticketId);  props.setDirty(true)}}
+          onClick={() => {
+            managerRelieveExpert(ticket.ticketId)
+            props.setDirty(true)
+          }}
         >
           Relieve expert
         </Button>
       </Col>
     </>
-  )
-}
-
-function AssignExpertModal(props) {
-  const experts = props.experts
-  const ticket = props.ticket
-  const [expert, setExpert] = useState(
-    experts && experts.content && experts.content[0],
-  )
-
-  const assign = () => {
-    props.handleAssign(ticket.ticketId, expert.id)
-    props.setDirty(true)
-    props.handleClose()
-  }
-
-  return (
-    <Modal show={props.show} onHide={props.handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Assign Expert</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form onSubmit={e => e.preventDefault()}>
-          <Form.Group controlId="exampleForm.ControlSelect1">
-            <Form.Label>Expert</Form.Label>
-            <Form.Control
-              as="select"
-              onSelect={(ev) => setExpert(ev.target.value)}
-            >
-              {experts &&
-                experts.content &&
-                experts.content.map((expert, index) => (
-                  <option key={index} value={expert}>
-                    {expert.email}
-                  </option>
-                ))}
-            </Form.Control>
-          </Form.Group>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={props.handleClose}>
-          Cancel
-        </Button>
-        <Button variant="primary" onClick={assign}>
-          Assign
-        </Button>
-      </Modal.Footer>
-    </Modal>
   )
 }
