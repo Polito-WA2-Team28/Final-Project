@@ -4,31 +4,11 @@ import { useContext, useState } from "react";
 import { Button, Card, CardGroup, Col, Row} from "react-bootstrap";
 import EmptySearch from "./EmptySearch";
 import { useNavigate } from "react-router-dom";
-import "../styles/TicketTab.css"
+// import "../styles/TicketTab.css"
 import { UserContext } from "../Context";
 import { Pagination } from 'react-bootstrap';
 
-/// REMOVE ////////////////////////////////////////////////
-
-function generateMockTickets(count) {
-  const tickets = [];
-  for (let i = 0; i < count; i++) {
-    const ticket = {
-      ticketId: i + 1,
-      title: `Example Title ${i + 1}`,
-      description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. `,
-    };
-    tickets.push(ticket);
-  }
-  return tickets;
-}
-
-const fakeTickets = generateMockTickets(1000);
-
-/// REMOVE /////////////////////////////////////
-
-
-export default function TicketTab() {
+export default function TicketTab(prop) {
 
   const ticketsPage = useContext(UserContext).tickets
   var tickets = ticketsPage.content
@@ -36,11 +16,12 @@ export default function TicketTab() {
 
   if(tickets==null) tickets=[]
 
-  const ticketsPerPage = 10;
-  const totalPages = Math.ceil(tickets.length / ticketsPerPage);
-  const [currentPage, setCurrentPage] = useState(0);
+  var ticketsPerPage = ticketsPage.pageSize;
+  var totalPages = ticketsPage.totalPages;
+  var [currentPage, setCurrentPage] = useState(0);
 
   const handlePageChange = (page) => {
+    prop.newTicketPage(page)
     setCurrentPage(page);
   };
 
@@ -65,18 +46,15 @@ export default function TicketTab() {
     return items;
   };
 
-  const offset = currentPage * ticketsPerPage;
-  const currentTickets = tickets.slice(offset, offset + ticketsPerPage);
-
   return (
     <>
-      <CardGroup>
+      <CardGroup className="mt-1">
         {(tickets === undefined || tickets.length === 0) ? (
           <EmptySearch />
         ) : (
-          <Row xs={1} md={2} lg={3} xl={4}>
-            {currentTickets.map((ticket) => (
-              <Col key={ticket.ticketId}>
+          <Row xs={1} className="w-100 justify-content-center">
+            {tickets.map((ticket) => (
+              <Col key={ticket.ticketId} className="mb-1 w-75">
                 <TicketItem ticket={ticket} />
               </Col>
             ))}
@@ -113,11 +91,11 @@ function TicketItem(props) {
   const navigate = useNavigate();
 
   return (
-    <Card className="ticketCard h-100">
+    <Card className="">
       <Card.Body>
         <Card.Title>
-          <Row>
-            <Col>{props.ticket.title}</Col>
+          <Row xs={2} className="align-items-center">
+            <p className="my-0">{props.ticket.description}</p>
             <Col className="text-end">
               <Button onClick={() => navigate(`/ticket/${props.ticket.ticketId}`)}>
                 <FontAwesomeIcon icon={faUpRightAndDownLeftFromCenter} />
@@ -125,7 +103,6 @@ function TicketItem(props) {
             </Col>
           </Row>
         </Card.Title>
-        <p>{props.ticket.description}</p>
       </Card.Body>
     </Card>
   );

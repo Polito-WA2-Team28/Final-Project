@@ -104,6 +104,15 @@ function App() {
       })
   };
 
+  const newTicketPage = async(newPageNo) => {
+    await customerAPI.getTicketsPages(token, newPageNo+1)
+        .then(newTickets => {
+          setTickets(newTickets)
+          // console.log(tickets)
+        })
+        .catch((err) => errorToast(err));
+  }
+
   const handleEditProfile = async (profile) => {
     await customerAPI.patchProfile(token, profile)
       .then(() => {
@@ -326,7 +335,7 @@ function App() {
             <Route path="/" element={loggedIn ? <Navigate to={"/dashboard"} /> : <LandingPage />} />
             <Route path="/register" element={loggedIn ? <Navigate to={"/dashboard"} /> : <RegisterPage />} />
             <Route path="/login" element={loggedIn ? <Navigate to={"/dashboard"} /> : <LoginPage />} />
-            <Route path="/dashboard" element={loggedIn ? <Dashboard /> : <Navigate to={"/"} />} />
+            <Route path="/dashboard" element={loggedIn ? <Dashboard newTicketPage={newTicketPage}/> : <Navigate to={"/"} />} />
             <Route path="/user" element={loggedIn ? <UserPage user={user} /> : <Navigate to={"/"} />} />
             <Route path="/editUser" element={loggedIn ? <EditUserPage user={user} handleEdit={handleEditProfile} /> : <Navigate to={"/"} />} />
             <Route path="/ticket/:ticketId" element={loggedIn ? <TicketPage /> : <Navigate to={"/"} />} />

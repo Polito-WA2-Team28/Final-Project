@@ -5,7 +5,7 @@ import Roles from "../model/rolesEnum";
 import { useContext } from "react";
 import { UserContext } from "../Context";
 
-export default function Dashboard() {
+export default function Dashboard(prop) {
 
   const { role } = useContext(UserContext)
 
@@ -13,7 +13,7 @@ export default function Dashboard() {
     <Container>
       <Tabs>
         <Tab eventKey="tickets" title="Tickets">
-          <TicketTab />
+          <TicketTab newTicketPage={prop.newTicketPage} />
         </Tab>
         {(role === Roles.CUSTOMER || role === Roles.MANAGER) &&
           <Tab eventKey="products" title="Products">

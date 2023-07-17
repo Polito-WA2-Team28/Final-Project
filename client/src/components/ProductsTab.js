@@ -81,7 +81,7 @@ export function ProductsTab(props) {
         {products === undefined || products.length === 0 ? (
           <EmptySearch />
         ) : (
-          <Row xs={1} md={2} lg={3} xl={maxColumns}>
+          <Row xs={1} md={2} lg={3} xl={4}>
             {currentPageProducts.map((product) => (
               <Col key={product.id}>
                 <ProductItem product={product} />
