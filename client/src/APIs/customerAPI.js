@@ -55,6 +55,13 @@ async function getTickets(token) {
     return data;
 }
 
+async function getTicketsPages(token, noPages) {
+    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
+        { method: "GET", headers: authHeader(token) })
+    if (!res.ok) throw res.statusText
+    const data = await res.json();
+    return data;
+}
 
 /** 
 * @throws {Error} if the data fails
@@ -159,6 +166,14 @@ async function getProduct(token, productId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
+async function getProductPages(token, noPages) {
+    const res = await fetch(url + `/products?pageNo=${noPages}`,
+        { method: "GET", headers: authHeader(token) })
+    if (!res.ok) throw res.statusText
+    const data = await res.json();
+    return data;
+}
+
 async function getAttachment(token, ticketId, attachmentName) {
     console.log("GET ATTACHMENT", ticketId, attachmentName);
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
@@ -186,7 +201,8 @@ async function registerProduct(token, productId, serialNumber) {
 const customerAPI = {
     getProfile, createTicket, getTickets, getTicket, patchProfile,
     reopenTicket, compileSurvey, sendMessage, getMessages,
-    getProducts, getProduct, getAttachment, registerProduct
+    getProducts, getProduct, getAttachment, registerProduct,
+    getProductPages, getTicketsPages
 }
 
 export default customerAPI
