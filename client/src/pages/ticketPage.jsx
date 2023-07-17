@@ -22,7 +22,7 @@ export default function TicketPage() {
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
     ActionContext,
   )
-  const { role, experts, user } = useContext(UserContext)
+  const { role, experts, user, username } = useContext(UserContext)
 
   const myGetMessages = () => {
     getMessages(ticketId).then((messages) => {
@@ -170,8 +170,7 @@ export default function TicketPage() {
                           key={index}
                           style={
                             role === Roles.MANAGER ||
-                            role === Roles.EXPERT ||
-                            message.sender === user.username
+                            message.sender === username
                               ? { textAlign: 'right', paddingRight: '20px' }
                               : { textAlign: 'left', paddingLeft: '20px' }
                           }

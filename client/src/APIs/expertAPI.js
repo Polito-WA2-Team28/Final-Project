@@ -59,7 +59,6 @@ async function sendMessage(token, message, ticketId, files) {
 
     const formdata = new FormData();
     formdata.append("messageText", message);
-    formdata.append("attachments", files);
 
     if (files) {
         for (let i = 0; i < files.length; i++) 

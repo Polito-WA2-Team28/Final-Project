@@ -30,6 +30,7 @@ function App() {
   const [role, setRole] = useState(null)
   const [experts, setExperts] = useState(null)
   const [dirty, setDirty] = useState(false)
+  const [username, setUsername] = useState(null)
 
 
   const handleLogin = async (credentials) => {
@@ -37,6 +38,7 @@ function App() {
       .then((data) => {
         var decoded = jwt_decode(data);
         const newRole = decoded.resource_access["ticketing-service-client"].roles[0]
+        setUsername(decoded.preferred_username)
         setRole(newRole)
         setToken(data);
         setLoggedIn(true);
@@ -57,6 +59,7 @@ function App() {
     setLoggedIn(false);
     setUser(null);
     setRole(null);
+    setUsername(null);
     successToast("Logged out successfully")
   };
 
@@ -339,7 +342,8 @@ function App() {
     role: role,
     products: products,
     tickets: tickets,
-    experts: experts
+    experts: experts,
+    username: username,
   }
 
   return (
