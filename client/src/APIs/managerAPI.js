@@ -1,5 +1,5 @@
-import { authHeader, compositeHeader } from "./util.js";
-const url = "http://localhost:3000/api/managers";
+import { authHeader, compositeHeader, port } from "./util.js";
+const url = `http://localhost:${port}/api/managers`;
 
 /** 
 * @throws {Error} if the data fails
