@@ -42,20 +42,11 @@ async function createTicket(token, ticket) {
     return data;
 }
 
-
 /** 
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTickets(token) {
-    const res = await fetch(url + "/tickets",
-        { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
-    const data = await res.json();
-    return data;
-}
-
-async function getTicketsPages(token, noPages) {
+async function getTicketsPage(token, noPages) {
     const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
@@ -138,17 +129,6 @@ async function getMessages(token, ticketId) {
     return data;
 }
 
-/** 
-* @throws {Error} if the data fails
-* @throws {String} if the response is not ok
-*/
-async function getProducts(token) {
-    const res = await fetch(url + "/products",
-        { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
-    const data = await res.json();
-    return data;
-}
 
 /** 
 * @throws {Error} if the data fails
@@ -166,7 +146,7 @@ async function getProduct(token, productId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProductPages(token, noPages) {
+async function getProductPage(token, noPages) {
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
@@ -199,10 +179,10 @@ async function registerProduct(token, productId, serialNumber) {
 }
 
 const customerAPI = {
-    getProfile, createTicket, getTickets, getTicket, patchProfile,
+    getProfile, createTicket, getTicket, patchProfile,
     reopenTicket, compileSurvey, sendMessage, getMessages,
-    getProducts, getProduct, getAttachment, registerProduct,
-    getProductPages, getTicketsPages
+    getProduct, getAttachment, registerProduct,
+    getProductPage, getTicketsPage
 }
 
 export default customerAPI

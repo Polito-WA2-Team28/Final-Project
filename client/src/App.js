@@ -107,8 +107,8 @@ function App() {
       })
   };
 
-  const newTicketPage = async(newPageNo) => {
-    await customerAPI.getTicketsPages(token, newPageNo+1)
+  const getTicketPage = async(newPageNo) => {
+    await customerAPI.getTicketsPage(token, newPageNo+1)
         .then(newTickets => {
           setTickets(newTickets)
           // console.log(tickets)
@@ -144,37 +144,37 @@ function App() {
 
   useEffect(() => {
     async function customerGetTickets() {
-      await customerAPI.getTickets(token)
+      await customerAPI.getTicketsPage(token, 1)
         .then(tickets => {
           setTickets(tickets)
         })
         .catch((err) => errorToast(err));
     }
     const customerGetProducts = async () => {
-      await customerAPI.getProducts(token)
+      await customerAPI.getProductsPage(token, 1)
         .then(products => {
           setProducts(products);
         })
         .catch((err) => errorToast(err));
     }
     async function expertGetTickets() {
-      await expertAPI.getTickets(token)
+      await expertAPI.getTicketsPage(token, 1)
         .then(tickets => { setTickets(tickets) })
         .catch((err) => errorToast(err));
     }
     async function managerGetTickets() {
-      await managerAPI.getTickets(token)
+      await managerAPI.getTicketsPage(token, 1)
         .then(tickets => { setTickets(tickets) })
         .catch((err) => errorToast(err));
     }
     async function managerGetProducts() {
-      await managerAPI.getProducts(token)
+      await managerAPI.getProductsPage(token, 1)
         .then(products => { setProducts(products) })
         .catch((err) => errorToast(err));
     }
     async function managerGetExperts() {
-      await managerAPI.getExperts(token)
-        .then(experts => { setExperts(experts) })
+      await managerAPI.getExpertsPage(token, 1)
+        .then(experts => { console.log(experts); setExperts(experts) })
         .catch((err) => errorToast(err));
     }
 
@@ -324,6 +324,12 @@ function App() {
   
   }
 
+  const getExpertsPage = async (pageNo) => {
+    await managerAPI.getExpertsPage(token, pageNo)
+      .then((expertsPage) => setExperts(expertsPage))
+      .catch((err) => errorToast(err));
+  }
+
 
   const actions = {
     getMessages: getMessages,
@@ -342,7 +348,9 @@ function App() {
     managerRelieveExpert: managerRelieveExpert,
     expertResolveTicket: expertResolveTicket,
     getAttachment: getAttachment, 
-    registerProduct: registerProduct
+    registerProduct: registerProduct,
+    getTicketPage: getTicketPage,
+    getExpertsPage: getExpertsPage,
   }
 
   const userValues = {
@@ -364,7 +372,7 @@ function App() {
             <Route path="/" element={loggedIn ? <Navigate to={"/dashboard"} /> : <LandingPage />} />
             <Route path="/register" element={loggedIn ? <Navigate to={"/dashboard"} /> : <RegisterPage />} />
             <Route path="/login" element={loggedIn ? <Navigate to={"/dashboard"} /> : <LoginPage />} />
-            <Route path="/dashboard" element={loggedIn ? <Dashboard newTicketPage={newTicketPage}/> : <Navigate to={"/"} />} />
+            <Route path="/dashboard" element={loggedIn ? <Dashboard /> : <Navigate to={"/"} />} />
             <Route path="/user" element={loggedIn ? <UserPage user={user} /> : <Navigate to={"/"} />} />
             <Route path="/editUser" element={loggedIn ? <EditUserPage user={user} handleEdit={handleEditProfile} /> : <Navigate to={"/"} />} />
             <Route path="/ticket/:ticketId" element={loggedIn ? <TicketPage /> : <Navigate to={"/"} />} />

@@ -1,12 +1,12 @@
-import { authHeader, compositeHeader } from './util.js';
+import { authHeader } from './util.js';
 const url = "http://localhost:3000/api/experts";
 
 /** 
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTickets(token) {
-    const res = await fetch(url + "/tickets",
+async function getTicketsPage(token, noPages) {
+    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -96,8 +96,8 @@ async function getMessages(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProducts(token) {
-    const res = await fetch(url + "/products",
+async function getProductsPage(token, noPages) {
+    const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -130,9 +130,9 @@ async function getAttachment(token, ticketId, attachmentName) {
 }
 
 const expertAPI = {
-    getTickets, getTicket, resolveTicket,
+    getTicketsPage, getTicket, resolveTicket,
     closeTicket, sendMessage, getMessages,
-    getProducts, getProduct, getAttachment
+    getProductsPage, getProduct, getAttachment
 }
 
 export default expertAPI;

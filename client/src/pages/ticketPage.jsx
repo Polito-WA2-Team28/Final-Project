@@ -19,10 +19,8 @@ export default function TicketPage() {
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
 
-  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
-    ActionContext,
-  )
-  const { role, experts, user, username } = useContext(UserContext)
+  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(    ActionContext  )
+  const { role, experts, username } = useContext(UserContext)
 
   const myGetMessages = () => {
     getMessages(ticketId).then((messages) => {
@@ -333,6 +331,7 @@ function ManagerButton(props) {
     managerHandleCloseTicket,
     managerAssignExpert,
     managerRelieveExpert,
+    getExpertsPage
   } = useContext(ActionContext)
 
   return (
@@ -351,7 +350,10 @@ function ManagerButton(props) {
                 justifyContent: 'center',
               }}
             >
-              <Button>{'<'}</Button>
+              <Button
+                disabled ={experts.currentPage === 1}
+                onClick={() => getExpertsPage(experts.currentPage - 1)}>
+                {'<'}</Button>
             </Col>
             <Col lg={10}>
               {experts.content.map((expert, index) => {
@@ -401,7 +403,10 @@ function ManagerButton(props) {
                 justifyContent: 'center',
               }}
             >
-              <Button>{'>'}</Button>
+              <Button
+                disabled={experts.currentPage === experts.totalPages}
+               onClick={() => getExpertsPage(experts.currentPage + 1)}
+              >{'>'}</Button>
             </Col>
           </Row>
         </Modal.Body>
