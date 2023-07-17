@@ -19,9 +19,10 @@ export default function TicketPage() {
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
 
-  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(ActionContext)
+  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
+    ActionContext,
+  )
   const { role, experts, user } = useContext(UserContext)
-
 
   const myGetMessages = () => {
     getMessages(ticketId).then((messages) => {
@@ -29,22 +30,24 @@ export default function TicketPage() {
         for (let i = 0; i < messages.content.length; i++) {
           if (messages.content[i].attachmentsNames.length !== 0) {
             messages.content[i].attachments = []
-            for (let j = 0; j < messages.content[i].attachmentsNames.length; j++) {
-              getAttachment(ticketId, messages.content[i].attachmentsNames[j])
-                .then((attachment) => {
-                  //messages.content[i].attachments.push(attachment)
-                  console.log(attachment)
-                }
-                )
+            for (
+              let j = 0;
+              j < messages.content[i].attachmentsNames.length;
+              j++
+            ) {
+              getAttachment(
+                ticketId,
+                messages.content[i].attachmentsNames[j],
+              ).then((attachment) => {
+                //messages.content[i].attachments.push(attachment)
+                console.log(attachment)
+              })
             }
           }
-       
         }
       }
       setMessages(
-        messages.content.sort((a, b) =>
-          a.timestamp.localeCompare(b.timestamp),
-        ),
+        messages.content.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
       )
     })
   }
@@ -86,7 +89,7 @@ export default function TicketPage() {
   useEffect(() => {
     myGetMessages()
   }, [ticket])
-  
+
   return (
     <>
       {ticket == null ? (
@@ -94,9 +97,10 @@ export default function TicketPage() {
       ) : (
         <Card className="ticketPageCard" style={{ height: '70%' }}>
           <Card.Body>
-            <Card.Title>Ticket Page</Card.Title>
+            <h1>Ticket page</h1>
             <Row style={{ height: '100%' }}>
-              <Col>
+              <Col style={{ display: 'grid' }}>
+                <h4>Ticket Details</h4>
                 <Card.Text>
                   <strong>Ticket ID:</strong> {ticket.ticketId}
                 </Card.Text>
@@ -109,7 +113,7 @@ export default function TicketPage() {
                 <Card.Text>
                   <strong>Serial Number:</strong> {ticket.serialNumber}
                 </Card.Text>
-                <Row>
+                <Row style={{ height: '100%' }}>
                   {role === Roles.CUSTOMER && (
                     <CustomerButton ticket={ticket} setDirty={setDirty} />
                   )}
@@ -127,23 +131,30 @@ export default function TicketPage() {
               </Col>
 
               {role === Roles.MANAGER && (
-                <Col>
-                  <Row>
-                    <Card.Text> Chronology</Card.Text>
-                  </Row>
-                  <Row>
-                    <div style={{ height: '300px', overflowY: 'auto' }}>
-                      {ticket.ticketStateLifecycle.map((state, index) => (
-                        <p>
-                          {dayjs(state.timestamp).format('DD/MM/YYYY HH:mm:ss')}
-                          - {state.state}
-                        </p>
-                      ))}
-                    </div>
-                  </Row>
-                </Col>
+                  <Col style={{borderLeft: "2px solid black"}}>
+                    <h4>Ticket Details</h4>
+                    <Row>
+                      <div
+                        style={{
+                          height: '300px',
+                          overflowY: 'auto',
+                          textAlign: 'start',
+                        }}
+                      >
+                        {ticket.ticketStateLifecycle.map((state, index) => (
+                          <p>
+                            {dayjs(state.timestamp).format(
+                              'DD/MM/YYYY HH:mm:ss',
+                            )}
+                            - {state.state}
+                          </p>
+                        ))}
+                      </div>
+                    </Row>
+                  </Col>
               )}
-              <Col style={{ position: 'relative' }}>
+              <Col style={{ position: 'relative', borderLeft: "2px solid black" }} >
+                <h4>Messages</h4>
                 <Col
                   style={{
                     overflowY: 'auto',
@@ -154,20 +165,21 @@ export default function TicketPage() {
                   {messages != null && messages.length !== 0 ? (
                     messages.map((message, index) => {
                       return (
-                        <div key={index} style={
-                          role === Roles.MANAGER
-                            || role === Roles.EXPERT
-                            || message.sender === user.username ?
-                            { textAlign: 'right', paddingRight: '20px' }
-                            : { textAlign: 'left', paddingLeft: '20px' }
-                        }>
-                         
-                          <p><strong>{message.sender}</strong>
+                        <div
+                          key={index}
+                          style={
+                            role === Roles.MANAGER ||
+                            role === Roles.EXPERT ||
+                            message.sender === user.username
+                              ? { textAlign: 'right', paddingRight: '20px' }
+                              : { textAlign: 'left', paddingLeft: '20px' }
+                          }
+                        >
+                          <p>
+                            <strong>{message.sender}</strong>
                             <p>{message.messageText}</p>
-                           
-                            </p>
+                          </p>
                         </div>
-                        
                       )
                     })
                   ) : (
@@ -190,10 +202,13 @@ export default function TicketPage() {
                             placeholder="Enter message"
                             value={newMessage}
                             onChange={(ev) => setNewMessage(ev.target.value)}
-                            />
-                            <Form.Control name={filesLabel}
-                              type="file" multiple
-                            onChange={myUpload}/>
+                          />
+                          <Form.Control
+                            name={filesLabel}
+                            type="file"
+                            multiple
+                            onChange={myUpload}
+                          />
                         </Form.Group>
                       </Form>
                     </Col>
@@ -320,7 +335,14 @@ function ManagerButton(props) {
         </Modal.Header>
         <Modal.Body>
           <Row>
-            <Col lg={1}>
+            <Col
+              lg={1}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Button>{'<'}</Button>
             </Col>
             <Col lg={10}>
@@ -329,14 +351,25 @@ function ManagerButton(props) {
                   <Row>
                     <Card style={{ padding: '10px', margin: '10px' }}>
                       <Row>
-                        <Col>
+                        <Col
+                          lg={10}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'start',
+                            alignItems: 'center',
+                          }}
+                        >
                           {expert.email} - Expertise:{' '}
                           {expert.expertiseFields.length === 0
                             ? 'NONE'
                             : expert.expertiseFields.toString()}
                         </Col>
-                        <Col>
+                        <Col
+                          lg={2}
+                          style={{ display: 'flex', justifyContent: 'end' }}
+                        >
                           <Button
+                            variant="success"
                             onClick={() => {
                               managerAssignExpert(ticket.ticketId, expert.id)
                               props.setDirty(true)
@@ -352,7 +385,14 @@ function ManagerButton(props) {
                 )
               })}
             </Col>
-            <Col lg={1}>
+            <Col
+              lg={1}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <Button>{'>'}</Button>
             </Col>
           </Row>
@@ -361,6 +401,7 @@ function ManagerButton(props) {
       <Col>
         <Button
           variant="success"
+          style={{ height: '60px' }}
           disabled={
             ![
               TicketState.OPEN,
@@ -379,6 +420,7 @@ function ManagerButton(props) {
 
       <Col>
         <Button
+          style={{ height: '60px' }}
           variant="primary"
           disabled={ticket.ticketState !== TicketState.OPEN}
           onClick={() => setShow(true)}
@@ -389,6 +431,7 @@ function ManagerButton(props) {
 
       <Col>
         <Button
+          style={{ height: '60px' }}
           variant="danger"
           disabled={ticket.ticketState !== TicketState.IN_PROGRESS}
           onClick={() => {

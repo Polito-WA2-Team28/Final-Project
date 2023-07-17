@@ -19,6 +19,10 @@ export default function Dashboard() {
           <Tab eventKey="products" title="Products">
             <ProductsTab />
           </Tab>}
+        {role === Roles.MANAGER &&
+          <Tab eventKey="experts" title="Experts">
+            <h1>Experts</h1>
+            </Tab>}
       </Tabs>
     </Container>
   );

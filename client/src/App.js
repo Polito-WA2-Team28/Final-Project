@@ -306,6 +306,10 @@ function App() {
     }
   }
 
+  const registerProduct = async (product) => {
+    console.log("Registering product", product)
+  }
+
 
   const actions = {
     getMessages: getMessages,
@@ -323,7 +327,8 @@ function App() {
     managerHandleCloseTicket: managerHandleCloseTicket,
     managerRelieveExpert: managerRelieveExpert,
     expertResolveTicket: expertResolveTicket,
-    getAttachment: getAttachment
+    getAttachment: getAttachment, 
+    registerProduct: registerProduct
   }
 
   const userValues = {

@@ -1,14 +1,16 @@
 import { useContext, useState } from 'react'
 import { Button, Card, Form, Modal } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ActionContext } from '../Context'
+import { ActionContext, UserContext } from '../Context'
 import { successToast } from '../components/toastHandler'
+import Roles from '../model/rolesEnum'
 
 export default function ProductPage() {
   const { productId } = useParams()
   const [product, setProduct] = useState(null)
   const [show, setShow] = useState(false)
   const { getProductByID, handleCreateTicket } = useContext(ActionContext)
+  const { role } = useContext(UserContext)
 
   product == null &&
     getProductByID(productId).then((product) => {
@@ -38,17 +40,19 @@ export default function ProductPage() {
             <h5>Serial number</h5>
             <p>{product.serialNumber}</p>
           </Card.Body>
-          <Card.Footer>
-            <OpenNewTicketModal
-              show={show}
-              handleClose={() => setShow(false)}
-              handleCreate={handleCreateTicket}
-              product={product}
-            />
-            <Button style={{ width: '100%' }} onClick={() => setShow(true)}>
-              Open a ticket
-            </Button>
-          </Card.Footer>
+          {role === Roles.CUSTOMER && (
+            <Card.Footer>
+              <OpenNewTicketModal
+                show={show}
+                handleClose={() => setShow(false)}
+                handleCreate={handleCreateTicket}
+                product={product}
+              />
+              <Button style={{ width: '100%' }} onClick={() => setShow(true)}>
+                Open a ticket
+              </Button>
+            </Card.Footer>
+          )}
         </Card>
       )}
     </div>
