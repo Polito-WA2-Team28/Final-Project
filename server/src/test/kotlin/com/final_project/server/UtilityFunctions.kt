@@ -159,6 +159,15 @@ class UtilityFunctions {
         val product: Product = Product(0, UUID.randomUUID(),"Iphone", "15", true, customer)
         val productId = productRepository.save(product).id
         product.id = productId
+
+        return product
+    }
+
+    fun createUnregisteredTestProduct(randomUUID: UUID): Product {
+        val product: Product = Product(0, randomUUID, "Samsung", "S21", false, null)
+        val productId = productRepository.save(product).id
+        product.id = productId
+
         return product
     }
 

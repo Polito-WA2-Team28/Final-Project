@@ -1,9 +1,14 @@
-import { useState } from "react";
-import { Button, Form, Modal, Row } from "react-bootstrap";
+import { useContext, useState } from "react";
+import { Button, Card, Col, Form, Modal, Row } from "react-bootstrap";
+import { UserContext } from "../Context";
+import EmptySearch from "./EmptySearch";
 
 export default function ExpertsInfoTab(props) {
     
     const [show, setShow] = useState(false);
+    const { experts } = useContext(UserContext)
+
+    console.log(experts)
 
     return(
         <>
@@ -11,27 +16,39 @@ export default function ExpertsInfoTab(props) {
             <Row>
                 <Button onClick={() => setShow(true)}>Create a new Expert</Button>
             </Row>
-            <ExpertList experts={props.experts} />
+            <Col style={{ display: 'flex', flexWrap: 'wrap' }}>
+        {experts == undefined || experts.content.length === 0 ? (
+          <EmptySearch />
+        ) : (
+          experts.content.map((expert) => (
+            <ExpertItem key={expert.id} expert={expert} />
+          ))
+        )}
+      </Col>
         </>
     )
 }
 
-function ExpertList(props) {
-    
-    const experts = props.experts
+function ExpertItem(props) {
 
+    console.log(props.expert)
+    
     return(
         <>
-            {(!experts || experts.length === 0) ? <h2>No experts</h2> 
-                : experts.map((expert, index) => {
-                    return (
-                        <Row>
-                            <h3>{index}</h3>
-                        </Row>
-                    )
-                }
-            )}
-        </>
+      <Card
+        style={{ minWidth: '300px' }}
+        key={props.product}
+        className="productCard"
+      >
+        <Card.Body>
+          <Card.Title>
+            <p>{props.expert.id}</p>
+          </Card.Title>
+                    <p>{props.expert.email}</p>
+                    <p>{props.expert.expertiseFields.toString()}</p>
+        </Card.Body>
+      </Card>
+    </>
     )
 }
 

@@ -134,10 +134,23 @@ async function getExperts(token) {
     return data;
 }
 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function getAttachment(token, ticketId, attachmentName) {
+    const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
+        { method: "GET", headers: authHeader(token) })
+    if (!res.ok) throw res.statusText
+    const data = await res.json();
+    console.log(data);
+    return data;
+}
+
  const managerAPI = {
     getTickets, getTicket, assignTicket,
     relieveExpert, closeTicket, resumeProgress, removeTicket,
-    sendMessage, getMessages, getProducts, getProduct,getExperts
+    sendMessage, getMessages, getProducts, getProduct,getExperts, getAttachment
 };
 
 export default managerAPI;

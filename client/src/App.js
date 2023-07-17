@@ -30,6 +30,7 @@ function App() {
   const [role, setRole] = useState(null)
   const [experts, setExperts] = useState(null)
   const [dirty, setDirty] = useState(false)
+  const [username, setUsername] = useState(null)
 
 
   const handleLogin = async (credentials) => {
@@ -37,6 +38,7 @@ function App() {
       .then((data) => {
         var decoded = jwt_decode(data);
         const newRole = decoded.resource_access["ticketing-service-client"].roles[0]
+        setUsername(decoded.preferred_username)
         setRole(newRole)
         setToken(data);
         setLoggedIn(true);
@@ -57,6 +59,7 @@ function App() {
     setLoggedIn(false);
     setUser(null);
     setRole(null);
+    setUsername(null);
     successToast("Logged out successfully")
   };
 
@@ -240,16 +243,16 @@ function App() {
     }
   }
 
-  const sendMessage = async (ticketId, message) => {
-    console.log("Sending message", ticketId, message)
+  const sendMessage = async (ticketId, message, files) => {
+    console.log("Sending message", ticketId, message, files)
     switch (role) {
       case Roles.CUSTOMER:
-        await customerAPI.sendMessage(token, message, ticketId)
+        await customerAPI.sendMessage(token, message, ticketId, files)
           .then(() => setDirty(true))
           .catch((err) => errorToast(err));
         break;
       case Roles.EXPERT:
-        await expertAPI.sendMessage(token, message, ticketId)
+        await expertAPI.sendMessage(token, message, ticketId, files)
           .then(() => setDirty(true))
           .catch((err) => errorToast(err));
         break;
@@ -298,6 +301,29 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
+  const getAttachment = async (ticketId, attachmentName) => {
+    console.log("Getting attachment", ticketId, attachmentName)
+    switch (role) {
+      case Roles.CUSTOMER:
+        return await customerAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      case Roles.EXPERT:
+        return await expertAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      case Roles.MANAGER:
+        return await managerAPI.getAttachment(token, ticketId, attachmentName)
+          .catch((err) => errorToast(err));
+      default:
+        errorToast("You are not allowed to see messages")
+    }
+  }
+
+  const registerProduct = async (product) => {
+    console.log("Registering product", product)
+    await customerAPI.registerProduct(token, product)
+  
+  }
+
 
   const actions = {
     getMessages: getMessages,
@@ -315,6 +341,8 @@ function App() {
     managerHandleCloseTicket: managerHandleCloseTicket,
     managerRelieveExpert: managerRelieveExpert,
     expertResolveTicket: expertResolveTicket,
+    getAttachment: getAttachment, 
+    registerProduct: registerProduct
   }
 
   const userValues = {
@@ -323,7 +351,8 @@ function App() {
     role: role,
     products: products,
     tickets: tickets,
-    experts: experts
+    experts: experts,
+    username: username,
   }
 
   return (

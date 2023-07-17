@@ -1,5 +1,6 @@
 package com.final_project.ticketing.util
 
+import com.final_project.security.service.KeycloakService
 import com.final_project.server.config.GlobalConfig
 import com.final_project.server.dto.CustomerDTO
 import com.final_project.server.dto.ExpertDTO
@@ -36,6 +37,7 @@ class Nexus (vararg services: Any) {
     private lateinit var ticketService: TicketService
     private lateinit var productService: ProductService
     private lateinit var fileStorageService: FileStorageService
+    private lateinit var keycloakService: KeycloakService
 
     init {
         for (service in services) {
@@ -46,6 +48,7 @@ class Nexus (vararg services: Any) {
                 is TicketService -> ticketService = service
                 is ProductService -> productService = service
                 is FileStorageService -> fileStorageService = service
+                is KeycloakService -> keycloakService = service
             }
         }
     }
@@ -71,6 +74,7 @@ class Nexus (vararg services: Any) {
     }
 
     fun assertCustomerExists(customerId: UUID): Nexus {
+        println(customerService.toString())
         this.customer = customerService.getCustomerById(customerId) ?: run {
             logger.error("Endpoint: ${endpointHolder.get()} Error: No customer profile found with this UUID.")
             throw Exception.CustomerNotFoundException("No customer profile found with this UUID.")
@@ -137,8 +141,8 @@ class Nexus (vararg services: Any) {
 
     fun assertProductExists(serialNumber: UUID): Nexus {
         this.product = productService.customerGetProductBySerialNumber(this.customer!!.id, serialNumber) ?: run {
-            logger.error("Endpoint: ${endpointHolder.get()} Error: Forbidden.")
-            throw Exception.ProductNotFoundException("Forbidden.")
+            logger.error("Endpoint: ${endpointHolder.get()} Error: Not Found.")
+            throw Exception.ProductNotFoundException("Not Found.")
         }
         return this
     }
@@ -161,12 +165,12 @@ class Nexus (vararg services: Any) {
         return this
     }
 
-    fun assertValidationResult(br: BindingResult): Nexus {
+    fun assertValidationResult(endpoint:String, br: BindingResult): Nexus {
         println("${br.hasErrors()} ${br.fieldErrors}")
         if(br.hasErrors()){
             println("error")
             val invalidFields = br.fieldErrors.map { it.field }
-            throw Exception.ValidationException("", invalidFields)
+            throw Exception.ValidationException("Endpoint: $endpoint, Error: Invalid fields:", invalidFields)
         }
 
         return this

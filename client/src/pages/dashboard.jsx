@@ -4,6 +4,7 @@ import { ProductsTab } from "../components/ProductsTab";
 import Roles from "../model/rolesEnum";
 import { useContext } from "react";
 import { UserContext } from "../Context";
+import ExpertsInfoTab from "../components/expertsInfoTab";
 
 export default function Dashboard(prop) {
 
@@ -19,6 +20,10 @@ export default function Dashboard(prop) {
           <Tab eventKey="products" title="Products">
             <ProductsTab />
           </Tab>}
+        {role === Roles.MANAGER &&
+          <Tab eventKey="experts" title="Experts">
+            <ExpertsInfoTab />
+            </Tab>}
       </Tabs>
     </Container>
   );
