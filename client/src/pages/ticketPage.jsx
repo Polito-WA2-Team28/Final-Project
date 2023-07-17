@@ -18,34 +18,33 @@ export default function TicketPage() {
   const [dirty, setDirty] = useState(false)
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
+  const [messagePage, setMessagePage] = useState(null)
 
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(    ActionContext  )
   const { role, experts, username } = useContext(UserContext)
 
-  const myGetMessages = () => {
-    getMessages(ticketId).then((messages) => {
-      if (messages && messages.content != null) {
-        for (let i = 0; i < messages.content.length; i++) {
-          if (messages.content[i].attachmentsNames.length !== 0) {
-            messages.content[i].attachments = []
-            for (
-              let j = 0;
-              j < messages.content[i].attachmentsNames.length;
+  const myGetMessages = (noPage) => {
+    getMessages(ticketId, noPage).then((messagesParam) => {
+      setMessagePage(messagesParam)
+      if (messagesParam && messagesParam.content != null) {
+        for (let i = 0; i < messagesParam.content.length; i++) {
+          if (messagesParam.content[i].attachmentsNames.length !== 0) {
+            messagesParam.content[i].attachments = []
+            for (             let j = 0;              j < messagesParam.content[i].attachmentsNames.length;
               j++
             ) {
               getAttachment(
                 ticketId,
-                messages.content[i].attachmentsNames[j],
+                messagesParam.content[i].attachmentsNames[j],
               ).then((attachment) => {
-                //messages.content[i].attachments.push(attachment)
                 console.log(attachment)
               })
             }
           }
         }
-      }
-      setMessages(
-        messages.content.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
+      }      
+      let newArray = [...messagesParam.content, ...messages]
+      setMessages(newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
       )
     })
   }
@@ -61,9 +60,9 @@ export default function TicketPage() {
         setNewMessage('')
         setFiles([])
         setFilesLabel('')
-        myGetMessages()
+        setMessages([])
+        myGetMessages(1)
       })
-      .catch((error) => console.error(error))
   }
 
   const myUpload = (e) => {
@@ -85,8 +84,8 @@ export default function TicketPage() {
   }, [dirty])
 
   useEffect(() => {
-    myGetMessages()
-  }, [ticket])
+    myGetMessages(1)
+  }, [])
 
   return (
     <>
@@ -160,9 +159,14 @@ export default function TicketPage() {
                     height: '250px',
                     marginBottom: '120px',
                   }}
-                >
+                  >
+                    {messagePage != null && messagePage.currentPage < messagePage.totalPages && 
+                      <Button
+                        onSubmit={e => e.preventDefault()}
+                        onClick={() => myGetMessages(messagePage.currentPage + 1)}
+                      >Load previous</Button>}
                   {messages != null && messages.length !== 0 ? (
-                    messages.map((message, index) => {
+                      messages.map((message, index) => {
                       return (
                         <div
                           key={index}
@@ -193,8 +197,7 @@ export default function TicketPage() {
                     }}
                   >
                     <Col>
-                        <Form onSubmit={(e) => e.preventDefault()}>
-                        
+                        <Form onSubmit={(e) => { e.preventDefault();  sendNewMessage()}}>
                         <Form.Group controlId="formBasicEmail">
                           <Row>
                               <Form.Control

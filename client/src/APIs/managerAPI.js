@@ -94,8 +94,8 @@ async function sendMessage(token, message, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getMessages(token, ticketId) {
-    const res = await fetch(url + "/tickets/" + ticketId + "/messages",
+async function getMessagesPage(token, ticketId, noPages) {
+    const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -154,7 +154,7 @@ async function getAttachment(token, ticketId, attachmentName) {
  const managerAPI = {
     getTicketsPage, getTicket, assignTicket,
     relieveExpert, closeTicket, resumeProgress, removeTicket,
-    sendMessage, getMessages, getProductsPage, getProduct,getExpertsPage, getAttachment
+    sendMessage, getMessagesPage, getProductsPage, getProduct,getExpertsPage, getAttachment
 };
 
 export default managerAPI;

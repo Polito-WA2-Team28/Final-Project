@@ -83,8 +83,8 @@ async function sendMessage(token, message, ticketId, files) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getMessages(token, ticketId) {
-    const res = await fetch(url + "/tickets/" + ticketId + "/messages",
+async function getMessagesPage(token, ticketId, noPages) {
+    const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
 
@@ -131,7 +131,7 @@ async function getAttachment(token, ticketId, attachmentName) {
 
 const expertAPI = {
     getTicketsPage, getTicket, resolveTicket,
-    closeTicket, sendMessage, getMessages,
+    closeTicket, sendMessage, getMessagesPage,
     getProductsPage, getProduct, getAttachment
 }
 
