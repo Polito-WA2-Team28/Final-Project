@@ -157,9 +157,10 @@ export default function TicketPage() {
                 <h4>Messages</h4>
                 <Col
                   style={{
-                    overflowY: 'auto',
-                    height: '300px',
-                    marginBottom: '100px',
+                      overflowY: 'auto',
+                  
+                    height: '250px',
+                    marginBottom: '120px',
                   }}
                 >
                   {messages != null && messages.length !== 0 ? (
@@ -191,29 +192,37 @@ export default function TicketPage() {
                   <Row
                     style={{
                       position: 'absolute',
-                      bottom: '20px',
+                      bottom: '10px',
                     }}
                   >
                     <Col>
-                      <Form onSubmit={(e) => e.preventDefault()}>
+                        <Form onSubmit={(e) => e.preventDefault()}>
+                        
                         <Form.Group controlId="formBasicEmail">
-                          <Form.Control
+                          <Row>
+                              <Form.Control
+                                style = {{margin: "10px"}}
+                                
                             type="text"
                             placeholder="Enter message"
                             value={newMessage}
                             onChange={(ev) => setNewMessage(ev.target.value)}
-                          />
-                          <Form.Control
+                              />
+                            </Row>
+                            <Row>
+                              <Form.Control
+                                style = {{margin: "10px"}}
                             name={filesLabel}
                             type="file"
                             multiple
                             onChange={myUpload}
-                          />
+                          /></Row>
                         </Form.Group>
                       </Form>
                     </Col>
-                    <Col>
-                      <Button onClick={sendNewMessage}>Send</Button>
+                    <Col style={{display: "flex", justifyContent: "end", alignItems: "center"}}>
+                        <Button onClick={sendNewMessage} style={{height: "80%", width: "60%"}}>
+                          Send</Button>
                     </Col>
                   </Row>
                 )}

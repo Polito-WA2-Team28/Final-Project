@@ -308,6 +308,8 @@ function App() {
 
   const registerProduct = async (product) => {
     console.log("Registering product", product)
+    await customerAPI.registerProduct(token, product)
+  
   }
 
 

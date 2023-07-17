@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useNavigate } from 'react-router-dom'
 import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons'
 import Roles from '../model/rolesEnum'
+import { errorToast, successToast } from './toastHandler'
 
 export function ProductsTab() {
   const productsPage = useContext(UserContext).products
@@ -83,7 +84,9 @@ function RegisterNewProductModal(props) {
   const handleCreate = () => {
     const product = { serialNumber, productId }
     props.handleCreate(product)
-    props.handleClose()
+      .then(() => {successToast("Product registered successfully"); props.handleClose()})
+      .catch((err) => errorToast(err))
+      
   }
 
   return (

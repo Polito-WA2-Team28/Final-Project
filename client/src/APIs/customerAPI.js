@@ -171,9 +171,22 @@ async function getAttachment(token, ticketId, attachmentName) {
     return data;
 }
 
+async function registerProduct(token, productId, serialNumber) {
+
+    const productIds = { productId, serialNumber}
+
+    const res = await fetch(url + "/products/registerProduct",
+        {
+            method: "PATCH", headers: compositeHeader(token),
+            body: JSON.stringify(productIds)
+        })
+    if (!res.ok) throw res.statusText
+}
+
 const customerAPI = {
     getProfile, createTicket, getTickets, getTicket, patchProfile,
-    reopenTicket, compileSurvey, sendMessage, getMessages, getProducts, getProduct, getAttachment
+    reopenTicket, compileSurvey, sendMessage, getMessages,
+    getProducts, getProduct, getAttachment, registerProduct
 }
 
 export default customerAPI
