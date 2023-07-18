@@ -19,7 +19,7 @@ export function ProductsTab(props) {
   const maxColumns = 4;
   const productsPerPage = maxColumns*4;
   const totalPages = Math.ceil(products.length / productsPerPage);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handlePageChange = (selectedPage) => {
     setCurrentPage(selectedPage);

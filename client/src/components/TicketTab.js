@@ -21,7 +21,7 @@ export default function TicketTab(prop) {
   if(tickets==null) tickets=[]
 
   var totalPages = ticketsPage.totalPages;
-  var [currentPage, setCurrentPage] = useState(0);
+  var [currentPage, setCurrentPage] = useState(1);
 
   const handlePageChange = (page, filter) => {
     getTicketPage(page, filter)
@@ -55,14 +55,14 @@ export default function TicketTab(prop) {
 
   return (
     <>
-      {role === Roles.MANAGER && 
+      {/* {role === Roles.MANAGER && 
         <Row>
           <Button onClick={handleFilterChange("OPEN")}>OPEN</Button>
           <Button onClick={handleFilterChange("IN_PROGRESS")}>IN PROGRESS</Button>
           <Button onClick={handleFilterChange("CLOSED")}>CLOSED</Button>
           <Button onClick={handleFilterChange("RESOLVED")}>SOLVED</Button>
           <Button onClick={handleFilterChange("REOPENED")}>REOPENED</Button>
-        </Row>}
+        </Row>} */}
       <CardGroup className="mt-1">
         {(tickets === undefined || tickets.length === 0) ? (
           <EmptySearch />

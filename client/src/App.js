@@ -235,8 +235,6 @@ function App() {
 
   const getMessages = async (ticketId, pageNo) => {
 
-    console.log("Getting messages", ticketId, pageNo)
-
     switch (role) {
       case Roles.CUSTOMER:
         return await customerAPI.getMessagesPage(token, ticketId, pageNo)

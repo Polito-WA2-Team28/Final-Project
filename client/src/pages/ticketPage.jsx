@@ -1,6 +1,6 @@
 import { Button, Card, Col, Row, Form, Modal } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import '../styles/TicketPage.css'
 import { ActionContext, UserContext } from '../Context'
 import Roles from '../model/rolesEnum'
@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import dayjs from 'dayjs'
 import { errorToast } from '../components/toastHandler'
+import { useInterval } from '../components/customHook'
 
 export default function TicketPage() {
   const { ticketId } = useParams()
@@ -19,35 +20,24 @@ export default function TicketPage() {
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
   const [messagePage, setMessagePage] = useState(null)
-
-  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(    ActionContext  )
+  const [totalMessages, setTotalMessages] = useState(0)
+  
+  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(ActionContext)
   const { role, experts, username } = useContext(UserContext)
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
       setMessagePage(messagesParam)
-      if (messagesParam && messagesParam.content != null) {
-        for (let i = 0; i < messagesParam.content.length; i++) {
-          if (messagesParam.content[i].attachmentsNames.length !== 0) {
-            messagesParam.content[i].attachments = []
-            for (             let j = 0;              j < messagesParam.content[i].attachmentsNames.length;
-              j++
-            ) {
-              getAttachment(
-                ticketId,
-                messagesParam.content[i].attachmentsNames[j],
-              ).then((attachment) => {
-                console.log(attachment)
-              })
-            }
-          }
-        }
-      }      
-      let newArray = [...messagesParam.content, ...messages]
-      setMessages(newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-      )
-    })
+      if(messagesParam.totalElements !== totalMessages){
+       let newArray = [...messagesParam.content, ...messages]
+        setMessages(newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp)))
+        setTotalMessages(messagesParam.totalElements)
+        scrollToBottom()
+      }
+    }
+    )
   }
+
 
   const sendNewMessage = () => {
     if (newMessage === '') {
@@ -60,9 +50,23 @@ export default function TicketPage() {
         setNewMessage('')
         setFiles([])
         setFilesLabel('')
-        setMessages([])
-        myGetMessages(1)
+        setTotalMessages(totalMessages + 1)
+        setMessages([...messages, {
+          sender: username,
+          messageText: newMessage,
+          timestamp: dayjs().format('YYYY-MM-DDTHH:mm:ssZ'),
+        }])
+         scrollToBottom()
       })
+      
+  }
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+    const messagesDiv = document.getElementById('messages')
+    console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight)
+      messagesDiv.scrollTop = messagesDiv.scrollHeight
+    }, 100)
   }
 
   const myUpload = (e) => {
@@ -73,11 +77,9 @@ export default function TicketPage() {
       label += files[i].name + ' '
     }
     setFilesLabel(label)
-    console.log(files)
   }
 
   useEffect(() => {
-    console.log('useEffect')
     getTicketByID(ticketId)
       .then((ticket) => setTicket(ticket))
       .then(() => setDirty(false))
@@ -86,6 +88,13 @@ export default function TicketPage() {
   useEffect(() => {
     myGetMessages(1)
   }, [])
+
+  useInterval(() => {
+    console.log("refreshing messages")
+    myGetMessages(1);
+  }, 10000)
+
+
 
   return (
     <>
@@ -131,7 +140,7 @@ export default function TicketPage() {
                   <Col style={{borderLeft: "2px solid black"}}>
                     <h4>Ticket Details</h4>
                     <Row>
-                      <div
+                      <div 
                         style={{
                           height: '300px',
                           overflowY: 'auto',
@@ -152,10 +161,9 @@ export default function TicketPage() {
               )}
               <Col style={{ position: 'relative', borderLeft: "2px solid black" }} >
                 <h4>Messages</h4>
-                <Col
+                <Col id = "messages"
                   style={{
-                      overflowY: 'auto',
-                  
+                    overflowY: 'auto',
                     height: '250px',
                     marginBottom: '120px',
                   }}
