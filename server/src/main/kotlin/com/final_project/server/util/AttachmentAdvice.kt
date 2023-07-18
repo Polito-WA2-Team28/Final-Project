@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @ControllerAdvice
 class AttachmentAdvice {
@@ -19,4 +20,12 @@ class AttachmentAdvice {
             e.error()
         )
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MaxUploadSizeExceededException::class)
+    fun handleFileSizeException(e: MaxUploadSizeExceededException): ErrorDetails {
+        return ErrorDetails("This attachment's size exceeds the maximum size for a file upload")
+    }
+
 }
