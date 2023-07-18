@@ -35,7 +35,6 @@ interface TicketRepository : CrudRepository<Ticket, Long>, JpaRepository<Ticket,
 
     fun findAllByExpertId(expertId: UUID, pageable: Pageable): Page<Ticket>
 
-    @Query("SELECT t FROM Ticket t WHERE t.state = :state")
     fun findAllByState(state: TicketState, pageable: Pageable): Page<Ticket>
 
 
