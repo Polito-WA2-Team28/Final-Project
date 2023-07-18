@@ -6,12 +6,16 @@ import EmptySearch from "./EmptySearch";
 import { useNavigate } from "react-router-dom";
 import { ActionContext, UserContext } from "../Context";
 import { Pagination } from 'react-bootstrap';
+import Roles from "../model/rolesEnum";
 
 export default function TicketTab(prop) {
 
-  const {getTicketPage} = useContext(ActionContext)
+  const { getTicketPage } = useContext(ActionContext)
+  
 
   const ticketsPage = useContext(UserContext).tickets
+  const role = useContext(UserContext).role
+
   var tickets = ticketsPage.content
 
   if(tickets==null) tickets=[]
@@ -19,10 +23,14 @@ export default function TicketTab(prop) {
   var totalPages = ticketsPage.totalPages;
   var [currentPage, setCurrentPage] = useState(0);
 
-  const handlePageChange = (page) => {
-    getTicketPage(page)
+  const handlePageChange = (page, filter) => {
+    getTicketPage(page, filter)
     setCurrentPage(page);
   };
+
+  const handleFilterChange = (filter) => {
+    handlePageChange(0, filter)
+  }
 
   const renderPaginationItems = () => {
     const items = [];
@@ -47,6 +55,14 @@ export default function TicketTab(prop) {
 
   return (
     <>
+      {role === Roles.MANAGER && 
+        <Row>
+          <Button onClick={handleFilterChange("OPEN")}>OPEN</Button>
+          <Button onClick={handleFilterChange("IN_PROGRESS")}>IN PROGRESS</Button>
+          <Button onClick={handleFilterChange("CLOSED")}>CLOSED</Button>
+          <Button onClick={handleFilterChange("RESOLVED")}>SOLVED</Button>
+          <Button onClick={handleFilterChange("REOPENED")}>REOPENED</Button>
+        </Row>}
       <CardGroup className="mt-1">
         {(tickets === undefined || tickets.length === 0) ? (
           <EmptySearch />

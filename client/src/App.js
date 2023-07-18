@@ -60,6 +60,7 @@ function App() {
     setUser(null);
     setRole(null);
     setUsername(null);
+    localStorage.removeItem("token");
     successToast("Logged out successfully")
   };
 
@@ -107,13 +108,56 @@ function App() {
       })
   };
 
-  const getTicketPage = async (newPageNo) => {
-    await customerAPI.getTicketsPage(token, newPageNo + 1)
-      .then(newTickets => {
-        setTickets(newTickets)
-        // console.log(tickets)
+  async function customerGetTickets(noPage) {
+    await customerAPI.getTicketsPage(token, noPage)
+      .then(tickets => {
+        setTickets(tickets)
       })
       .catch((err) => errorToast(err));
+  }
+
+  const customerGetProducts = async (noPage) => {
+    await customerAPI.getProductsPage(token, noPage)
+      .then(products => {
+        setProducts(products);
+      })
+      .catch((err) => errorToast(err));
+  }
+  async function expertGetTickets(noPage) {
+    await expertAPI.getTicketsPage(token, noPage)
+      .then(tickets => { setTickets(tickets) })
+      .catch((err) => errorToast(err));
+  }
+  async function managerGetTickets(noPage, filter) {
+    await managerAPI.getTicketsPage(token, noPage, filter)
+      .then(tickets => { setTickets(tickets) })
+      .catch((err) => errorToast(err));
+  }
+  async function managerGetProducts(noPage) {
+    await managerAPI.getProductsPage(token, noPage)
+      .then(products => { setProducts(products) })
+      .catch((err) => errorToast(err));
+  }
+  async function managerGetExperts(noPage) {
+    await managerAPI.getExpertsPage(token, noPage)
+      .then(experts => { setExperts(experts) })
+      .catch((err) => errorToast(err));
+  }
+
+  const getTicketPage = async (newPageNo, filter) => {
+    switch (role) {
+      case Roles.CUSTOMER:
+        customerGetTickets(newPageNo);
+        break;
+      case Roles.EXPERT:
+        expertGetTickets(newPageNo);
+        break;
+      case Roles.MANAGER:
+        managerGetTickets(newPageNo, filter);
+        break;
+      default:
+        console.error("Error: No role found")
+    }
   }
 
   const handleEditProfile = async (profile) => {
@@ -143,50 +187,16 @@ function App() {
   }, [token, role, dirty])
 
   useEffect(() => {
-    async function customerGetTickets() {
-      await customerAPI.getTicketsPage(token, 1)
-        .then(tickets => {
-          setTickets(tickets)
-        })
-        .catch((err) => errorToast(err));
-    }
-    const customerGetProducts = async () => {
-      await customerAPI.getProductsPage(token, 1)
-        .then(products => {
-          setProducts(products);
-        })
-        .catch((err) => errorToast(err));
-    }
-    async function expertGetTickets() {
-      await expertAPI.getTicketsPage(token, 1)
-        .then(tickets => { setTickets(tickets) })
-        .catch((err) => errorToast(err));
-    }
-    async function managerGetTickets() {
-      await managerAPI.getTicketsPage(token, 1)
-        .then(tickets => { setTickets(tickets) })
-        .catch((err) => errorToast(err));
-    }
-    async function managerGetProducts() {
-      await managerAPI.getProductsPage(token, 1)
-        .then(products => { setProducts(products) })
-        .catch((err) => errorToast(err));
-    }
-    async function managerGetExperts() {
-      await managerAPI.getExpertsPage(token, 1)
-        .then(experts => { setExperts(experts) })
-        .catch((err) => errorToast(err));
-    }
-
+  
     switch (role) {
       case Roles.CUSTOMER:
-        customerGetTickets(); customerGetProducts();
+        customerGetTickets(1); customerGetProducts(1);
         break;
       case Roles.EXPERT:
-        expertGetTickets();
+        expertGetTickets(1);
         break;
       case Roles.MANAGER:
-        managerGetTickets(); managerGetProducts(); managerGetExperts();
+        managerGetTickets(1); managerGetProducts(1); managerGetExperts(1);
         break;
       default:
         break;

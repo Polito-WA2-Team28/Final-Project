@@ -5,8 +5,9 @@ const url = "http://localhost:3000/api/managers";
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTicketsPage(token, noPages) {
-    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
+async function getTicketsPage(token, noPages, filter) {
+    if (filter == null) filter = ""
+    const res = await fetch(url + `/tickets?pageNo=${noPages}&filter=${filter}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
