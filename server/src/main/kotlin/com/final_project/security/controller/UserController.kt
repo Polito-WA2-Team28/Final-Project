@@ -44,7 +44,6 @@ class UserController(
         val entity = HttpEntity(body, headers)
 
         return try {
-
             val response = restTemplate.postForEntity(tokenEndpoint, entity, String::class.java)
             val jsonReader = Json.createReader(StringReader(response.body))
             val jsonResponse = jsonReader.readObject()
@@ -52,7 +51,7 @@ class UserController(
 
         } catch (e: HttpClientErrorException.Unauthorized) {
             logger.error("Status: 401 Unauthorized")
-            throw  SecurityException.UnauthorizedException("401 Unauthorized123 ${e.statusCode}")
+            throw  SecurityException.UnauthorizedException("401 Unauthorized")
         } catch (e: HttpClientErrorException) {
             logger.error("Status: ${e.statusCode} Error: ${e.message}")
             throw  SecurityException.UnauthorizedException("Status ${e.statusCode} message: ${e.message}")
