@@ -85,4 +85,13 @@ class TicketAdvice {
             e.error()
         )
     }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(TicketException.InvalidTicketStateException::class)
+    fun invalidTicketState(e: TicketException.InvalidTicketStateException): ErrorDetails {
+        return ErrorDetails(
+            e.error()
+        )
+    }
 }

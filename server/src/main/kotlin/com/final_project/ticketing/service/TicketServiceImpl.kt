@@ -5,20 +5,15 @@ import com.final_project.server.dto.ProductDTO
 import com.final_project.server.model.toModel
 import com.final_project.server.service.FileStorageService
 import com.final_project.ticketing.dto.*
+import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.model.Attachment
+import com.final_project.ticketing.model.TicketStateEvolution
 import com.final_project.ticketing.model.toModel
 import com.final_project.ticketing.repository.MessageRepository
 import com.final_project.ticketing.repository.TicketRepository
+import com.final_project.ticketing.repository.TicketStateEvolutionRepository
 import com.final_project.ticketing.util.TicketState
 import org.springframework.beans.factory.annotation.Autowired
-import com.final_project.ticketing.dto.TicketCreationData
-import com.final_project.ticketing.dto.TicketDTO
-import com.final_project.ticketing.dto.toDTO
-import com.final_project.ticketing.exception.TicketException
-import com.final_project.ticketing.model.TicketStateEvolution
-import com.final_project.ticketing.repository.TicketStateEvolutionRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -83,6 +78,15 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
     @Transactional(readOnly=true)
     override fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketManagerDTO> {
         return ticketRepository.findAll(pageable)
+            .map {
+                val ticketStateLifecycle = it.getId()?.let { ticketId -> this.retrieveTicketStateLifecycle(ticketId) }
+                it.toDTO().toManagerDTO(ticketStateLifecycle)
+            }
+    }
+
+    @Transactional(readOnly=true)
+    override fun getTicketsByStateWithPaging(pageable: Pageable, state: TicketState): Page<TicketManagerDTO> {
+        return ticketRepository.findAllByState(state, pageable)
             .map {
                 val ticketStateLifecycle = it.getId()?.let { ticketId -> this.retrieveTicketStateLifecycle(ticketId) }
                 it.toDTO().toManagerDTO(ticketStateLifecycle)
