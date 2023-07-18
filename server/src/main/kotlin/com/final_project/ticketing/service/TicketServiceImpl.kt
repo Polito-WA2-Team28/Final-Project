@@ -89,6 +89,15 @@ class TicketServiceImpl @Autowired constructor(private val ticketRepository: Tic
             }
     }
 
+    @Transactional(readOnly=true)
+    override fun getTicketsByStateWithPaging(pageable: Pageable, state: String): Page<TicketManagerDTO> {
+        return ticketRepository.findAllByState(state, pageable)
+            .map {
+                val ticketStateLifecycle = it.getId()?.let { ticketId -> this.retrieveTicketStateLifecycle(ticketId) }
+                it.toDTO().toManagerDTO(ticketStateLifecycle)
+            }
+    }
+
 
     @Transactional(readOnly=true)
     override fun getAllTicketsWithPagingByCustomerId(customerId: UUID, pageable: Pageable): Page<TicketDTO> {

@@ -42,7 +42,8 @@ class TicketManagerController @Autowired constructor(
     @GetMapping("/api/managers/tickets")
     @ResponseStatus(HttpStatus.OK)
     fun getTickets(
-        @RequestParam("pageNo", defaultValue = "1") pageNo: Int
+        @RequestParam("pageNo", defaultValue = "1") pageNo: Int,
+        @RequestParam("state", required = false) state: String
     ): PageResponseDTO<TicketManagerDTO> {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
@@ -58,7 +59,12 @@ class TicketManagerController @Autowired constructor(
         var page: Pageable = PageRequest.of(pageNo-1, result.computePageSize())
 
         /* return result to client */
-        result = ticketService.getAllTicketsWithPaging(page).toDTO()
+        result = if(state == null || state.isEmpty()){
+            ticketService.getTicketsByStateWithPaging(page, state).toDTO()
+        } else{
+            ticketService.getAllTicketsWithPaging(page).toDTO()
+        }
+
         return result
     }
 
