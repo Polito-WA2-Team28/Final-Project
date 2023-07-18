@@ -9,6 +9,7 @@ import com.final_project.server.service.ManagerService
 import com.final_project.server.service.ProductService
 import com.final_project.ticketing.dto.*
 import com.final_project.ticketing.dto.PageResponseDTO.Companion.toDTO
+import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import com.final_project.ticketing.util.Nexus
 import com.final_project.ticketing.util.TicketState
@@ -24,7 +25,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @RestController
 @Observed
@@ -43,7 +44,7 @@ class TicketManagerController @Autowired constructor(
     @ResponseStatus(HttpStatus.OK)
     fun getTickets(
         @RequestParam("pageNo", defaultValue = "1") pageNo: Int,
-        @RequestParam("state", required = false) state: String
+        @RequestParam("state", required = false) state: String?
     ): PageResponseDTO<TicketManagerDTO> {
 
         val nexus: Nexus = Nexus(managerService, expertService, ticketService)
@@ -59,10 +60,15 @@ class TicketManagerController @Autowired constructor(
         var page: Pageable = PageRequest.of(pageNo-1, result.computePageSize())
 
         /* return result to client */
-        result = if(state == null || state.isEmpty()){
-            ticketService.getTicketsByStateWithPaging(page, state).toDTO()
-        } else{
+        result = if(state.isNullOrEmpty()){
             ticketService.getAllTicketsWithPaging(page).toDTO()
+        } else{
+            try {
+                val ticketState = TicketState.valueOf(state.uppercase(Locale.getDefault()))
+                ticketService.getTicketsByStateWithPaging(page, ticketState).toDTO()
+            } catch (e: IllegalArgumentException) {
+                throw TicketException.InvalidTicketStateException("An invalid ticket state has been specified as filter")
+            }
         }
 
         return result

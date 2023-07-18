@@ -30,7 +30,7 @@ interface TicketService {
 
     fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketManagerDTO>
 
-    fun getTicketsByStateWithPaging(pageable: Pageable, state: String): Page<TicketManagerDTO>
+    fun getTicketsByStateWithPaging(pageable: Pageable, state: TicketState): Page<TicketManagerDTO>
 
     fun getAllTicketsWithPagingByCustomerId(customerId: UUID, pageable: Pageable): Page<TicketDTO>
     fun getAllTicketsWithPagingByExpertId(expertId: UUID, pageable: Pageable): Page<TicketDTO>
