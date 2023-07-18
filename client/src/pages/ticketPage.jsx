@@ -1,6 +1,6 @@
 import { Button, Card, Col, Row, Form, Modal } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect,  useState } from 'react'
 import '../styles/TicketPage.css'
 import { ActionContext, UserContext } from '../Context'
 import Roles from '../model/rolesEnum'
@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import dayjs from 'dayjs'
 import { errorToast } from '../components/toastHandler'
+import { useInterval } from '../components/customHook'
 
 export default function TicketPage() {
   const { ticketId } = useParams()
@@ -19,33 +20,24 @@ export default function TicketPage() {
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
   const [messagePage, setMessagePage] = useState(null)
+  const [totalMessages, setTotalMessages] = useState(0)
 
-  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(    ActionContext  )
+  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
+    ActionContext,
+  )
   const { role, experts, username } = useContext(UserContext)
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
       setMessagePage(messagesParam)
-      if (messagesParam && messagesParam.content != null) {
-        for (let i = 0; i < messagesParam.content.length; i++) {
-          if (messagesParam.content[i].attachmentsNames.length !== 0) {
-            messagesParam.content[i].attachments = []
-            for (             let j = 0;              j < messagesParam.content[i].attachmentsNames.length;
-              j++
-            ) {
-              getAttachment(
-                ticketId,
-                messagesParam.content[i].attachmentsNames[j],
-              ).then((attachment) => {
-                console.log(attachment)
-              })
-            }
-          }
-        }
-      }      
-      let newArray = [...messagesParam.content, ...messages]
-      setMessages(newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-      )
+      if (messagesParam.totalElements !== totalMessages) {
+        let newArray = [...messagesParam.content, ...messages]
+        setMessages(
+          newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
+        )
+        setTotalMessages(messagesParam.totalElements)
+        scrollToBottom()
+      }
     })
   }
 
@@ -55,14 +47,30 @@ export default function TicketPage() {
       return
     }
 
-    sendMessage(ticketId, newMessage, files)
-      .then(() => {
-        setNewMessage('')
-        setFiles([])
-        setFilesLabel('')
-        setMessages([])
-        myGetMessages(1)
-      })
+    sendMessage(ticketId, newMessage, files).then(() => {
+      setNewMessage('')
+      setFilesLabel('')
+      setTotalMessages(totalMessages + 1)
+      /* setMessages([
+        ...messages,
+        {
+          sender: username,
+          messageText: newMessage,
+          timestamp: dayjs().format('YYYY-MM-DDTHH:mm:ssZ'),
+        },
+      ]) */
+      scrollToBottom()
+      setFiles([])
+      setDirty(true)
+    })
+  }
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      const messagesDiv = document.getElementById('messages')
+      console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight)
+      messagesDiv.scrollTop = messagesDiv.scrollHeight
+    }, 100)
   }
 
   const myUpload = (e) => {
@@ -73,19 +81,20 @@ export default function TicketPage() {
       label += files[i].name + ' '
     }
     setFilesLabel(label)
-    console.log(files)
   }
 
   useEffect(() => {
-    console.log('useEffect')
     getTicketByID(ticketId)
       .then((ticket) => setTicket(ticket))
+      .then(() => myGetMessages(1))
       .then(() => setDirty(false))
   }, [dirty])
 
-  useEffect(() => {
+
+  useInterval(() => {
+    console.log('refreshing messages')
     myGetMessages(1)
-  }, [])
+  }, 10000)
 
   return (
     <>
@@ -128,45 +137,51 @@ export default function TicketPage() {
               </Col>
 
               {role === Roles.MANAGER && (
-                  <Col style={{borderLeft: "2px solid black"}}>
-                    <h4>Ticket Details</h4>
-                    <Row>
-                      <div
-                        style={{
-                          height: '300px',
-                          overflowY: 'auto',
-                          textAlign: 'start',
-                        }}
-                      >
-                        {ticket.ticketStateLifecycle.map((state, index) => (
-                          <p>
-                            {dayjs(state.timestamp).format(
-                              'DD/MM/YYYY HH:mm:ss',
-                            )}
-                            - {state.state}
-                          </p>
-                        ))}
-                      </div>
-                    </Row>
-                  </Col>
+                <Col style={{ borderLeft: '2px solid black' }}>
+                  <h4>Ticket Details</h4>
+                  <Row>
+                    <div
+                      style={{
+                        height: '300px',
+                        overflowY: 'auto',
+                        textAlign: 'start',
+                      }}
+                    >
+                      {ticket.ticketStateLifecycle.map((state, index) => (
+                        <p>
+                          {dayjs(state.timestamp).format('DD/MM/YYYY HH:mm:ss')}
+                          - {state.state}
+                        </p>
+                      ))}
+                    </div>
+                  </Row>
+                </Col>
               )}
-              <Col style={{ position: 'relative', borderLeft: "2px solid black" }} >
+              <Col
+                style={{ position: 'relative', borderLeft: '2px solid black' }}
+              >
                 <h4>Messages</h4>
                 <Col
+                  id="messages"
                   style={{
-                      overflowY: 'auto',
-                  
+                    overflowY: 'auto',
                     height: '250px',
                     marginBottom: '120px',
                   }}
-                  >
-                    {messagePage != null && messagePage.currentPage < messagePage.totalPages && 
+                >
+                  {messagePage != null &&
+                    messagePage.currentPage < messagePage.totalPages && (
                       <Button
-                        onSubmit={e => e.preventDefault()}
-                        onClick={() => myGetMessages(messagePage.currentPage + 1)}
-                      >Load previous</Button>}
+                        onSubmit={(e) => e.preventDefault()}
+                        onClick={() =>
+                          myGetMessages(messagePage.currentPage + 1)
+                        }
+                      >
+                        Load previous
+                      </Button>
+                    )}
                   {messages != null && messages.length !== 0 ? (
-                      messages.map((message, index) => {
+                    messages.map((message, index) => {
                       return (
                         <div
                           key={index}
@@ -179,7 +194,17 @@ export default function TicketPage() {
                         >
                           <p>
                             <strong>{message.sender}</strong>
-                            <p>{message.messageText}</p>
+                            <br />
+                            {message.messageText}
+                            {message.attachmentsNames && message.attachmentsNames.length > 0 &&
+                              message.attachmentsNames.map(
+                                (attachment, index) => (
+                                  <>
+                                    <br />
+                                    <Button onClick={() => getAttachment(ticket.ticketId, attachment)} variant="link">{index + 1} - {attachment}</Button>
+                                  </>
+                                ),
+                              )}
                           </p>
                         </div>
                       )
@@ -197,32 +222,47 @@ export default function TicketPage() {
                     }}
                   >
                     <Col>
-                        <Form onSubmit={(e) => { e.preventDefault();  sendNewMessage()}}>
+                      <Form
+                        onSubmit={(e) => {
+                          e.preventDefault()
+                          sendNewMessage()
+                        }}
+                      >
                         <Form.Group controlId="formBasicEmail">
                           <Row>
-                              <Form.Control
-                                style = {{margin: "10px"}}
-                                
-                            type="text"
-                            placeholder="Enter message"
-                            value={newMessage}
-                            onChange={(ev) => setNewMessage(ev.target.value)}
-                              />
-                            </Row>
-                            <Row>
-                              <Form.Control
-                                style = {{margin: "10px"}}
-                            name={filesLabel}
-                            type="file"
-                            multiple
-                            onChange={myUpload}
-                          /></Row>
+                            <Form.Control
+                              style={{ margin: '10px' }}
+                              type="text"
+                              placeholder="Enter message"
+                              value={newMessage}
+                              onChange={(ev) => setNewMessage(ev.target.value)}
+                            />
+                          </Row>
+                          <Row>
+                            <Form.Control
+                              style={{ margin: '10px' }}
+                              name={filesLabel}
+                              type="file"
+                              multiple
+                              onChange={myUpload}
+                            />
+                          </Row>
                         </Form.Group>
                       </Form>
                     </Col>
-                    <Col style={{display: "flex", justifyContent: "end", alignItems: "center"}}>
-                        <Button onClick={sendNewMessage} style={{height: "80%", width: "60%"}}>
-                          Send</Button>
+                    <Col
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'end',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Button
+                        onClick={sendNewMessage}
+                        style={{ height: '80%', width: '60%' }}
+                      >
+                        Send
+                      </Button>
                     </Col>
                   </Row>
                 )}
@@ -334,7 +374,7 @@ function ManagerButton(props) {
     managerHandleCloseTicket,
     managerAssignExpert,
     managerRelieveExpert,
-    getExpertsPage
+    getExpertsPage,
   } = useContext(ActionContext)
 
   return (
@@ -354,9 +394,11 @@ function ManagerButton(props) {
               }}
             >
               <Button
-                disabled ={experts.currentPage === 1}
-                onClick={() => getExpertsPage(experts.currentPage - 1)}>
-                {'<'}</Button>
+                disabled={experts.currentPage === 1}
+                onClick={() => getExpertsPage(experts.currentPage - 1)}
+              >
+                {'<'}
+              </Button>
             </Col>
             <Col lg={10}>
               {experts.content.map((expert, index) => {
@@ -408,8 +450,10 @@ function ManagerButton(props) {
             >
               <Button
                 disabled={experts.currentPage === experts.totalPages}
-               onClick={() => getExpertsPage(experts.currentPage + 1)}
-              >{'>'}</Button>
+                onClick={() => getExpertsPage(experts.currentPage + 1)}
+              >
+                {'>'}
+              </Button>
             </Col>
           </Row>
         </Modal.Body>

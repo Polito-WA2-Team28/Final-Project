@@ -123,14 +123,16 @@ function App() {
       })
       .catch((err) => errorToast(err));
   }
+
   async function expertGetTickets(noPage) {
     await expertAPI.getTicketsPage(token, noPage)
       .then(tickets => { setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
   async function managerGetTickets(noPage, filter) {
+    console.log("managerGetTickets", filter)
     await managerAPI.getTicketsPage(token, noPage, filter)
-      .then(tickets => { setTickets(tickets) })
+      .then(tickets => { console.log(tickets); setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
   async function managerGetProducts(noPage) {
@@ -234,8 +236,6 @@ function App() {
   }
 
   const getMessages = async (ticketId, pageNo) => {
-
-    console.log("Getting messages", ticketId, pageNo)
 
     switch (role) {
       case Roles.CUSTOMER:
