@@ -49,7 +49,7 @@ class UserController(
             val jsonReader = Json.createReader(StringReader(response.body))
             val jsonResponse = jsonReader.readObject()
             TokenDTO(jsonResponse.getString("access_token"))
-            
+
         } catch (e: HttpClientErrorException.Unauthorized) {
             logger.error("Status: 401 Unauthorized")
             throw  SecurityException.UnauthorizedException("401 Unauthorized123 ${e.statusCode}")
