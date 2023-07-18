@@ -8,27 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icons";
 
 import { Pagination } from 'react-bootstrap';
-// import '../styles/Pagination.css'; 
 
-////////////////////////////// DELETE THIS LATER///////////////////////////
-
-function generateMockProducts(count) {
-  const products = [];
-  for (let i = 0; i < count; i++) {
-    const product = {
-      id: i + 1,
-      model: `Example-Model-${i+1}`,
-      deviceType: "Example-Name",
-      serialNumber: "Example-Id-123456789",
-    };
-    products.push(product);
-  }
-  return products;
-}
-
-const fakeProducts = generateMockProducts(1000);
-
-//////////////////////////////////////////////////////////////////////
 
 export function ProductsTab(props) {
   const productsPage = useContext(UserContext).products;
@@ -103,11 +83,11 @@ export function ProductsTab(props) {
           />
           {renderPaginationItems()}
           <Pagination.Next
-            disabled={currentPage === totalPages - 1 || products.length == 0}
+            disabled={currentPage === totalPages - 1 || products.length === 0}
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
-            disabled={currentPage === totalPages - 1 || products.length == 0}
+            disabled={currentPage === totalPages - 1 || products.length === 0}
             onClick={() => handlePageChange(totalPages - 1)}
           />
         </Pagination>

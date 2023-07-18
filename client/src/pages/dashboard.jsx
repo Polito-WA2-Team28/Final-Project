@@ -14,7 +14,7 @@ export default function Dashboard(prop) {
     <Container>
       <Tabs>
         <Tab eventKey="tickets" title="Tickets">
-          <TicketTab newTicketPage={prop.newTicketPage} />
+          <TicketTab/>
         </Tab>
         {(role === Roles.CUSTOMER || role === Roles.MANAGER) &&
           <Tab eventKey="products" title="Products">

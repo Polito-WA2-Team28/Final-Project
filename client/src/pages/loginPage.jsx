@@ -52,7 +52,11 @@ function LoginForm(props) {
     if (password === '') invalids.push(' password')
     if (invalids.length === 0) {
       await handleLogin(credentials)
-        .then(() => navigate('/dashboard'))
+        .then(() => {
+          setUsername('')
+          setPassword('')
+          navigate('/dashboard')
+        })
         .catch((error) => {
           if (error === 'Unauthorized') setMessage('Invalid username or password')
           else setMessage(error.message)
@@ -68,9 +72,9 @@ function LoginForm(props) {
         </Alert>
       )}
       <Form.Group controlId="username">
-        <Form.Label>E-mail</Form.Label>
+        <Form.Label>Username</Form.Label>
         <Form.Control
-          type="email"
+          type="text"
           value={username}
           onChange={(ev) => setUsername(ev.target.value)}
         />
