@@ -423,11 +423,12 @@ class TestCases : ApplicationTests() {
     @Test
             /** PATCH /api/customers/products/registerProduct */
     fun successRegisterProduct() {
-        val customer: Customer = utilityFunctions.createTestCustomer("John", "Doe")
+        val customer: Customer = utilityFunctions.createTestCustomer("Mario", "Rossi")
             ?: fail("Test failed because no customer was created in the database.")
 
         val randUUID = UUID.randomUUID()
         val product = utilityFunctions.createUnregisteredTestProduct(randUUID)
+        println(product)
 
         val jsonRequest = JSONObject()
         jsonRequest.put("productId", product.id)
@@ -452,8 +453,9 @@ class TestCases : ApplicationTests() {
         Assertions.assertNotNull(response)
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
         val updatedProduct = productRepository.findByIdOrNull(product.id)
+        println("${updatedProduct?.id} ${updatedProduct?.registered} ${updatedProduct?.owner?.id}")
         Assertions.assertEquals(true, updatedProduct?.registered)
-        Assertions.assertEquals(customer.id, product.owner?.id)
+        Assertions.assertEquals(customer.id, updatedProduct?.owner?.id)
 
     }
 

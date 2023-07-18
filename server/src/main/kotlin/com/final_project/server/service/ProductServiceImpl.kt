@@ -30,6 +30,7 @@ class ProductServiceImpl @Autowired constructor(
         return productRepository.findAllByOwnerId(customerId, pageable).map { it.toDTO() }
     }
 
+    @Transactional
     override fun registerProduct(customerId:UUID, productId: Long, serialNumber: UUID) {
         return productRepository.registerProduct(customerId, productId, serialNumber)
     }
@@ -40,6 +41,10 @@ class ProductServiceImpl @Autowired constructor(
 
     override fun customerGetProductById(customerId: UUID, productId: Long): ProductDTO? {
         return productRepository.customerFindProductById(customerId, productId)?.toDTO()
+    }
+
+    override fun getProductBySerialNumber(serialNumber: UUID): ProductDTO? {
+        return productRepository.findBySerialNumber(serialNumber)?.toDTO()
     }
 
     override fun managerGetProductById(productId: Long): ProductDTO? {
