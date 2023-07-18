@@ -4,24 +4,23 @@ import { useContext, useState } from "react";
 import { Button, Card, CardGroup, Col, Row} from "react-bootstrap";
 import EmptySearch from "./EmptySearch";
 import { useNavigate } from "react-router-dom";
-// import "../styles/TicketTab.css"
-import { UserContext } from "../Context";
+import { ActionContext, UserContext } from "../Context";
 import { Pagination } from 'react-bootstrap';
 
 export default function TicketTab(prop) {
 
+  const {getTicketPage} = useContext(ActionContext)
+
   const ticketsPage = useContext(UserContext).tickets
   var tickets = ticketsPage.content
-  // const tickets = fakeTickets
 
   if(tickets==null) tickets=[]
 
-  var ticketsPerPage = ticketsPage.pageSize;
   var totalPages = ticketsPage.totalPages;
   var [currentPage, setCurrentPage] = useState(0);
 
   const handlePageChange = (page) => {
-    prop.newTicketPage(page)
+    getTicketPage(page)
     setCurrentPage(page);
   };
 
@@ -74,11 +73,11 @@ export default function TicketTab(prop) {
           />
           {renderPaginationItems()}
           <Pagination.Next
-            disabled={currentPage === totalPages - 1 || tickets.length == 0}
+            disabled={currentPage === totalPages - 1 || tickets.length === 0}
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
-            disabled={currentPage === totalPages - 1 || tickets.length == 0}
+            disabled={currentPage === totalPages - 1 || tickets.length === 0}
             onClick={() => handlePageChange(totalPages - 1)}
           />
         </Pagination>

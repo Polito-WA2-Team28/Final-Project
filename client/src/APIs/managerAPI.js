@@ -5,8 +5,8 @@ const url = `http://localhost:${port}/api/managers`;
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTickets(token) {
-    const res = await fetch(url + "/tickets",
+async function getTicketsPage(token, noPages) {
+    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -94,8 +94,8 @@ async function sendMessage(token, message, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getMessages(token, ticketId) {
-    const res = await fetch(url + "/tickets/" + ticketId + "/messages",
+async function getMessagesPage(token, ticketId, noPages) {
+    const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -106,8 +106,8 @@ async function getMessages(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProducts(token) {
-    const res = await fetch(url + "/products",
+async function getProductsPage(token, noPages) {
+    const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -126,8 +126,12 @@ async function getProduct(token, productId) {
     return data;
 }
 
-async function getExperts(token) {
-    const res = await fetch(url + "/experts", 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function getExpertsPage(token, noPages) {
+    const res = await fetch(url + `/experts?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -148,9 +152,9 @@ async function getAttachment(token, ticketId, attachmentName) {
 }
 
  const managerAPI = {
-    getTickets, getTicket, assignTicket,
+    getTicketsPage, getTicket, assignTicket,
     relieveExpert, closeTicket, resumeProgress, removeTicket,
-    sendMessage, getMessages, getProducts, getProduct,getExperts, getAttachment
+    sendMessage, getMessagesPage, getProductsPage, getProduct,getExpertsPage, getAttachment
 };
 
 export default managerAPI;

@@ -7,18 +7,31 @@ import org.springframework.stereotype.Service
 import com.final_project.server.repository.ProductRepository
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
 
 
 @Service
-class ProductServiceImpl @Autowired constructor(private val productRepository: ProductRepository) : ProductService {
-    override fun registerProduct(customerId:UUID, productId: Long, serialNumber: UUID) {
-        return productRepository.registerProduct(customerId, productId, serialNumber)
+class ProductServiceImpl @Autowired constructor(
+    private val productRepository: ProductRepository
+): ProductService {
+
+    override fun getManagerProductsWithPaging(pageable: Pageable): Page<ProductDTO> {
+        return productRepository.findAll(pageable).map { it.toDTO() }
     }
 
-    override fun getCustomerProducts(customerId: UUID): List<ProductDTO> {
-        return productRepository.findByOwnerId(customerId).map{it.toDTO()}
+    /*override fun getExpertProductsWithPaging(expertId: UUID, pageable: Pageable): Page<ProductDTO> {
+        return productRepository.findAllByExpertId(expertId, pageable).map { it.toDTO() }
+    }*/
+
+    override fun getCustomerProductsWithPaging(customerId: UUID, pageable: Pageable): Page<ProductDTO> {
+        return productRepository.findAllByOwnerId(customerId, pageable).map { it.toDTO() }
+    }
+
+    override fun registerProduct(customerId:UUID, productId: Long, serialNumber: UUID) {
+        return productRepository.registerProduct(customerId, productId, serialNumber)
     }
 
     override fun customerGetProductBySerialNumber(customerId:UUID, serialNumber: UUID): ProductDTO? {
@@ -29,17 +42,8 @@ class ProductServiceImpl @Autowired constructor(private val productRepository: P
         return productRepository.customerFindProductById(customerId, productId)?.toDTO()
     }
 
-    override fun getManagerProducts(): List<ProductDTO> {
-        return productRepository.findAll().map{it.toDTO()}
-    }
-
     override fun managerGetProductById(productId: Long): ProductDTO? {
         return productRepository.findByIdOrNull(productId)?.toDTO()
-    }
-
-
-    override fun getExpertProducts(expertId:UUID): List<ProductDTO> {
-        return productRepository.expertFindProducts(expertId).map{it.toDTO()}
     }
 
     override fun expertGetProductById(expertId: UUID, productId: Long): ProductDTO? {

@@ -1,6 +1,10 @@
 package com.final_project.server.repository
 
 import com.final_project.server.model.Product
+import com.final_project.ticketing.model.Ticket
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -8,7 +12,11 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface ProductRepository : CrudRepository<Product, Long> {
+interface ProductRepository : CrudRepository<Product, Long>, JpaRepository<Product, Long> {
+
+    fun findAllByOwnerId(ownerId: UUID, pageable: Pageable): Page<Product>
+
+    // fun findAllByExpertId(expertId: UUID, pageable: Pageable): Page<Product>
 
 
     fun findByOwnerId(ownerId: UUID):List<Product>
