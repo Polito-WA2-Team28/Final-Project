@@ -16,6 +16,8 @@ open class TicketException(override val message: String): Throwable() {
 
     class TicketForbiddenException(message: String): TicketException(message)
 
+    class InvalidTicketStateException(message: String): TicketException(message)
+
     class ValidationException(message: String, private val invalidFields: List<String>): Exception(message) {
         override fun error(): String {
             return "The following fields are invalid: $invalidFields"
