@@ -32,8 +32,6 @@ class SecurityConfig(val jwtAuthConverter:JwtAuthConverter) {
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.authorizeHttpRequests()
-            .requestMatchers("/*").permitAll()
-            .requestMatchers("/static/**").permitAll()
             .requestMatchers("/api/auth/login").permitAll()
             .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
             .requestMatchers("/api/experts/**").hasRole("EXPERT")
