@@ -45,11 +45,10 @@ class UserController(
 
         return try {
             val response = restTemplate.postForEntity(tokenEndpoint, entity, String::class.java)
-
             val jsonReader = Json.createReader(StringReader(response.body))
             val jsonResponse = jsonReader.readObject()
-
             TokenDTO(jsonResponse.getString("access_token"))
+
         } catch (e: HttpClientErrorException.Unauthorized) {
             logger.error("Status: 401 Unauthorized")
             throw  SecurityException.UnauthorizedException("401 Unauthorized")
@@ -57,8 +56,8 @@ class UserController(
             logger.error("Status: ${e.statusCode} Error: ${e.message}")
             throw  SecurityException.UnauthorizedException("Status ${e.statusCode} message: ${e.message}")
         } catch (e: Exception) {
-            logger.error(e.message)
-            throw  SecurityException.UnknownException(e.message)
+            logger.error("this one ${e.message}")
+            throw  SecurityException.UnauthorizedException(e.message)
         }
 
 
@@ -75,11 +74,15 @@ class UserController(
 
         val response = keycloakService.createUser(profile)
 
-        if(response.status != Response.Status.CREATED.statusCode){
+
+        if(response.status == Response.Status.CONFLICT.statusCode){
+            logger.error("Endpoint: /api/auth/register Error: This email or username are already being used by another user")
+            throw Exception.ProfileAlreadyExistingException("This email or username are already being used by another user")
+        }
+        else if(response.status != Response.Status.CREATED.statusCode){
             logger.error("Endpoint: /api/auth/register Error: It was not possible to register the customer")
             throw Exception.CouldNotRegisterCustomer("It was not possible to register the customer")
         }
-
     }
 
 

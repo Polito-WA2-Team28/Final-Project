@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface ExpertRepository: JpaRepository<Expert, UUID> {
+    fun findByEmail(email:String): Expert?
 }

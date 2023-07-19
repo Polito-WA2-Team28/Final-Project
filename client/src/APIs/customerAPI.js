@@ -1,6 +1,6 @@
-import { compositeHeader, authHeader } from "./util";
+import { compositeHeader, authHeader, port } from "./util";
 
-const url = "http://localhost:3000/api/customers";
+const url = `http://localhost:${port}/api/customers`;
 
 /** 
 * @throws {Error} if the data fails
@@ -99,16 +99,16 @@ async function sendMessage(token, message, ticketId, files) {
     formdata.append("messageText", message);
 
     if (files) {
-        for (let i = 0; i < files.length; i++) 
+        for (let i = 0; i < files.length; i++)
             formdata.append("attachments", files.item(i));
-    } 
+    }
 
     formdata.forEach((value, key) => console.log(key + " " + value));
 
 
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
         {
-            method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data"  },
+            method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data" },
             body: formdata
         })
     if (!res.ok) throw res.statusText
@@ -161,22 +161,29 @@ async function getAttachment(token, ticketId, attachmentName) {
     console.log("GET ATTACHMENT", ticketId, attachmentName);
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
-    
+
     console.log("RES", res);
     if (!res.ok) throw res.statusText
-    const data = await res.json();
-    console.log("DATA", data);
-    return data;
+
+    const response = new Response(res.body);
+    response.blob()
+        .then(blob => {
+            console.log("BLOB", blob);
+            const newUrl = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = newUrl;
+            link.download = attachmentName; // Set the desired file name
+            link.click();
+            URL.revokeObjectURL(url);
+        });
 }
 
-async function registerProduct(token, productId, serialNumber) {
-
-    const productIds = { productId, serialNumber}
+async function registerProduct(token, product) {
 
     const res = await fetch(url + "/products/registerProduct",
         {
             method: "PATCH", headers: compositeHeader(token),
-            body: JSON.stringify(productIds)
+            body: JSON.stringify(product)
         })
     if (!res.ok) throw res.statusText
 }

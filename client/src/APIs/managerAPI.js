@@ -1,12 +1,16 @@
-import { authHeader, compositeHeader } from "./util.js";
-const url = "http://localhost:3000/api/managers";
+import { authHeader, compositeHeader, port } from "./util.js";
+const url = `http://localhost:${port}/api/managers`;
 
 /** 
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTicketsPage(token, noPages) {
-    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
+async function getTicketsPage(token, noPages, filter) {
+    if (filter == null) filter = ""
+
+    console.log(url + `/tickets?pageNo=${noPages}&state=${filter}`)
+
+    const res = await fetch(url + `/tickets?pageNo=${noPages}&state=${filter}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
@@ -89,6 +93,16 @@ async function sendMessage(token, message, ticketId) {
     return data;
 }
 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function registerExpert(token, expert) {
+    const res = await fetch(`http://localhost:${port}/api/auth/createExpert`,
+        { method: "POST", headers: compositeHeader(token), body: JSON.stringify(expert) })
+    if (!res.ok) throw res.statusText
+}
+
 
 /** 
 * @throws {Error} if the data fails
@@ -152,7 +166,7 @@ async function getAttachment(token, ticketId, attachmentName) {
 }
 
  const managerAPI = {
-    getTicketsPage, getTicket, assignTicket,
+    getTicketsPage, getTicket, assignTicket, registerExpert,
     relieveExpert, closeTicket, resumeProgress, removeTicket,
     sendMessage, getMessagesPage, getProductsPage, getProduct,getExpertsPage, getAttachment
 };

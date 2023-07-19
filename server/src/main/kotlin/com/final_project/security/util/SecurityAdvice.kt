@@ -1,4 +1,4 @@
-package com.lab5.security.util
+package com.final_project.security.util
 
 import com.final_project.security.exception.SecurityErrorDetails
 import com.final_project.security.exception.SecurityException

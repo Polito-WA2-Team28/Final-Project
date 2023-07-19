@@ -79,9 +79,10 @@ class CustomerProductController @Autowired constructor (
         val customerId = securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB)
         /* Checking errors */
         nexus
+            .setEndpointForLogger("/api/customers/products/registerProduct")
             .assertValidationResult("/api/customers/products/registerProduct", br)
             .assertCustomerExists(UUID.fromString(customerId))
-            .assertProductExists(productIds.serialNumber)
+            .assertCustomerlessProductExists(productIds.serialNumber)
 
 
 

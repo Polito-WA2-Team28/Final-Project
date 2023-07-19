@@ -12,7 +12,7 @@ import { Pagination } from 'react-bootstrap';
 
 export function ProductsTab(props) {
 
-  const {getProductPage} = useContext(ActionContext)
+  const {customerGetProducts, registerProduct} = useContext(ActionContext)
 
   const productsPage = useContext(UserContext).products;
   var products = productsPage.content;
@@ -26,7 +26,7 @@ export function ProductsTab(props) {
   const [currentPage, setCurrentPage] = useState(0);
 
   const handlePageChange = (selectedPage) => {
-    getProductPage(selectedPage);
+    customerGetProducts(selectedPage);
     setCurrentPage(selectedPage);
   };
 
@@ -34,18 +34,18 @@ export function ProductsTab(props) {
     const items = [];
 
     // Calcula los límites de los elementos a mostrar
-    let startPage = Math.max(currentPage - 2, 0);
-    let endPage = Math.min(startPage + 4, totalPages - 1);
-    startPage = Math.max(endPage - 4, 0);
+    let startPage = Math.max(currentPage - 2, 1);
+    let endPage = Math.min(startPage + 4, totalPages);
+    startPage = Math.max(endPage - 4, 1);
 
     for (let page = startPage; page <= endPage; page++) {
       items.push(
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => handlePageChange(page)}
+          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
         >
-          {page + 1}
+          {page}
         </Pagination.Item>
       );
     }
@@ -58,7 +58,7 @@ export function ProductsTab(props) {
     <>
       <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button>
       <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-        handleCreate={() => { console.log("CREATE") }}
+        handleCreate={registerProduct}
       />
       <CardGroup>
         {products === undefined || products.length === 0 ? (
@@ -77,20 +77,20 @@ export function ProductsTab(props) {
       <div className="d-flex justify-content-center">
         <Pagination>
           <Pagination.First
-            disabled={currentPage === 0}
-            onClick={() => handlePageChange(0)}
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(1)}
           />
           <Pagination.Prev
-            disabled={currentPage === 0}
+            disabled={currentPage === 1}
             onClick={() => handlePageChange(currentPage - 1)}
           />
           {renderPaginationItems()}
           <Pagination.Next
-            disabled={currentPage === totalPages - 1 || products.length === 0}
+            disabled={currentPage === totalPages || products.length === 0}
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
-            disabled={currentPage === totalPages - 1 || products.length === 0}
+            disabled={currentPage === totalPages || products.length === 0}
             onClick={() => handlePageChange(totalPages - 1)}
           />
         </Pagination>
@@ -129,7 +129,7 @@ function RegisterNewProductModal(props) {
   const [serialNumber, setSerialNumber] = useState("");
 
   const handleCreate = () => {
-    const product = { serialNumber }
+    const product = {productId, serialNumber }
     props.handleCreate(product);
     props.handleClose();
   }

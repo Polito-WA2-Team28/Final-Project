@@ -147,6 +147,14 @@ class Nexus (vararg services: Any) {
         return this
     }
 
+    fun assertCustomerlessProductExists(serialNumber: UUID): Nexus {
+        this.product = productService.getProductBySerialNumber(serialNumber) ?: run {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: Not Found.")
+            throw Exception.ProductNotFoundException("Not Found.")
+        }
+        return this
+    }
+
     fun assertProductOwnership(): Nexus {
         if (this.product!!.owner != this.customer!!.id) {
             logger.error("Endpoint: ${endpointHolder.get()} Error: Customer is not the owner of this product.")

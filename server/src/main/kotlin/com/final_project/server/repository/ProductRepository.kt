@@ -16,10 +16,8 @@ interface ProductRepository : CrudRepository<Product, Long>, JpaRepository<Produ
 
     fun findAllByOwnerId(ownerId: UUID, pageable: Pageable): Page<Product>
 
-    // fun findAllByExpertId(expertId: UUID, pageable: Pageable): Page<Product>
+    fun findBySerialNumber(serialNumber: UUID): Product?
 
-
-    fun findByOwnerId(ownerId: UUID):List<Product>
 
     @Query("SELECT p FROM Product p WHERE p.owner.id = :customerId AND p.id = :productId")
     fun customerFindProductById(customerId: UUID, productId:Long):Product?

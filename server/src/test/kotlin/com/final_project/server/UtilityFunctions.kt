@@ -100,14 +100,14 @@ class UtilityFunctions {
 
     private fun createFirstExpert(): Expert {
         val uuid = UUID.fromString("6e2f3411-1f7b-4da4-9128-2bac562b3687")
-        val expert: Expert =  Expert(uuid, "expert@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        val expert: Expert =  Expert(uuid, "expert@ticketingservice.it", "expert-test-first", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
         expertRepository.save(expert)
         return expert
     }
 
     private fun createSecondExpert(): Expert {
         val uuid = UUID.fromString("5b960e3c-d068-4e57-9640-87e8ebb55b78")
-        val expert: Expert =  Expert(uuid, "expert-2@ticketingservice.it", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
+        val expert: Expert =  Expert(uuid, "expert-2@ticketingservice.it", "expert-test-second", mutableSetOf(ExpertiseFieldEnum.APPLIANCES))
         expertRepository.save(expert)
         return expert
     }
