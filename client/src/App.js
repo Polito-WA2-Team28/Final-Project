@@ -191,7 +191,7 @@ function App() {
   }, [token, role, dirty])
 
   useEffect(() => {
-  
+
     switch (role) {
       case Roles.CUSTOMER:
         customerGetTickets(1); customerGetProducts(1);
@@ -226,6 +226,7 @@ function App() {
     await customerAPI.compileSurvey(token, ticketId, survey)
       .then(() => {
         setTickets((prev) => prev.filter((ticket) => ticket.ticketId !== ticketId))
+        successToast("Survey submitted!")
         setDirty(true)
       })
       .catch((err) => errorToast(err))
@@ -233,7 +234,7 @@ function App() {
 
   const customerReopenTicket = async (ticketId) => {
     await customerAPI.reopenTicket(token, ticketId)
-      .then(() => { setDirty(true) })
+      .then(() => { successToast("Ticket reopened"); setDirty(true) })
       .catch(err => errorToast(err))
   }
 
@@ -274,7 +275,7 @@ function App() {
 
   const managerAssignExpert = async (ticketId, expertId) => {
     await managerAPI.assignTicket(token, ticketId, expertId)
-      .then(() => setDirty(true))
+      .then(() => { successToast("Expert assigned"); setDirty(true) })
       .catch((err) => errorToast(err));
   }
 
@@ -282,15 +283,15 @@ function App() {
     switch (ticket.ticketState) {
       case TicketState.OPEN:
         managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => setDirty(true))
+          .then(() => { successToast("ticket closed"); setDirty(true) })
         break
       case TicketState.IN_PROGRESS:
         managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => setDirty(true))
+          .then(() => { successToast("ticket closed"); setDirty(true) })
         break
       case TicketState.REOPENED:
         managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => setDirty(true))
+          .then(() => { successToast("ticket closed"); setDirty(true) })
         break
       default:
         console.error('Invalid ticket state')
@@ -300,13 +301,13 @@ function App() {
 
   const managerRelieveExpert = async (ticketId) => {
     await managerAPI.relieveExpert(token, ticketId)
-      .then(() => setDirty(true))
+      .then(() => { setDirty(true); successToast("Expert relieved!") })
       .catch((err) => errorToast(err));
   }
 
   const expertResolveTicket = async (ticketId) => {
     await expertAPI.resolveTicket(token, ticketId)
-      .then(() => setDirty(true))
+      .then(() => { setDirty(true); successToast("Ticket resolved!") })
       .catch((err) => errorToast(err));
   }
 
@@ -328,7 +329,7 @@ function App() {
 
   const registerProduct = async (product) => {
     await customerAPI.registerProduct(token, product)
-      .then(() => { customerGetProducts(1);  successToast("Product registered!") })
+      .then(() => { customerGetProducts(1); successToast("Product registered!") })
 
   }
 
@@ -338,13 +339,22 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
+  const registerExpert = async (expert) => {
+
+    console.log("Registering expert: " + expert)
+
+    await managerAPI.registerExpert(token, expert)
+      .then(() => { managerGetExperts(1); successToast("Expert registered!") })
+      .catch((err) => errorToast(err));
+  }
+
 
   const actions = {
-    getMessages, sendMessage, handleLogin, handleLogout,
+    getMessages, sendMessage, handleLogin, handleLogout, registerExpert,
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage
+    registerProduct, getTicketPage, getExpertsPage,
   }
 
   const userValues = {

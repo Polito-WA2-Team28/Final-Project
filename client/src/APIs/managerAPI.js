@@ -93,6 +93,16 @@ async function sendMessage(token, message, ticketId) {
     return data;
 }
 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function registerExpert(token, expert) {
+    const res = await fetch(`http://localhost:${port}/api/auth/createExpert`,
+        { method: "POST", headers: compositeHeader(token), body: JSON.stringify(expert) })
+    if (!res.ok) throw res.statusText
+}
+
 
 /** 
 * @throws {Error} if the data fails
@@ -156,7 +166,7 @@ async function getAttachment(token, ticketId, attachmentName) {
 }
 
  const managerAPI = {
-    getTicketsPage, getTicket, assignTicket,
+    getTicketsPage, getTicket, assignTicket, registerExpert,
     relieveExpert, closeTicket, resumeProgress, removeTicket,
     sendMessage, getMessagesPage, getProductsPage, getProduct,getExpertsPage, getAttachment
 };
