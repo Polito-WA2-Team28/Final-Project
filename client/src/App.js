@@ -116,6 +116,14 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
+  const getProductPage = async (newPageNo) => {
+    await customerAPI.getProductsPage(token, newPageNo + 1)
+      .then(newProducts => {
+        setProducts(newProducts)
+      })
+      .catch((err) => errorToast(err));
+  }
+
   const handleEditProfile = async (profile) => {
     await customerAPI.patchProfile(token, profile)
       .then(() => {
@@ -151,7 +159,7 @@ function App() {
         .catch((err) => errorToast(err));
     }
     const customerGetProducts = async () => {
-      await customerAPI.getProductsPage(token, 1)
+      await customerAPI.getProductsPage(token)
         .then(products => {
           setProducts(products);
         })
@@ -335,7 +343,7 @@ function App() {
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage,
+    registerProduct, getTicketPage, getExpertsPage, getProductPage
   }
 
   const userValues = {

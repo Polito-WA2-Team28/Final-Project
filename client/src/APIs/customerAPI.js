@@ -146,11 +146,14 @@ async function getProduct(token, productId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProductsPage(token, noPages) {
+async function getProductsPage(token, noPages=1) {
+    console.log(`/products?pageNo=${noPages}`)
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
+    console.log(data)
+
     return data;
 }
 
