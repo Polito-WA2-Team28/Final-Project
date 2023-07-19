@@ -2,7 +2,7 @@ import { Button, Card, CardGroup, Modal, Form, Col, Row } from "react-bootstrap"
 import EmptySearch from "./EmptySearch";
 import { useContext, useState } from "react";
 import "../styles/ProductsTab.css"
-import { UserContext } from "../Context";
+import { ActionContext, UserContext } from "../Context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,9 @@ import { Pagination } from 'react-bootstrap';
 
 
 export function ProductsTab(props) {
+
+  const { registerProduct} = useContext(ActionContext);
+
   const productsPage = useContext(UserContext).products;
   var products = productsPage.content;
   if(products==null) products=[]
@@ -32,16 +35,12 @@ export function ProductsTab(props) {
     let endPage = Math.min(startPage + 4, totalPages);
     startPage = Math.max(endPage - 4, 1);
 
-    console.log("startPage", startPage)
-    console.log("endPage", endPage)
-    console.log("totalPages", totalPages)
-
     for (let page = startPage; page <= endPage; page++) {
       items.push(
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => handlePageChange(page)}
+          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
         >
           {page}
         </Pagination.Item>
@@ -55,7 +54,7 @@ export function ProductsTab(props) {
     <>
      <Button onClick={() => setShow(true)} style={{margin: "10px"}}>Register a new product</Button>
       <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-        handleCreate={() => { console.log("CREATE") }}
+        handleCreate={registerProduct}
       />
       <CardGroup>
         {products === undefined || products.length === 0 ? (
@@ -126,7 +125,7 @@ function RegisterNewProductModal(props) {
   const [serialNumber, setSerialNumber] = useState("");
 
   const handleCreate = () => {
-    const product = { serialNumber }
+    const product = {productId, serialNumber }
     props.handleCreate(product);
     props.handleClose();
   }

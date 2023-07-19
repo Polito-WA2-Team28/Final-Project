@@ -8,7 +8,7 @@ export default function ExpertsInfoTab(props) {
     const [show, setShow] = useState(false);
     const { experts } = useContext(UserContext)
 
-    console.log(experts)
+    //console.log(experts)
 
     return(
         <>
@@ -17,7 +17,7 @@ export default function ExpertsInfoTab(props) {
                 <Button onClick={() => setShow(true)}>Create a new Expert</Button>
             </Row>
             <Col style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {experts == undefined || experts.content.length === 0 ? (
+        {experts == null || experts.content.length === 0 ? (
           <EmptySearch />
         ) : (
           experts.content.map((expert) => (
@@ -31,7 +31,7 @@ export default function ExpertsInfoTab(props) {
 
 function ExpertItem(props) {
 
-    console.log(props.expert)
+    //console.log(props.expert)
     
     return(
         <>
