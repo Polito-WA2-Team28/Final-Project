@@ -60,6 +60,9 @@ function App() {
     setUser(null);
     setRole(null);
     setUsername(null);
+    setProducts([]);
+    setTickets([]);
+    setExperts([]);
     localStorage.removeItem("token");
     successToast("Logged out successfully")
   };
@@ -130,14 +133,13 @@ function App() {
       .catch((err) => errorToast(err));
   }
   async function managerGetTickets(noPage, filter) {
-    console.log("managerGetTickets", filter)
     await managerAPI.getTicketsPage(token, noPage, filter)
-      .then(tickets => { console.log(tickets); setTickets(tickets) })
+      .then(tickets => { setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
   async function managerGetProducts(noPage) {
     await managerAPI.getProductsPage(token, noPage)
-      .then(products => { setProducts(products) })
+      .then(products => { console.log(products); setProducts(products) })
       .catch((err) => errorToast(err));
   }
   async function managerGetExperts(noPage) {
@@ -253,7 +255,6 @@ function App() {
   }
 
   const sendMessage = async (ticketId, message, files) => {
-    console.log("Sending message", ticketId, message, files)
     switch (role) {
       case Roles.CUSTOMER:
         await customerAPI.sendMessage(token, message, ticketId, files)
@@ -272,7 +273,6 @@ function App() {
   }
 
   const managerAssignExpert = async (ticketId, expertId) => {
-    console.log("Assigning expert", ticketId, expertId)
     await managerAPI.assignTicket(token, ticketId, expertId)
       .then(() => setDirty(true))
       .catch((err) => errorToast(err));
@@ -311,7 +311,6 @@ function App() {
   }
 
   const getAttachment = async (ticketId, attachmentName) => {
-    console.log("Getting attachment", ticketId, attachmentName)
     switch (role) {
       case Roles.CUSTOMER:
         return await customerAPI.getAttachment(token, ticketId, attachmentName)
@@ -328,8 +327,8 @@ function App() {
   }
 
   const registerProduct = async (product) => {
-    console.log("Registering product", product)
     await customerAPI.registerProduct(token, product)
+      .then(() => { customerGetProducts(1);  successToast("Product registered!") })
 
   }
 
@@ -345,7 +344,7 @@ function App() {
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage,
+    registerProduct, getTicketPage, getExpertsPage
   }
 
   const userValues = {

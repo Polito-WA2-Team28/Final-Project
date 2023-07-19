@@ -41,17 +41,12 @@ export default function TicketTab(prop) {
     let endPage = Math.min(startPage + 4, totalPages);
     startPage = Math.max(endPage - 4, 1);
 
-    console.log("startPage", startPage)
-    console.log("endPage", endPage)
-    console.log("totalPages", totalPages)
-
     for (let page = startPage; page <= endPage; page++) {
-      console.log("page", page)
       items.push(
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => handlePageChange(page)}
+          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
         >
           {page}
         </Pagination.Item>

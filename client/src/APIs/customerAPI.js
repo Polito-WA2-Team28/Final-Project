@@ -175,14 +175,12 @@ async function getAttachment(token, ticketId, attachmentName) {
         });
 }
 
-async function registerProduct(token, productId, serialNumber) {
-
-    const productIds = { productId, serialNumber }
+async function registerProduct(token, product) {
 
     const res = await fetch(url + "/products/registerProduct",
         {
             method: "PATCH", headers: compositeHeader(token),
-            body: JSON.stringify(productIds)
+            body: JSON.stringify(product)
         })
     if (!res.ok) throw res.statusText
 }

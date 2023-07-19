@@ -47,8 +47,7 @@ function RegistrationForm() {
       email,
       phoneNumber,
       password,
-      birthDate,
-      registrationDate: dayjs().format('YYYY-MM-DD'),
+      birthDate
     }
     let invalids = []
 
