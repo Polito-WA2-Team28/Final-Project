@@ -6,6 +6,7 @@ import com.final_project.server.model.Expert
 import com.final_project.server.model.Product
 import com.final_project.ticketing.model.Ticket
 import com.final_project.ticketing.util.TicketState
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Ignore
 import org.junit.jupiter.api.Assertions
@@ -74,6 +75,7 @@ class TestCases : ApplicationTests() {
 
 
     //CUSTOMERS
+
 
     @Test
             /** GET /api/customers/tickets */
@@ -530,6 +532,10 @@ class TestCases : ApplicationTests() {
 
 
     //EXPERTS
+
+
+
+
 
     @Test
             /** GET /api/experts/tickets*/

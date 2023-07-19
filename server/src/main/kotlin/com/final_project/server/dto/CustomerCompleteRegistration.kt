@@ -19,6 +19,8 @@ class CustomerCompleteRegistration(
 
 
 fun CustomerFormRegistration.toCompleteCustomer(id: UUID, profile:CustomerFormRegistration): CustomerCompleteRegistration {
-    return CustomerCompleteRegistration(id, profile.name, profile.surname, profile.username, profile.registrationDate,
+    val registrationDate = Date()
+
+    return CustomerCompleteRegistration(id, profile.name, profile.surname, profile.username, registrationDate,
                                         profile.birthDate, profile.email, profile.phoneNumber)
 }

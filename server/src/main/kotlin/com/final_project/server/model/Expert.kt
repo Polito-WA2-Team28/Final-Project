@@ -11,6 +11,7 @@ import java.util.UUID
 class Expert(
     @Id val id: UUID,
     var email:String,
+    var username: String,
 
     @ElementCollection(targetClass = ExpertiseFieldEnum::class)
     @Enumerated(EnumType.STRING)
@@ -25,5 +26,5 @@ class Expert(
  * @return a Expert object.
  */
 fun ExpertCompleteRegistration.toModel(): Expert {
-    return Expert(id, email, expertiseFields)
+    return Expert(id, email, username, expertiseFields)
 }
