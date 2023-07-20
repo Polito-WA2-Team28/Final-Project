@@ -9,12 +9,6 @@ export default function ExpertsInfoTab(props) {
   var [currentPage, setCurrentPage] = useState(1)
 
   const { registerExpert, managerGetExperts } = useContext(ActionContext)
-  /* const expertPage = useContext(UserContext).experts
-  console.log(expertPage)
-  var experts = expertPage.content
-  if (experts == null) experts = []
-
-  var totalPages = expertPage.totalPages; */
 
   const { experts } = useContext(UserContext)
 
@@ -88,13 +82,19 @@ export default function ExpertsInfoTab(props) {
           {renderPaginationItems()}
           <Pagination.Next
             disabled={
-              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+              currentPage === totalPages ||
+              experts == null ||
+              experts.content == null ||
+              experts.content.length === 0
             }
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
             disabled={
-              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+              currentPage === totalPages ||
+              experts == null ||
+              experts.content == null ||
+              experts.content.length === 0
             }
             onClick={() => handlePageChange(totalPages - 1)}
           />

@@ -65,7 +65,17 @@ export default function TicketPage() {
   }
 
   const myUpload = (e) => {
-    const files = e.target.files
+    
+    let files = []
+    
+    for (let i = 0; i < e.target.files.length; i++){
+      if (e.target.files[i].size > 20000000) {
+        errorToast('File too big')
+        return
+      }
+      files.push(e.target.files[i])
+    }
+
     setFiles(files)
     let label = ''
     for (let i = 0; i < files.length; i++) {
@@ -75,13 +85,14 @@ export default function TicketPage() {
   }
 
   useEffect(() => {
+    console.log('dirty', dirty)
     if (dirty) {
       getTicketByID(ticketId)
         .then((ticket) => {
           setTicket(ticket)
+          console.log('ticket', ticket)
         })
         .then(() => setLock(false))
-        //.then(() => myGetMessages(1))
         .then(() => setDirty(false))
     }
   }, [dirty])
@@ -171,7 +182,7 @@ export default function TicketPage() {
                       }}
                     >
                       {ticket.ticketStateLifecycle.map((state, index) => (
-                        <p>
+                        <p key={state.timestamp + state.state}>
                           {dayjs(state.timestamp).format('DD/MM/YYYY HH:mm:ss')}
                           - {state.state}
                         </p>
@@ -280,8 +291,8 @@ export default function TicketPage() {
                         alignItems: 'center',
                       }}
                     >
-                        <Button
-                          disabled={newMessage === ''}
+                      <Button
+                        disabled={newMessage === ''}
                         onClick={sendNewMessage}
                         style={{ height: '80%', width: '60%' }}
                       >
@@ -337,9 +348,10 @@ function CustomerButton(props) {
             variant="primary"
             onClick={() => {
               props.setLock(true)
-              customerCompileSurvey(ticket.ticketId, survey)
-              props.setDirty(true)
-              handleCloseModal()
+              customerCompileSurvey(ticket.ticketId, survey).then(() => {
+                props.setDirty(true)
+                handleCloseModal()
+              })
             }}
           >
             Submit
@@ -364,8 +376,9 @@ function CustomerButton(props) {
           disabled={ticket.ticketState !== TicketState.CLOSED || props.lock}
           onClick={() => {
             props.setLock(true)
-            customerReopenTicket(ticket.ticketId)
-            props.setDirty(true)
+            customerReopenTicket(ticket.ticketId).then(() =>
+              props.setDirty(true),
+            )
           }}
         >
           Reopen Ticket
@@ -387,8 +400,7 @@ function ExpertButton(props) {
         disabled={ticket.ticketState !== TicketState.IN_PROGRESS || props.lock}
         onClick={() => {
           props.setLock(true)
-          expertResolveTicket(ticket.ticketId)
-          props.setDirty(true)
+          expertResolveTicket(ticket.ticketId).then(() => props.setDirty(true))
         }}
       >
         Resolve Ticket
@@ -405,6 +417,7 @@ function ManagerButton(props) {
   const {
     managerHandleCloseTicket,
     managerAssignExpert,
+    managerResumeProgress,
     managerRelieveExpert,
     getExpertsPage,
   } = useContext(ActionContext)
@@ -459,8 +472,18 @@ function ManagerButton(props) {
                             variant="success"
                             onClick={() => {
                               props.setLock(true)
-                              managerAssignExpert(ticket.ticketId, expert.id)
-                              props.setDirty(true)
+                              if (ticket.ticketState === TicketState.OPEN)
+                                managerAssignExpert(
+                                  ticket.ticketId,
+                                  expert.id,
+                                ).then(() => props.setDirty(true))
+                              else if (
+                                ticket.ticketState === TicketState.REOPENED
+                              )
+                                managerResumeProgress(
+                                  ticket.ticketId,
+                                  
+                                ).then(() => props.setDirty(true))
                               setShow(false)
                             }}
                           >
@@ -498,14 +521,15 @@ function ManagerButton(props) {
           disabled={
             ![
               TicketState.OPEN,
-              TicketState.IN_PROGRESS,
+              TicketState.RESOLVED,
               TicketState.REOPENED,
             ].includes(ticket.ticketState) || props.lock
           }
           onClick={() => {
             props.setLock(true)
-            managerHandleCloseTicket(ticket)
-            props.setDirty(true)
+            managerHandleCloseTicket(ticket.ticketId).then(() =>
+              props.setDirty(true),
+            )
           }}
         >
           Close Ticket
@@ -516,7 +540,11 @@ function ManagerButton(props) {
         <Button
           style={{ height: '60px' }}
           variant="primary"
-          disabled={ticket.ticketState !== TicketState.OPEN || props.lock}
+          disabled={
+            ![TicketState.OPEN, TicketState.REOPENED].includes(
+              ticket.ticketState,
+            ) || props.lock
+          }
           onClick={() => setShow(true)}
         >
           Assign Ticket
@@ -532,8 +560,9 @@ function ManagerButton(props) {
           }
           onClick={() => {
             props.setLock(true)
-            managerRelieveExpert(ticket.ticketId)
-            props.setDirty(true)
+            managerRelieveExpert(ticket.ticketId).then(() =>
+              props.setDirty(true),
+            )
           }}
         >
           Relieve expert

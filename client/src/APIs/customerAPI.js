@@ -1,4 +1,4 @@
-import { compositeHeader, authHeader, port, handleError } from "./util";
+import { compositeHeader, authHeader, port } from "./util";
 
 const url = `http://localhost:${port}/api/customers`;
 
@@ -150,6 +150,7 @@ async function sendMessage(token, message, ticketId, files) {
         })
     if (!res.ok) {
         const body = await res.json()
+        console.error(body)
         if (body.error)
             throw body.error
         else
