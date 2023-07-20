@@ -11,11 +11,13 @@ class CustomerFormModification(
     @field:NotBlank
     @field:NotNull
     @field:Size(max = 30)
+    @field:Pattern(regexp = "^[A-Za-z]+\$")
     var name:String,
 
     @field:NotBlank
     @field:NotNull
     @field:Size(max = 30)
+    @field:Pattern(regexp = "^[A-Za-z]+\$")
     val surname:String,
 
     @field:DateTimeFormat

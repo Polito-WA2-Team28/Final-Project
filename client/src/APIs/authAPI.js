@@ -44,8 +44,8 @@ async function register(profile) {
         else
             throw res.statusText
     }
-    const data = await res.json();
-    return data;
+    
+    return 
 }
 
 /** 

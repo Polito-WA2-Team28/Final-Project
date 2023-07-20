@@ -262,7 +262,7 @@ class TicketManagerController @Autowired constructor(
         /* running checks... */
         val managerId = UUID.fromString(securityConfig.retrieveUserClaim(SecurityConfig.ClaimType.SUB))
         nexus
-            .setEndpointForLogger("/api/experts/tickets/$ticketId/attachments/$attachmentUniqueName")
+            .setEndpointForLogger("/api/managers/tickets/$ticketId/attachments/$attachmentUniqueName")
             .assertManagerExists(managerId)
             .assertTicketExists(ticketId)
             .assertFileExists(attachmentUniqueName)

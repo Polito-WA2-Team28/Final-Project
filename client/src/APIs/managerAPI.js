@@ -96,6 +96,7 @@ async function closeTicket(token, ticketId) {
 
 */
 async function resumeProgress(token, ticketId, expertId) {
+    console.log(expertId)
     const res = await fetch(url + "/tickets/" + ticketId + "/resumeProgress",
         { method: "PATCH", headers: compositeHeader(token), body: JSON.stringify({expertId: expertId }) })
     if (!res.ok) {
@@ -244,8 +245,15 @@ async function getAttachment(token, ticketId, attachmentName) {
         else
             throw res.statusText
     }
-    const data = await res.json();
-    return data;
+    const response = new Response(res.body);
+    response.blob().then(blob => {
+        const newUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = newUrl;
+        link.download = attachmentName; // Set the desired file name
+        link.click();
+        URL.revokeObjectURL(url);
+    });
 }
 
 const managerAPI = {

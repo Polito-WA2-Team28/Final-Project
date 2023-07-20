@@ -50,6 +50,7 @@ function App() {
   const handleRegistration = async (credentials) => {
     await authAPI.register(credentials)
       .then((data) => {
+        successToast("Registration was Successful!")
         setUser(data);
       })
   };
@@ -226,7 +227,8 @@ function App() {
   const customerCompileSurvey = async (ticketId, survey) => {
     await customerAPI.compileSurvey(token, ticketId, survey)
       .then(() => {
-        setTickets((prev) => prev.filter((ticket) => ticket.ticketId !== ticketId))
+        console.log(tickets)
+        setTickets((prev) => prev.content.filter((ticket) => ticket.ticketId !== ticketId))
         successToast("Survey submitted!")
       })
       .catch((err) => errorToast(err))

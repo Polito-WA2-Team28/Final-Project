@@ -167,9 +167,16 @@ async function getAttachment(token, ticketId, attachmentName) {
             throw body.error
         else
             throw res.statusText
-}
-    const data = await res.json();
-    return data;
+    }
+    const response = new Response(res.body);
+    response.blob().then(blob => {
+        const newUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = newUrl;
+        link.download = attachmentName; // Set the desired file name
+        link.click();
+        URL.revokeObjectURL(url);
+    });
 }
 
 const expertAPI = {

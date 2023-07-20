@@ -482,7 +482,7 @@ function ManagerButton(props) {
                               )
                                 managerResumeProgress(
                                   ticket.ticketId,
-                                  
+                                  expert.id
                                 ).then(() => props.setDirty(true))
                               setShow(false)
                             }}
