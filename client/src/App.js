@@ -288,6 +288,12 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
+  const managerResumeProgress = async (ticketId, expertId) => {
+    await managerAPI.resumeProgress(token, ticketId, expertId)
+      .then(() => { successToast("Ticket resumed!") })
+      .catch((err) => errorToast(err));
+  }
+
   const getAttachment = async (ticketId, attachmentName) => {
     switch (role) {
       case Roles.CUSTOMER:
@@ -324,7 +330,7 @@ function App() {
   }
 
   const actions = {
-    getMessages, sendMessage, handleLogin, handleLogout, registerExpert,
+    getMessages, sendMessage, handleLogin, handleLogout, registerExpert, managerResumeProgress,
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
