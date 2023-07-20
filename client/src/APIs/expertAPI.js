@@ -124,6 +124,7 @@ async function getMessagesPage(token, ticketId, noPages) {
 * @throws {String} if the response is not ok
 */
 async function getProductsPage(token, noPages) {
+    console.log(url + `/products?pageNo=${noPages}`)
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) {const body = await res.json()

@@ -116,9 +116,16 @@ function App() {
   }
 
   const customerGetProducts = async (noPage) => {
-    await customerAPI.getProductsPage(token, noPage)
+    if(role==Roles.CUSTOMER){
+      await customerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products); })
       .catch((err) => errorToast(err));
+    }else if(role==Roles.MANAGER){
+      await managerAPI.getProductsPage(token, noPage)
+      .then(products => { setProducts(products); })
+      .catch((err) => errorToast(err));
+    }
+
   }
 
   async function expertGetTickets(noPage) {

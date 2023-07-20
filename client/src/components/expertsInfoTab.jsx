@@ -18,8 +18,6 @@ export default function ExpertsInfoTab(props) {
 
   const { experts } = useContext(UserContext)
 
-  console.log("experts", experts)
-
   let totalPages = 1
   if (experts != null) totalPages = experts.totalPages
 
@@ -67,9 +65,7 @@ export default function ExpertsInfoTab(props) {
         experts.content.length === 0 ? (
           <EmptySearch />
         ) : (
-          <Row xs={1} className="w-50">
-            {console.log(experts)}
-
+          <Row xs={1} md={2} className="w-100">
             {experts.content.map((expert) => (
               <Col key={expert.id} className="mb-1 ">
                 <ExpertItem expert={expert} />
