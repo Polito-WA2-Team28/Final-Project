@@ -21,7 +21,7 @@ export function ProductsTab(props) {
   const [show, setShow] = useState(false);
   
   const totalPages = productsPage.totalPages;
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const handlePageChange = (selectedPage) => {
     customerGetProducts(selectedPage);
@@ -41,7 +41,7 @@ export function ProductsTab(props) {
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
+          onClick={() => {if (page !== currentPage) handlePageChange(page)}}
         >
           {page}
         </Pagination.Item>

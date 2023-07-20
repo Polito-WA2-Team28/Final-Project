@@ -71,7 +71,7 @@ export default function TicketTab() {
           </Col>
           <Col className="text-end">
             <h3>Active Filter: {filter}</h3>
-            <h3>Num: {tickets.length}</h3>
+            <h3>Num: {ticketsPage.totalElements}</h3>
           </Col>
         </Row>
       }
