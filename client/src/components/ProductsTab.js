@@ -16,7 +16,6 @@ export function ProductsTab(props) {
 
   const productsPage = useContext(UserContext).products;
   var products = productsPage.content;
-
   if(products==null) products=[]
 
   const [show, setShow] = useState(false);

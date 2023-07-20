@@ -28,7 +28,7 @@ function App() {
   const [tickets, setTickets] = useState([]);
   const [products, setProducts] = useState([]);
   const [role, setRole] = useState(null)
-  const [experts, setExperts] = useState(null)
+  const [experts, setExperts] = useState([])
   const [username, setUsername] = useState(null)
 
 
@@ -128,6 +128,13 @@ function App() {
       .then(tickets => { setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
+
+  async function managerGetExperts(noPage) {
+    await managerAPI.getExpertsPage(token, noPage)
+      .then(tickets => { setTickets(tickets) })
+      .catch((err) => errorToast(err));
+  }
+
   async function managerGetProducts(noPage) {
     await managerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products) })
@@ -340,7 +347,7 @@ function App() {
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage, customerGetProducts
+    registerProduct, getTicketPage, getExpertsPage, customerGetProducts, managerGetExperts
   }
 
   const userValues = {

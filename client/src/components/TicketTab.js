@@ -8,7 +8,7 @@ import { ActionContext, UserContext } from "../Context";
 import { Pagination } from 'react-bootstrap';
 import Roles from "../model/rolesEnum";
 
-export default function TicketTab(prop) {
+export default function TicketTab() {
 
   const { getTicketPage } = useContext(ActionContext)
   const [filter, setFilter] = useState("ALL")
