@@ -129,7 +129,7 @@ function App() {
   }
   async function managerGetProducts(noPage) {
     await managerAPI.getProductsPage(token, noPage)
-      .then(products => { console.log(products); setProducts(products) })
+      .then(products => { setProducts(products) })
       .catch((err) => errorToast(err));
   }
   async function managerGetExperts(noPage) {
@@ -329,9 +329,6 @@ function App() {
   }
 
   const registerExpert = async (expert) => {
-
-    console.log("Registering expert: " + expert)
-
     await managerAPI.registerExpert(token, expert)
       .then(() => { managerGetExperts(1); successToast("Expert registered!") })
       .catch((err) => errorToast(err));

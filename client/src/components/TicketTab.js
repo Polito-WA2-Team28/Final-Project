@@ -26,7 +26,6 @@ export default function TicketTab(prop) {
 
   const handlePageChange = (page, filter) => {
     getTicketPage(page, filter)
-    console.log("page", page)
     setCurrentPage(page);
   };
 
@@ -119,8 +118,6 @@ export default function TicketTab(prop) {
 
 function TicketItem(props) {
   const navigate = useNavigate();
-
-  console.log(props.ticket)
 
   return (
     <Card className="">

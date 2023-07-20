@@ -53,7 +53,6 @@ export default function TicketPage() {
   const scrollToBottom = () => {
     setTimeout(() => {
       const messagesDiv = document.getElementById('messages')
-      console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight)
       messagesDiv.scrollTop = messagesDiv.scrollHeight
     }, 100)
   }
@@ -77,7 +76,6 @@ export default function TicketPage() {
 
   useEffect(() => {
     if (messageDirty) {
-      console.log('message sent ')
       myGetMessages(1)
       setMessageDirty(false)
     }

@@ -12,7 +12,7 @@ async function login(credentials) {
             headers: jsonHeader,
             body: JSON.stringify(credentials)
         })
-        .catch((err) => {console.log(err); throw Error("Server error") })
+        .catch((err) => {console.error(err); throw Error("Server error") })
     if (!res.ok) throw res.statusText
     const data = await res.json();
     return data.accessToken;

@@ -6,13 +6,11 @@ import {
   faEnvelope,
   faCalendar,
   faPhone,
-  faSave,
-  faTimes,
 } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from 'react-router-dom'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { successToast, errorToast } from '../components/toastHandler'
+import { errorToast } from '../components/toastHandler'
 import SaveChangesModal from '../components/SaveChangesModal'
 import validator from 'validator'
 import dayjs from 'dayjs'; // Import dayjs
@@ -84,7 +82,6 @@ export default function EditUserPage(props) {
             setNewUser(tempUser)
             openModal()
         } else {
-            console.log(errors);
             Object.values(errors).forEach((errorMessage) => {
             errorToast(errorMessage);
             });
