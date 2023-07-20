@@ -71,7 +71,7 @@ export default function TicketPage() {
 
   useEffect(() => {
     getTicketByID(ticketId)
-      .then((ticket) => setTicket(ticket))
+      .then((ticket) => { setTicket(ticket);  console.log(ticket) })
       //.then(() => myGetMessages(1))
       .then(() => setDirty(false))
   }, [dirty])
@@ -111,6 +111,12 @@ export default function TicketPage() {
                 </Card.Text>
                 <Card.Text>
                   <strong>Serial Number:</strong> {ticket.serialNumber}
+                  </Card.Text>
+                {ticket.survey &&  <Card.Text>
+                  <strong>Customer Survey:</strong> {ticket.survey}
+                  </Card.Text>}
+                <Card.Text>
+                  <strong>Expert assigned:</strong> {ticket.expertEmail || 'NONE'}
                 </Card.Text>
                 <Row style={{ height: '100%' }}>
                   {role === Roles.CUSTOMER && (
@@ -276,6 +282,7 @@ function CustomerButton(props) {
   )
 
   const [show, setShow] = useState(false)
+  const [survey, setSurvey] = useState('')
 
   const handleCloseModal = () => setShow(false)
 
@@ -289,7 +296,11 @@ function CustomerButton(props) {
           <Form>
             <Form.Group>
               <Form.Label>How would you rate the service?</Form.Label>
-              <Form.Control></Form.Control>
+              <Form.Control
+                type="text"
+                value={survey}
+                onChange={(ev) => setSurvey(ev.target.value)}
+              />
             </Form.Group>
           </Form>
         </Modal.Body>

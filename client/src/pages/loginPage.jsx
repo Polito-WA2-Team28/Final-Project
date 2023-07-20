@@ -58,8 +58,7 @@ function LoginForm(props) {
           navigate('/dashboard')
         })
         .catch((error) => {
-          if (error === 'Unauthorized') setMessage('Invalid username or password')
-          else setMessage(error.message)
+          setMessage(error)
         })
     } else setMessage('Invalid' + invalids)
   }
