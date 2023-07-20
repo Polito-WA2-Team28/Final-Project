@@ -8,18 +8,22 @@ import { useNavigate } from "react-router-dom";
 import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icons";
 
 import { Pagination } from 'react-bootstrap';
+import Roles from "../model/rolesEnum";
 
 
 export function ProductsTab(props) {
 
-  const {customerGetProducts, registerProduct} = useContext(ActionContext)
+  const { customerGetProducts, registerProduct } = useContext(ActionContext)
 
   const productsPage = useContext(UserContext).products;
+  const role = useContext(UserContext).role;
+
+
   var products = productsPage.content;
-  if(products==null) products=[]
+  if (products == null) products = []
 
   const [show, setShow] = useState(false);
-  
+
   const totalPages = productsPage.totalPages;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -41,7 +45,7 @@ export function ProductsTab(props) {
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => {if (page !== currentPage) handlePageChange(page)}}
+          onClick={() => { if (page !== currentPage) handlePageChange(page) }}
         >
           {page}
         </Pagination.Item>
@@ -54,15 +58,19 @@ export function ProductsTab(props) {
 
   return (
     <>
-      <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button>
-      <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-        handleCreate={registerProduct}
-      />
+      {Roles.CUSTOMER === role &&
+        <>
+          <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button >
+          <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
+            handleCreate={registerProduct}
+          />
+        </>
+      }
       <CardGroup>
         {products === undefined || products.length === 0 ? (
           <EmptySearch />
         ) : (
-          <Row xs={1} md={2} lg={3}  className="mb-3">
+          <Row xs={1} md={2} lg={3} className="mb-3">
             {products.map((product) => (
               <Col key={product.id}>
                 <ProductItem product={product} />
@@ -127,7 +135,7 @@ function RegisterNewProductModal(props) {
   const [serialNumber, setSerialNumber] = useState("");
 
   const handleCreate = () => {
-    const product = {productId, serialNumber }
+    const product = { productId, serialNumber }
     props.handleCreate(product);
     props.handleClose();
   }

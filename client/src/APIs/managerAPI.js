@@ -55,23 +55,6 @@ async function assignTicket(token, ticketId, expertId) {
     }
 }
 
-/** 
-* @throws {Error} if the data fails
-* @throws {String} if the response is not ok
-*/
-async function assignTicketWhenReopened(token, ticketId, expertId) {
-    const res = await fetch(url + "/tickets/" + ticketId + "/assign",
-        { method: "PATCH", headers: compositeHeader(token), body: JSON.stringify({ expertId: expertId }) })
-    if (!res.ok) {
-        const body = await res.json()
-        if (body.error)
-            throw body.error
-        else
-            throw res.statusText
-    }
-}
-
-
 
 /** 
 * @throws {Error} if the data fails
