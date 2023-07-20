@@ -161,7 +161,6 @@ async function getAttachment(token, ticketId, attachmentName) {
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
-    console.log(data);
     return data;
 }
 

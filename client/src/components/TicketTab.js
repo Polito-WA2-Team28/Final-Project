@@ -8,7 +8,7 @@ import { ActionContext, UserContext } from "../Context";
 import { Pagination } from 'react-bootstrap';
 import Roles from "../model/rolesEnum";
 
-export default function TicketTab(prop) {
+export default function TicketTab() {
 
   const { getTicketPage } = useContext(ActionContext)
   const [filter, setFilter] = useState("ALL")
@@ -26,7 +26,6 @@ export default function TicketTab(prop) {
 
   const handlePageChange = (page, filter) => {
     getTicketPage(page, filter)
-    console.log("page", page)
     setCurrentPage(page);
   };
 
@@ -119,8 +118,6 @@ export default function TicketTab(prop) {
 
 function TicketItem(props) {
   const navigate = useNavigate();
-
-  console.log(props.ticket)
 
   return (
     <Card className="">

@@ -147,28 +147,21 @@ async function getProduct(token, productId) {
 * @throws {String} if the response is not ok
 */
 async function getProductsPage(token, noPages=1) {
-    console.log(`/products?pageNo=${noPages}`)
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
-    console.log(data)
-
     return data;
 }
 
 async function getAttachment(token, ticketId, attachmentName) {
-    console.log("GET ATTACHMENT", ticketId, attachmentName);
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
-
-    console.log("RES", res);
     if (!res.ok) throw res.statusText
 
     const response = new Response(res.body);
     response.blob()
         .then(blob => {
-            console.log("BLOB", blob);
             const newUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = newUrl;
