@@ -65,7 +65,17 @@ export default function TicketPage() {
   }
 
   const myUpload = (e) => {
-    const files = e.target.files
+    
+    let files = []
+    
+    for (let i = 0; i < e.target.files.length; i++){
+      if (e.target.files[i].size > 20000000) {
+        errorToast('File too big')
+        return
+      }
+      files.push(e.target.files[i])
+    }
+
     setFiles(files)
     let label = ''
     for (let i = 0; i < files.length; i++) {
@@ -472,7 +482,7 @@ function ManagerButton(props) {
                               )
                                 managerResumeProgress(
                                   ticket.ticketId,
-                                  expert.id,
+                                  
                                 ).then(() => props.setDirty(true))
                               setShow(false)
                             }}

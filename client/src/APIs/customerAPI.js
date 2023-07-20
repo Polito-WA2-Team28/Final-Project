@@ -1,4 +1,4 @@
-import { compositeHeader, authHeader, port, handleError } from "./util";
+import { compositeHeader, authHeader, port } from "./util";
 
 const url = `http://localhost:${port}/api/customers`;
 
