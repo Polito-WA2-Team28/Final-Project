@@ -156,7 +156,7 @@ async function getExpertsPage(token, noPages) {
 async function getAttachment(token, ticketId, attachmentName) {
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) { console.log(res.statusText); throw res.statusText}
     const data = await res.json();
     return data;
 }

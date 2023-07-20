@@ -1,12 +1,45 @@
 import { useContext, useState } from 'react'
-import { Button, Card, Col, Form, Modal, Row } from 'react-bootstrap'
+import { Button, Card, Col, Form, CardGroup, Modal, Row } from 'react-bootstrap'
 import { ActionContext, UserContext } from '../Context'
 import EmptySearch from './EmptySearch'
+import { Pagination } from 'react-bootstrap';
 
 export default function ExpertsInfoTab(props) {
   const [show, setShow] = useState(false)
-  const { experts } = useContext(UserContext)
-  const { registerExpert } = useContext(ActionContext)
+  const { registerExpert, managerGetExperts } = useContext(ActionContext)
+  const expertPage = useContext(UserContext).experts
+  console.log(expertPage)
+  var experts = expertPage.content
+  if (experts == null) experts = []
+
+  var totalPages = expertPage.totalPages;
+  var [currentPage, setCurrentPage] = useState(1);
+
+  const handlePageChange = (page) => {
+    managerGetExperts(page)
+    setCurrentPage(page);
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    let startPage = Math.max(currentPage - 2, 1);
+    let endPage = Math.min(startPage + 4, totalPages);
+    startPage = Math.max(endPage - 4, 1);
+
+    for (let page = startPage; page <= endPage; page++) {
+      items.push(
+        <Pagination.Item
+          key={page}
+          active={page === currentPage}
+          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
+        >
+          {page}
+        </Pagination.Item>
+      );
+    }
+
+    return items;
+  };
 
   return (
     <>
@@ -18,17 +51,41 @@ export default function ExpertsInfoTab(props) {
       <Row>
         <Button onClick={() => setShow(true)}>Create a new Expert</Button>
       </Row>
-      <Col style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {experts == null ||
-        experts.content == null ||
-        experts.content.length === 0 ? (
+      <CardGroup className="mt-1 justify-content-center">
+        {experts == null || experts.length === 0 ? (
           <EmptySearch />
         ) : (
-          experts.content.map((expert) => (
-            <ExpertItem key={expert.id} expert={expert} />
-          ))
+          <Row xs={1}  className="w-50">
+            {experts.map((expert) => (
+              <Col key={expert.id} className="mb-1 ">
+                <ExpertItem expert={expert} />
+              </Col>
+            ))}
+          </Row>
         )}
-      </Col>
+      </CardGroup>
+
+      <div className="d-flex justify-content-center">
+        <Pagination>
+          <Pagination.First
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(1)}
+          />
+          <Pagination.Prev
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          />
+          {renderPaginationItems()}
+          <Pagination.Next
+            disabled={currentPage === totalPages || experts.length === 0}
+            onClick={() => handlePageChange(currentPage + 1)}
+          />
+          <Pagination.Last
+            disabled={currentPage === totalPages || experts.length === 0}
+            onClick={() => handlePageChange(totalPages - 1)}
+          />
+        </Pagination>
+      </div>
     </>
   )
 }
@@ -37,18 +94,14 @@ function ExpertItem(props) {
 
   return (
     <>
-      <Card
-        style={{ minWidth: '300px' }}
-        key={props.product}
-        className="productCard"
-      >
+      <Card key={props.product} className="h-100">
         <Card.Body>
           <Card.Title>
             <p>{props.expert.username}</p>
           </Card.Title>
           <p>{props.expert.id}</p>
           <p>{props.expert.email}</p>
-          <p>{props.expert.expertiseFields.toString()}</p>
+          <p>{props.expert.expertiseFields}</p>
         </Card.Body>
       </Card>
     </>
@@ -77,7 +130,10 @@ function CreateExpertModal(props) {
     if (computers) expertiseFields.push('COMPUTERS')
     if (tablets) expertiseFields.push('TABLETS')
     const expert = { username, email, password, expertiseFields }
-    props.registrateExpert(expert).then(() => props.handleClose())
+
+    props.registrateExpert(expert)
+      .then(() => props.handleClose())
+      .catch((error) => console.log(error))
   }
 
   return (

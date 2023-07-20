@@ -20,6 +20,7 @@ export default function TicketPage() {
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
   const [messageDirty, setMessageDirty] = useState(true)
+  const [lock, setLock] = useState(false)
 
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
     ActionContext,
@@ -28,6 +29,7 @@ export default function TicketPage() {
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
+      if(messagesParam != null && messagesParam.content != null && messagesParam.content.length !== 0)
         setMessages(
           messagesParam.content.sort((a, b) =>
             a.timestamp.localeCompare(b.timestamp)),

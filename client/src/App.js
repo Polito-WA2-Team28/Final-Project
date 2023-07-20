@@ -28,7 +28,7 @@ function App() {
   const [tickets, setTickets] = useState([]);
   const [products, setProducts] = useState([]);
   const [role, setRole] = useState(null)
-  const [experts, setExperts] = useState(null)
+  const [experts, setExperts] = useState([])
   const [username, setUsername] = useState(null)
 
 
@@ -127,6 +127,13 @@ function App() {
       .then(tickets => { setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
+
+  async function managerGetExperts(noPage) {
+    await managerAPI.getExpertsPage(token, noPage)
+      .then(tickets => { setTickets(tickets) })
+      .catch((err) => errorToast(err));
+  }
+
   async function managerGetProducts(noPage) {
     await managerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products) })
@@ -325,22 +332,21 @@ function App() {
   const getExpertsPage = async (pageNo) => {
     await managerAPI.getExpertsPage(token, pageNo)
       .then((expertsPage) => setExperts(expertsPage))
-      .catch((err) => errorToast(err));
+      .catch((err) => (errorToast(err)));
   }
 
   const registerExpert = async (expert) => {
     await managerAPI.registerExpert(token, expert)
       .then(() => { managerGetExperts(1); successToast("Expert registered!") })
-      .catch((err) => errorToast(err));
+      .catch((err) => { errorToast(err);  throw err;});
   }
-
 
   const actions = {
     getMessages, sendMessage, handleLogin, handleLogout, registerExpert,
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage, customerGetProducts
+    registerProduct, getTicketPage, getExpertsPage, customerGetProducts, managerGetExperts
   }
 
   const userValues = {
