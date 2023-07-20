@@ -58,6 +58,7 @@ export function ProductsTab(props) {
 
   return (
     <>
+      <CardGroup className="d-flex justify-content-center">
       {Roles.CUSTOMER === role &&
         <>
           <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button >
@@ -66,11 +67,10 @@ export function ProductsTab(props) {
           />
         </>
       }
-      <CardGroup>
         {products === undefined || products.length === 0 ? (
           <EmptySearch />
         ) : (
-          <Row xs={1} md={2} lg={3} className="mb-3">
+          <Row xs={1} md={2} lg={3} className="mb-3 w-100">
             {products.map((product) => (
               <Col key={product.id}>
                 <ProductItem product={product} />
@@ -110,7 +110,7 @@ function ProductItem(props) {
   const navigate = useNavigate();
 
   return <>
-    <Card key={props.product} className="productCard h-100">
+    <Card key={props.product} className="productCard">
       <Card.Body>
         <Card.Title>
           <Row>
