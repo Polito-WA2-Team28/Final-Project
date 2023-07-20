@@ -9,16 +9,8 @@ export default function ExpertsInfoTab(props) {
   var [currentPage, setCurrentPage] = useState(1)
 
   const { registerExpert, managerGetExperts } = useContext(ActionContext)
-  /* const expertPage = useContext(UserContext).experts
-  console.log(expertPage)
-  var experts = expertPage.content
-  if (experts == null) experts = []
-
-  var totalPages = expertPage.totalPages; */
 
   const { experts } = useContext(UserContext)
-
-  console.log("experts", experts)
 
   let totalPages = 1
   if (experts != null) totalPages = experts.totalPages
@@ -68,8 +60,6 @@ export default function ExpertsInfoTab(props) {
           <EmptySearch />
         ) : (
           <Row xs={1} className="w-50">
-            {console.log(experts)}
-
             {experts.content.map((expert) => (
               <Col key={expert.id} className="mb-1 ">
                 <ExpertItem expert={expert} />
@@ -92,13 +82,19 @@ export default function ExpertsInfoTab(props) {
           {renderPaginationItems()}
           <Pagination.Next
             disabled={
-              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+              currentPage === totalPages ||
+              experts == null ||
+              experts.content == null ||
+              experts.content.length === 0
             }
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
             disabled={
-              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+              currentPage === totalPages ||
+              experts == null ||
+              experts.content == null ||
+              experts.content.length === 0
             }
             onClick={() => handlePageChange(totalPages - 1)}
           />

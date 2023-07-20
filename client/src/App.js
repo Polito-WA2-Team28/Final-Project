@@ -270,27 +270,10 @@ function App() {
       .catch((err) => errorToast(err));
   }
 
-  const managerHandleCloseTicket = async (ticket) => {
-    switch (ticket.ticketState) {
-      case TicketState.OPEN:
-        managerAPI.closeTicket(token, ticket.ticketId)
+  const managerHandleCloseTicket = async (ticketId) => {
+      await managerAPI.closeTicket(token, ticketId)
           .then(() => { successToast("ticket closed"); })
-          .catch((err) => errorToast(err));
-        break
-      case TicketState.IN_PROGRESS:
-        managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => { successToast("ticket closed"); })
-          .catch((err) => errorToast(err));
-        break
-      case TicketState.REOPENED:
-        managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => { successToast("ticket closed"); })
-          .catch((err) => errorToast(err));
-        break
-      default:
-        console.error('Invalid ticket state')
-        throw new Error('Invalid ticket state')
-    }
+          .catch((err) => errorToast(err));   
   }
 
   const managerRelieveExpert = async (ticketId) => {
