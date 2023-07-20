@@ -37,4 +37,6 @@ interface ProductRepository : CrudRepository<Product, Long>, JpaRepository<Produ
     @Modifying
     @Query("UPDATE Product p SET p.registered = true, p.owner.id = :ownerId WHERE p.id = :productId AND p.serialNumber = :serialNumber")
     fun registerProduct(ownerId:UUID, productId:Long, serialNumber: UUID)
+
+    fun findProductBySerialNumberAndId(serialNumber: UUID, productId: Long):Product?
 }

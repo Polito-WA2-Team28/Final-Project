@@ -79,10 +79,11 @@ async function sendMessage(token, message, ticketId, files) {
 
     const formdata = new FormData();
     formdata.append("messageText", message);
+    console.log(files)
 
     if (files) {
         for (let i = 0; i < files.length; i++) 
-            formdata.append("attachments", files.item(i));
+            formdata.append("attachments", files[i]);
     } 
 
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
