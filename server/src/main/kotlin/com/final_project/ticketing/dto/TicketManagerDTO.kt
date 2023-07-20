@@ -12,6 +12,7 @@ data class TicketManagerDTO(
     val serialNumber: UUID,
     val customerId: UUID?,
     var expertId: UUID?,
+    var expertEmail: String?,
     val creationDate: Date,
     val lastModified: Date,
     val ticketStateLifecycle: List<TicketStateEvolutionDTO>,
@@ -35,7 +36,7 @@ data class TicketManagerDTO(
 fun TicketDTO.toManagerDTO(ticketStateLifecycle: List<TicketStateEvolutionDTO>?) : TicketManagerDTO? {
     return ticketStateLifecycle?.let {
         TicketManagerDTO(ticketId, ticketState, description, serialNumber,
-        customerId, expertId, this.creationDate, this.lastModified, it, this.survey
+        customerId, expertId, expertEmail, this.creationDate, this.lastModified, it, this.survey
         )
     }
 }

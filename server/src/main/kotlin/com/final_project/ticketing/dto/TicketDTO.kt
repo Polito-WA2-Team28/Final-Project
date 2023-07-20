@@ -12,6 +12,7 @@ data class TicketDTO(
     val serialNumber: UUID,
     val customerId: UUID?,
     var expertId: UUID?,
+    var expertEmail: String?,
     val creationDate: Date,
     val lastModified:Date,
     var survey:String?
@@ -37,5 +38,5 @@ data class TicketDTO(
 
 fun Ticket.toDTO() : TicketDTO {
     return TicketDTO(this.getId(), state, description, this.product.serialNumber,
-                     this.customer.id, this.expert?.id, this.creationDate, this.lastModified, this.survey)
+                     this.customer.id, this.expert?.id, this.expert?.email, this.creationDate, this.lastModified, this.survey)
 }
