@@ -97,8 +97,9 @@ function ExpertItem(props) {
       <Card key={props.product} className="h-100">
         <Card.Body>
           <Card.Title>
-            <p>{props.expert.id}</p>
+            <p>{props.expert.username}</p>
           </Card.Title>
+          <p>{props.expert.id}</p>
           <p>{props.expert.email}</p>
           <p>{props.expert.expertiseFields}</p>
         </Card.Body>
@@ -120,7 +121,6 @@ function CreateExpertModal(props) {
   const [tablets, setTablets] = useState(false)
 
   const handleRegistration = () => {
-    console.log('Registration')
     const expertiseFields = []
     if (mobile) expertiseFields.push('MOBILE')
     if (appliances) expertiseFields.push('APPLIANCES')
@@ -130,7 +130,10 @@ function CreateExpertModal(props) {
     if (computers) expertiseFields.push('COMPUTERS')
     if (tablets) expertiseFields.push('TABLETS')
     const expert = { username, email, password, expertiseFields }
-    props.registrateExpert(expert).then(() => props.handleClose())
+
+    props.registrateExpert(expert)
+      .then(() => props.handleClose())
+      .catch((error) => console.log(error))
   }
 
   return (

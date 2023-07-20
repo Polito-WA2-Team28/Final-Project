@@ -103,9 +103,6 @@ async function sendMessage(token, message, ticketId, files) {
             formdata.append("attachments", files.item(i));
     }
 
-    formdata.forEach((value, key) => console.log(key + " " + value));
-
-
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
         {
             method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data" },
@@ -146,7 +143,7 @@ async function getProduct(token, productId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProductsPage(token, noPages=1) {
+async function getProductsPage(token, noPages = 1) {
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
@@ -158,17 +155,15 @@ async function getAttachment(token, ticketId, attachmentName) {
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
-
     const response = new Response(res.body);
-    response.blob()
-        .then(blob => {
-            const newUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = newUrl;
-            link.download = attachmentName; // Set the desired file name
-            link.click();
-            URL.revokeObjectURL(url);
-        });
+    response.blob().then(blob => {
+        const newUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = newUrl;
+        link.download = attachmentName; // Set the desired file name
+        link.click();
+        URL.revokeObjectURL(url);
+    });
 }
 
 async function registerProduct(token, product) {

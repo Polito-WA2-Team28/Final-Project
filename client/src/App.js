@@ -332,18 +332,14 @@ function App() {
   const getExpertsPage = async (pageNo) => {
     await managerAPI.getExpertsPage(token, pageNo)
       .then((expertsPage) => setExperts(expertsPage))
-      .catch((err) => errorToast(err));
+      .catch((err) => (errorToast(err)));
   }
 
   const registerExpert = async (expert) => {
-
-    console.log("Registering expert: " + expert)
-
     await managerAPI.registerExpert(token, expert)
       .then(() => { managerGetExperts(1); successToast("Expert registered!") })
-      .catch((err) => errorToast(err));
+      .catch((err) => { errorToast(err);  throw err;});
   }
-
 
   const actions = {
     getMessages, sendMessage, handleLogin, handleLogout, registerExpert,

@@ -19,8 +19,7 @@ export function ProductsTab(props) {
   if(products==null) products=[]
 
   const [show, setShow] = useState(false);
-  const maxColumns = 4;
-  const productsPerPage = maxColumns*4;
+  
   const totalPages = productsPage.totalPages;
   const [currentPage, setCurrentPage] = useState(0);
 

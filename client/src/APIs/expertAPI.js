@@ -1,4 +1,4 @@
-import { authHeader, compositeHeader, port } from './util.js';
+import { authHeader, port } from './util.js';
 const url = `http://localhost:${port}/api/experts`;
 
 /** 
@@ -65,9 +65,6 @@ async function sendMessage(token, message, ticketId, files) {
             formdata.append("attachments", files.item(i));
     } 
 
-    formdata.forEach((value, key) => console.log(key + " " + value));
-
-
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
         {
             method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data"  },
@@ -125,7 +122,6 @@ async function getAttachment(token, ticketId, attachmentName) {
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
-    console.log(data);
     return data;
 }
 

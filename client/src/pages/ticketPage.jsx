@@ -19,7 +19,8 @@ export default function TicketPage() {
   const [dirty, setDirty] = useState(false)
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
-  const [messageDirty, setMessageDirty] = useState(false)
+  const [messageDirty, setMessageDirty] = useState(true)
+  const [lock, setLock] = useState(false)
 
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
     ActionContext,
@@ -28,6 +29,7 @@ export default function TicketPage() {
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
+      if(messagesParam != null && messagesParam.content != null && messagesParam.content.length !== 0)
         setMessages(
           messagesParam.content.sort((a, b) =>
             a.timestamp.localeCompare(b.timestamp)),
@@ -53,7 +55,6 @@ export default function TicketPage() {
   const scrollToBottom = () => {
     setTimeout(() => {
       const messagesDiv = document.getElementById('messages')
-      console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight)
       messagesDiv.scrollTop = messagesDiv.scrollHeight
     }, 100)
   }
@@ -77,7 +78,6 @@ export default function TicketPage() {
 
   useEffect(() => {
     if (messageDirty) {
-      console.log('message sent ')
       myGetMessages(1)
       setMessageDirty(false)
     }
