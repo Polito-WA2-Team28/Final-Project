@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import { Button, Card, Col, Form, FormCheck, Modal, Row } from 'react-bootstrap'
+import { Button, Card, Col, Form, Modal, Row } from 'react-bootstrap'
 import { ActionContext, UserContext } from '../Context'
 import EmptySearch from './EmptySearch'
 
@@ -34,7 +34,6 @@ export default function ExpertsInfoTab(props) {
 }
 
 function ExpertItem(props) {
-  //console.log(props.expert)
 
   return (
     <>
@@ -69,7 +68,6 @@ function CreateExpertModal(props) {
   const [tablets, setTablets] = useState(false)
 
   const handleRegistration = () => {
-    console.log('Registration')
     const expertiseFields = []
     if (mobile) expertiseFields.push('MOBILE')
     if (appliances) expertiseFields.push('APPLIANCES')

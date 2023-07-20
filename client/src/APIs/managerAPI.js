@@ -7,9 +7,6 @@ const url = `http://localhost:${port}/api/managers`;
 */
 async function getTicketsPage(token, noPages, filter) {
     if (filter == null) filter = ""
-
-    console.log(url + `/tickets?pageNo=${noPages}&state=${filter}`)
-
     const res = await fetch(url + `/tickets?pageNo=${noPages}&state=${filter}`,
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
@@ -161,7 +158,6 @@ async function getAttachment(token, ticketId, attachmentName) {
         { method: "GET", headers: authHeader(token) })
     if (!res.ok) throw res.statusText
     const data = await res.json();
-    console.log(data);
     return data;
 }
 
