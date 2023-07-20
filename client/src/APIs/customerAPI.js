@@ -150,6 +150,7 @@ async function sendMessage(token, message, ticketId, files) {
         })
     if (!res.ok) {
         const body = await res.json()
+        console.error(body)
         if (body.error)
             throw body.error
         else
