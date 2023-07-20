@@ -147,11 +147,12 @@ class Nexus (vararg services: Any) {
         return this
     }
 
-    fun assertCustomerlessProductExists(serialNumber: UUID): Nexus {
-        this.product = productService.getProductBySerialNumber(serialNumber) ?: run {
-            logger.error("Endpoint: ${endpointHolder.get()} Error: Not Found.")
-            throw Exception.ProductNotFoundException("Not Found.")
+    fun assertCustomerlessProductExists(serialNumber: UUID, productId: Long): Nexus {
+        this.product = productService.getProductBySerialNumberAndId(serialNumber, productId) ?: run {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: The product you are trying to register doesn't exist")
+            throw Exception.ProductNotFoundException("The product you are trying to register doesn't exist")
         }
+
         return this
     }
 

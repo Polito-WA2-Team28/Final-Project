@@ -23,6 +23,8 @@ interface ProductService {
 
     fun getProductBySerialNumber(serialNumber: UUID): ProductDTO?
 
+    fun getProductBySerialNumberAndId(serialNumber: UUID, productId: Long): ProductDTO?
+
     fun customerGetProductBySerialNumber(customerId:UUID, serialNumber:UUID): ProductDTO?
 
     fun registerProduct(customerId:UUID, productId:Long, serialNumber: UUID)

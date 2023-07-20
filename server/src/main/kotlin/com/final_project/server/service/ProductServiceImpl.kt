@@ -47,6 +47,11 @@ class ProductServiceImpl @Autowired constructor(
         return productRepository.findBySerialNumber(serialNumber)?.toDTO()
     }
 
+    override fun getProductBySerialNumberAndId(serialNumber: UUID, productId: Long): ProductDTO? {
+        return productRepository.findProductBySerialNumberAndId(serialNumber, productId)?.toDTO()
+    }
+
+
     override fun managerGetProductById(productId: Long): ProductDTO? {
         return productRepository.findByIdOrNull(productId)?.toDTO()
     }

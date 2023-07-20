@@ -82,7 +82,7 @@ class CustomerProductController @Autowired constructor (
             .setEndpointForLogger("/api/customers/products/registerProduct")
             .assertValidationResult("/api/customers/products/registerProduct", br)
             .assertCustomerExists(UUID.fromString(customerId))
-            .assertCustomerlessProductExists(productIds.serialNumber)
+            .assertCustomerlessProductExists(productIds.serialNumber, productIds.productId)
 
 
 
