@@ -76,7 +76,10 @@ function CreateExpertModal(props) {
     if (computers) expertiseFields.push('COMPUTERS')
     if (tablets) expertiseFields.push('TABLETS')
     const expert = { username, email, password, expertiseFields }
-    props.registrateExpert(expert).then(() => props.handleClose())
+
+    props.registrateExpert(expert)
+      .then(() => props.handleClose())
+      .catch((error) => console.log(error))
   }
 
   return (
