@@ -102,10 +102,14 @@ class UserController(
         /* create the expert */
         val response = keycloakService.createExpert(expert)
 
-        if (response.status != Response.Status.CREATED.statusCode){
-            logger.error("Endpoint: /api/auth/createExpert Error: An error occurred while trying to creating an expert.")
-            throw Exception.CreateExpertException("An error occurred while trying to creating an expert.")
+        if(response.status == Response.Status.CONFLICT.statusCode){
+            logger.error("Endpoint: /api/auth/createExpert Error: This email or username are already being used by another expert")
+            throw Exception.ProfileAlreadyExistingException("This email or username are already being used by another expert")
         }
 
+        else if(response.status != Response.Status.CREATED.statusCode){
+            logger.error("Endpoint: /api/auth/register Error: It was not possible to register the customer")
+            throw Exception.CouldNotRegisterCustomer("It was not possible to register the customer")
+        }
     }
 }
