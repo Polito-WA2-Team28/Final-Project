@@ -1,4 +1,4 @@
-import { authHeader, port } from './util.js';
+import { authHeader, port, handleError } from './util.js';
 const url = `http://localhost:${port}/api/experts`;
 
 /** 
@@ -8,7 +8,12 @@ const url = `http://localhost:${port}/api/experts`;
 async function getTicketsPage(token, noPages) {
     const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -21,7 +26,12 @@ async function getTicketsPage(token, noPages) {
 async function getTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 
     const data = await res.json();
     return data;
@@ -34,7 +44,12 @@ async function getTicket(token, ticketId) {
 async function resolveTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId + "/resolve",
         { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 }
 
 
@@ -45,7 +60,12 @@ async function resolveTicket(token, ticketId) {
 async function closeTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId + "/close",
         { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 
     const data = await res.json();
     return data;
@@ -70,7 +90,12 @@ async function sendMessage(token, message, ticketId, files) {
             method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data"  },
             body: formdata
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -83,7 +108,12 @@ async function sendMessage(token, message, ticketId, files) {
 async function getMessagesPage(token, ticketId, noPages) {
     const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 
     const data = await res.json();
     return data;
@@ -96,7 +126,12 @@ async function getMessagesPage(token, ticketId, noPages) {
 async function getProductsPage(token, noPages) {
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -108,7 +143,12 @@ async function getProductsPage(token, noPages) {
 async function getProduct(token, productId) {
     const res = await fetch(url + "/products/" + productId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -120,7 +160,12 @@ async function getProduct(token, productId) {
 async function getAttachment(token, ticketId, attachmentName) {
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }

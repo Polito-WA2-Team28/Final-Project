@@ -12,8 +12,14 @@ async function login(credentials) {
             headers: jsonHeader,
             body: JSON.stringify(credentials)
         })
-        .catch((err) => {console.error(err); throw Error("Server error") })
-    if (!res.ok) throw res.statusText
+        .catch((err) => { console.error(err); throw Error("Server error") })
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data.accessToken;
 }
@@ -30,8 +36,14 @@ async function register(profile) {
             body: JSON.stringify(profile)
         })
         .catch((err) => { throw Error("Server error") })
-    
-    if (!res.ok) throw res.statusText
+
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -48,8 +60,14 @@ async function editProfile(token, profile) {
             body: JSON.stringify(profile)
         })
         .catch((err) => { throw Error("Server error") })
-    
-    if (!res.ok) throw res.statusText
+
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }

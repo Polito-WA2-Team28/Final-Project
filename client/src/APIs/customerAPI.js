@@ -1,4 +1,4 @@
-import { compositeHeader, authHeader, port } from "./util";
+import { compositeHeader, authHeader, port, handleError } from "./util";
 
 const url = `http://localhost:${port}/api/customers`;
 
@@ -9,7 +9,13 @@ const url = `http://localhost:${port}/api/customers`;
 async function getProfile(token) {
     const res = await fetch(url + "/getProfile",
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -24,7 +30,13 @@ async function patchProfile(token, profile) {
             method: "PATCH", headers: compositeHeader(token),
             body: JSON.stringify(profile)
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
 }
 
 /** 
@@ -37,7 +49,13 @@ async function createTicket(token, ticket) {
             method: "POST", headers: compositeHeader(token),
             body: JSON.stringify(ticket)
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -49,7 +67,13 @@ async function createTicket(token, ticket) {
 async function getTicketsPage(token, noPages) {
     const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -61,7 +85,13 @@ async function getTicketsPage(token, noPages) {
 async function getTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -73,7 +103,13 @@ async function getTicket(token, ticketId) {
 async function reopenTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId + "/reopen",
         { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
 }
 
 
@@ -81,12 +117,16 @@ async function reopenTicket(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function compileSurvey(token, ticketId) {
+async function compileSurvey(token, ticketId, survey) {
     const res = await fetch(url + "/tickets/" + ticketId + "/compileSurvey",
-        { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
-    const data = await res.json();
-    return data;
+        { method: "PATCH", headers: compositeHeader(token), body: JSON.stringify({survey: survey}) })
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
 }
 
 /** 
@@ -108,7 +148,13 @@ async function sendMessage(token, message, ticketId, files) {
             method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data" },
             body: formdata
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -121,7 +167,13 @@ async function sendMessage(token, message, ticketId, files) {
 async function getMessagesPage(token, ticketId, noPages) {
     const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -134,7 +186,13 @@ async function getMessagesPage(token, ticketId, noPages) {
 async function getProduct(token, productId) {
     const res = await fetch(url + "/products/" + productId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -146,7 +204,13 @@ async function getProduct(token, productId) {
 async function getProductsPage(token, noPages = 1) {
     const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }
@@ -154,7 +218,13 @@ async function getProductsPage(token, noPages = 1) {
 async function getAttachment(token, ticketId, attachmentName) {
     const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const response = new Response(res.body);
     response.blob().then(blob => {
         const newUrl = URL.createObjectURL(blob);
@@ -173,7 +243,13 @@ async function registerProduct(token, product) {
             method: "PATCH", headers: compositeHeader(token),
             body: JSON.stringify(product)
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
 }
 
 const customerAPI = {

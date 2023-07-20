@@ -44,6 +44,7 @@ function App() {
         localStorage.setItem("token", data);
         successToast("Logged in successfully")
       })
+      .catch((err) => { errorToast(err); throw err; });
   };
 
   const handleRegistration = async (credentials) => {
@@ -54,8 +55,8 @@ function App() {
   };
 
   const handleLogout = async () => {
-    setToken(null);setLoggedIn(false);
-    setUser(null);setRole(null);
+    setToken(null); setLoggedIn(false);
+    setUser(null); setRole(null);
     setUsername(null); setProducts([]);
     setTickets([]); setExperts([]);
     localStorage.removeItem("token");
@@ -107,13 +108,13 @@ function App() {
 
   async function customerGetTickets(noPage) {
     await customerAPI.getTicketsPage(token, noPage)
-      .then(tickets => { setTickets(tickets)})
+      .then(tickets => { setTickets(tickets) })
       .catch((err) => errorToast(err));
   }
 
   const customerGetProducts = async (noPage) => {
     await customerAPI.getProductsPage(token, noPage)
-      .then(products => {setProducts(products);})
+      .then(products => { setProducts(products); })
       .catch((err) => errorToast(err));
   }
 
@@ -275,12 +276,12 @@ function App() {
     switch (ticket.ticketState) {
       case TicketState.OPEN:
         managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => { successToast("ticket closed");  })
+          .then(() => { successToast("ticket closed"); })
           .catch((err) => errorToast(err));
         break
       case TicketState.IN_PROGRESS:
         managerAPI.closeTicket(token, ticket.ticketId)
-          .then(() => { successToast("ticket closed");  })
+          .then(() => { successToast("ticket closed"); })
           .catch((err) => errorToast(err));
         break
       case TicketState.REOPENED:
@@ -296,13 +297,13 @@ function App() {
 
   const managerRelieveExpert = async (ticketId) => {
     await managerAPI.relieveExpert(token, ticketId)
-      .then(() => {  successToast("Expert relieved!") })
+      .then(() => { successToast("Expert relieved!") })
       .catch((err) => errorToast(err));
   }
 
   const expertResolveTicket = async (ticketId) => {
     await expertAPI.resolveTicket(token, ticketId)
-      .then(() => {successToast("Ticket resolved!") })
+      .then(() => { successToast("Ticket resolved!") })
       .catch((err) => errorToast(err));
   }
 
@@ -338,7 +339,7 @@ function App() {
   const registerExpert = async (expert) => {
     await managerAPI.registerExpert(token, expert)
       .then(() => { managerGetExperts(1); successToast("Expert registered!") })
-      .catch((err) => { errorToast(err);  throw err;});
+      .catch((err) => { errorToast(err); throw err; });
   }
 
   const actions = {
