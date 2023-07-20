@@ -75,13 +75,14 @@ export default function TicketPage() {
   }
 
   useEffect(() => {
+    console.log('dirty', dirty)
     if (dirty) {
       getTicketByID(ticketId)
         .then((ticket) => {
           setTicket(ticket)
+          console.log('ticket', ticket)
         })
         .then(() => setLock(false))
-        //.then(() => myGetMessages(1))
         .then(() => setDirty(false))
     }
   }, [dirty])
@@ -171,7 +172,7 @@ export default function TicketPage() {
                       }}
                     >
                       {ticket.ticketStateLifecycle.map((state, index) => (
-                        <p>
+                        <p key={state.timestamp + state.state}>
                           {dayjs(state.timestamp).format('DD/MM/YYYY HH:mm:ss')}
                           - {state.state}
                         </p>
@@ -338,8 +339,7 @@ function CustomerButton(props) {
             onClick={() => {
               props.setLock(true)
               customerCompileSurvey(ticket.ticketId, survey)
-              props.setDirty(true)
-              handleCloseModal()
+                .then(() => {props.setDirty(true); handleCloseModal()})
             }}
           >
             Submit
@@ -365,7 +365,7 @@ function CustomerButton(props) {
           onClick={() => {
             props.setLock(true)
             customerReopenTicket(ticket.ticketId)
-            props.setDirty(true)
+            .then(() => props.setDirty(true))
           }}
         >
           Reopen Ticket
@@ -388,7 +388,7 @@ function ExpertButton(props) {
         onClick={() => {
           props.setLock(true)
           expertResolveTicket(ticket.ticketId)
-          props.setDirty(true)
+          .then(() => props.setDirty(true))
         }}
       >
         Resolve Ticket
@@ -460,7 +460,7 @@ function ManagerButton(props) {
                             onClick={() => {
                               props.setLock(true)
                               managerAssignExpert(ticket.ticketId, expert.id)
-                              props.setDirty(true)
+                                .then(() => props.setDirty(true))
                               setShow(false)
                             }}
                           >
@@ -498,14 +498,14 @@ function ManagerButton(props) {
           disabled={
             ![
               TicketState.OPEN,
-              TicketState.IN_PROGRESS,
+              TicketState.RESOLVED,
               TicketState.REOPENED,
             ].includes(ticket.ticketState) || props.lock
           }
           onClick={() => {
             props.setLock(true)
-            managerHandleCloseTicket(ticket)
-            props.setDirty(true)
+            managerHandleCloseTicket(ticket.ticketId)
+              .then(() => props.setDirty(true))
           }}
         >
           Close Ticket
@@ -533,7 +533,7 @@ function ManagerButton(props) {
           onClick={() => {
             props.setLock(true)
             managerRelieveExpert(ticket.ticketId)
-            props.setDirty(true)
+              .then(() => props.setDirty(true))
           }}
         >
           Relieve expert
