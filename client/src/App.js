@@ -102,7 +102,10 @@ function App() {
 
   const handleCreateTicket = async (ticket) => {
     await customerAPI.createTicket(token, ticket)
-      .then(() => { successToast("Ticket created!"); })
+      .then(() => {
+        customerGetTickets(1);
+        successToast("Ticket created!");
+      })
       .catch((err) => errorToast(err));
   };
 
@@ -138,11 +141,6 @@ function App() {
   async function managerGetProducts(noPage) {
     await managerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products) })
-      .catch((err) => errorToast(err));
-  }
-  async function managerGetExperts(noPage) {
-    await managerAPI.getExpertsPage(token, noPage)
-      .then(experts => { setExperts(experts) })
       .catch((err) => errorToast(err));
   }
 

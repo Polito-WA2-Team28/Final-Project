@@ -55,7 +55,7 @@ export default function TicketPage() {
   const scrollToBottom = () => {
     setTimeout(() => {
       const messagesDiv = document.getElementById('messages')
-      messagesDiv.scrollTop = messagesDiv.scrollHeight
+      if(messagesDiv != null)messagesDiv.scrollTop = messagesDiv.scrollHeight
     }, 100)
   }
 

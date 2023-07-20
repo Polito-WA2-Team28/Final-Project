@@ -2,7 +2,6 @@ import { useContext, useState } from 'react'
 import { Button, Card, Form, Modal } from 'react-bootstrap'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ActionContext, UserContext } from '../Context'
-import { successToast } from '../components/toastHandler'
 import Roles from '../model/rolesEnum'
 
 export default function ProductPage() {
@@ -70,7 +69,6 @@ function OpenNewTicketModal(props) {
     const ticket = { description, serialNumber }
     props
       .handleCreate(ticket)
-      .then(() => successToast('Ticket created successfully'))
       .then(() => props.handleClose())
       .then(() => navigate('/dashboard'))
   }
