@@ -19,8 +19,7 @@ export default function TicketPage() {
   const [dirty, setDirty] = useState(false)
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
-  const [messagePage, setMessagePage] = useState(null)
-  const [totalMessages, setTotalMessages] = useState(0)
+  const [messageDirty, setMessageDirty] = useState(false)
 
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
     ActionContext,
@@ -29,16 +28,12 @@ export default function TicketPage() {
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
-      setMessagePage(messagesParam)
-      if (messagesParam.totalElements !== totalMessages) {
-        let newArray = [...messagesParam.content, ...messages]
         setMessages(
-          newArray.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
+          messagesParam.content.sort((a, b) =>
+            a.timestamp.localeCompare(b.timestamp)),
         )
-        setTotalMessages(messagesParam.totalElements)
         scrollToBottom()
-      }
-    })
+      })
   }
 
   const sendNewMessage = () => {
@@ -46,22 +41,12 @@ export default function TicketPage() {
       errorToast('Message cannot be empty')
       return
     }
-
     sendMessage(ticketId, newMessage, files).then(() => {
       setNewMessage('')
       setFilesLabel('')
-      setTotalMessages(totalMessages + 1)
-      /* setMessages([
-        ...messages,
-        {
-          sender: username,
-          messageText: newMessage,
-          timestamp: dayjs().format('YYYY-MM-DDTHH:mm:ssZ'),
-        },
-      ]) */
       scrollToBottom()
       setFiles([])
-      setDirty(true)
+      setMessageDirty(true)
     })
   }
 
@@ -86,9 +71,17 @@ export default function TicketPage() {
   useEffect(() => {
     getTicketByID(ticketId)
       .then((ticket) => setTicket(ticket))
-      .then(() => myGetMessages(1))
+      //.then(() => myGetMessages(1))
       .then(() => setDirty(false))
   }, [dirty])
+
+  useEffect(() => {
+    if (messageDirty) {
+      console.log('message sent ')
+      myGetMessages(1)
+      setMessageDirty(false)
+    }
+  }, [messageDirty])
 
 
   useInterval(() => {
@@ -169,7 +162,7 @@ export default function TicketPage() {
                     marginBottom: '120px',
                   }}
                 >
-                  {messagePage != null &&
+                  {/* {messagePage != null &&
                     messagePage.currentPage < messagePage.totalPages && (
                       <Button
                         onSubmit={(e) => e.preventDefault()}
@@ -179,7 +172,7 @@ export default function TicketPage() {
                       >
                         Load previous
                       </Button>
-                    )}
+                    )} */}
                   {messages != null && messages.length !== 0 ? (
                     messages.map((message, index) => {
                       return (
