@@ -51,7 +51,7 @@ class UserController(
 
         } catch (e: HttpClientErrorException.Unauthorized) {
             logger.error("Status: 401 Unauthorized")
-            throw  SecurityException.UnauthorizedException("401 Unauthorized")
+            throw  SecurityException.UnauthorizedException("Invalid Credentials")
         } catch (e: HttpClientErrorException) {
             logger.error("Status: ${e.statusCode} Error: ${e.message}")
             throw  SecurityException.UnauthorizedException("Status ${e.statusCode} message: ${e.message}")
