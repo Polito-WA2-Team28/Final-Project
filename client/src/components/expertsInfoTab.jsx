@@ -45,8 +45,9 @@ function ExpertItem(props) {
       >
         <Card.Body>
           <Card.Title>
-            <p>{props.expert.id}</p>
+            <p>{props.expert.username}</p>
           </Card.Title>
+          <p>{props.expert.id}</p>
           <p>{props.expert.email}</p>
           <p>{props.expert.expertiseFields.toString()}</p>
         </Card.Body>

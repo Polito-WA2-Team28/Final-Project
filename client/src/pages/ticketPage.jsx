@@ -19,7 +19,7 @@ export default function TicketPage() {
   const [dirty, setDirty] = useState(false)
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
-  const [messageDirty, setMessageDirty] = useState(false)
+  const [messageDirty, setMessageDirty] = useState(true)
 
   const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
     ActionContext,
