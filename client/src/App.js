@@ -134,7 +134,7 @@ function App() {
 
   async function managerGetExperts(noPage) {
     await managerAPI.getExpertsPage(token, noPage)
-      .then(tickets => { setTickets(tickets) })
+      .then(experts => { setExperts(experts) })
       .catch((err) => errorToast(err));
   }
 

@@ -1,6 +1,6 @@
 import { Button, Card, Col, Row, Form, Modal } from 'react-bootstrap'
 import { useParams } from 'react-router-dom'
-import { useContext, useEffect,  useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import '../styles/TicketPage.css'
 import { ActionContext, UserContext } from '../Context'
 import Roles from '../model/rolesEnum'
@@ -16,7 +16,7 @@ export default function TicketPage() {
   const [ticket, setTicket] = useState(null)
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
-  const [dirty, setDirty] = useState(false)
+  const [dirty, setDirty] = useState(true)
   const [files, setFiles] = useState([])
   const [filesLabel, setFilesLabel] = useState('')
   const [messageDirty, setMessageDirty] = useState(true)
@@ -29,13 +29,18 @@ export default function TicketPage() {
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
-      if(messagesParam != null && messagesParam.content != null && messagesParam.content.length !== 0)
+      if (
+        messagesParam != null &&
+        messagesParam.content != null &&
+        messagesParam.content.length !== 0
+      )
         setMessages(
           messagesParam.content.sort((a, b) =>
-            a.timestamp.localeCompare(b.timestamp)),
+            a.timestamp.localeCompare(b.timestamp),
+          ),
         )
-        scrollToBottom()
-      })
+      scrollToBottom()
+    })
   }
 
   const sendNewMessage = () => {
@@ -55,7 +60,7 @@ export default function TicketPage() {
   const scrollToBottom = () => {
     setTimeout(() => {
       const messagesDiv = document.getElementById('messages')
-      if(messagesDiv != null)messagesDiv.scrollTop = messagesDiv.scrollHeight
+      if (messagesDiv != null) messagesDiv.scrollTop = messagesDiv.scrollHeight
     }, 100)
   }
 
@@ -70,10 +75,15 @@ export default function TicketPage() {
   }
 
   useEffect(() => {
-    getTicketByID(ticketId)
-      .then((ticket) => { setTicket(ticket);  console.log(ticket) })
-      //.then(() => myGetMessages(1))
-      .then(() => setDirty(false))
+    if (dirty) {
+      getTicketByID(ticketId)
+        .then((ticket) => {
+          setTicket(ticket)
+        })
+        .then(() => setLock(false))
+        //.then(() => myGetMessages(1))
+        .then(() => setDirty(false))
+    }
   }, [dirty])
 
   useEffect(() => {
@@ -82,7 +92,6 @@ export default function TicketPage() {
       setMessageDirty(false)
     }
   }, [messageDirty])
-
 
   useInterval(() => {
     console.log('refreshing messages')
@@ -111,25 +120,40 @@ export default function TicketPage() {
                 </Card.Text>
                 <Card.Text>
                   <strong>Serial Number:</strong> {ticket.serialNumber}
+                </Card.Text>
+                {ticket.survey && (
+                  <Card.Text>
+                    <strong>Customer Survey:</strong> {ticket.survey}
                   </Card.Text>
-                {ticket.survey &&  <Card.Text>
-                  <strong>Customer Survey:</strong> {ticket.survey}
-                  </Card.Text>}
+                )}
                 <Card.Text>
-                  <strong>Expert assigned:</strong> {ticket.expertEmail || 'NONE'}
+                  <strong>Expert assigned:</strong>{' '}
+                  {ticket.expertEmail || 'NONE'}
                 </Card.Text>
                 <Row style={{ height: '100%' }}>
                   {role === Roles.CUSTOMER && (
-                    <CustomerButton ticket={ticket} setDirty={setDirty} />
+                    <CustomerButton
+                      ticket={ticket}
+                      setDirty={setDirty}
+                      lock={lock}
+                      setLock={setLock}
+                    />
                   )}
                   {role === Roles.EXPERT && (
-                    <ExpertButton ticket={ticket} setDirty={setDirty} />
+                    <ExpertButton
+                      ticket={ticket}
+                      setDirty={setDirty}
+                      lock={lock}
+                      setLock={setLock}
+                    />
                   )}
                   {role === Roles.MANAGER && (
                     <ManagerButton
                       ticket={ticket}
                       experts={experts}
                       setDirty={setDirty}
+                      lock={lock}
+                      setLock={setLock}
                     />
                   )}
                 </Row>
@@ -168,17 +192,6 @@ export default function TicketPage() {
                     marginBottom: '120px',
                   }}
                 >
-                  {/* {messagePage != null &&
-                    messagePage.currentPage < messagePage.totalPages && (
-                      <Button
-                        onSubmit={(e) => e.preventDefault()}
-                        onClick={() =>
-                          myGetMessages(messagePage.currentPage + 1)
-                        }
-                      >
-                        Load previous
-                      </Button>
-                    )} */}
                   {messages != null && messages.length !== 0 ? (
                     messages.map((message, index) => {
                       return (
@@ -195,12 +208,23 @@ export default function TicketPage() {
                             <strong>{message.sender}</strong>
                             <br />
                             {message.messageText}
-                            {message.attachmentsNames && message.attachmentsNames.length > 0 &&
+                            {message.attachmentsNames &&
+                              message.attachmentsNames.length > 0 &&
                               message.attachmentsNames.map(
                                 (attachment, index) => (
                                   <>
                                     <br />
-                                    <Button onClick={() => getAttachment(ticket.ticketId, attachment)} variant="link">{index + 1} - {attachment}</Button>
+                                    <Button
+                                      onClick={() =>
+                                        getAttachment(
+                                          ticket.ticketId,
+                                          attachment,
+                                        )
+                                      }
+                                      variant="link"
+                                    >
+                                      {index + 1} - {attachment}
+                                    </Button>
                                   </>
                                 ),
                               )}
@@ -256,7 +280,8 @@ export default function TicketPage() {
                         alignItems: 'center',
                       }}
                     >
-                      <Button
+                        <Button
+                          disabled={newMessage === ''}
                         onClick={sendNewMessage}
                         style={{ height: '80%', width: '60%' }}
                       >
@@ -311,7 +336,8 @@ function CustomerButton(props) {
           <Button
             variant="primary"
             onClick={() => {
-              customerCompileSurvey(ticket.ticketId, 'survey')
+              props.setLock(true)
+              customerCompileSurvey(ticket.ticketId, survey)
               props.setDirty(true)
               handleCloseModal()
             }}
@@ -323,7 +349,7 @@ function CustomerButton(props) {
       <Col>
         <Button
           variant="success"
-          disabled={ticket.ticketState !== TicketState.RESOLVED}
+          disabled={ticket.ticketState !== TicketState.RESOLVED || props.lock}
           onClick={() => {
             setShow(true)
           }}
@@ -335,8 +361,9 @@ function CustomerButton(props) {
       <Col>
         <Button
           variant="danger"
-          disabled={ticket.ticketState !== TicketState.CLOSED}
+          disabled={ticket.ticketState !== TicketState.CLOSED || props.lock}
           onClick={() => {
+            props.setLock(true)
             customerReopenTicket(ticket.ticketId)
             props.setDirty(true)
           }}
@@ -357,8 +384,9 @@ function ExpertButton(props) {
     <Col>
       <Button
         variant="success"
-        disabled={ticket.ticketState !== TicketState.IN_PROGRESS}
+        disabled={ticket.ticketState !== TicketState.IN_PROGRESS || props.lock}
         onClick={() => {
+          props.setLock(true)
           expertResolveTicket(ticket.ticketId)
           props.setDirty(true)
         }}
@@ -430,6 +458,7 @@ function ManagerButton(props) {
                           <Button
                             variant="success"
                             onClick={() => {
+                              props.setLock(true)
                               managerAssignExpert(ticket.ticketId, expert.id)
                               props.setDirty(true)
                               setShow(false)
@@ -471,9 +500,10 @@ function ManagerButton(props) {
               TicketState.OPEN,
               TicketState.IN_PROGRESS,
               TicketState.REOPENED,
-            ].includes(ticket.ticketState)
+            ].includes(ticket.ticketState) || props.lock
           }
           onClick={() => {
+            props.setLock(true)
             managerHandleCloseTicket(ticket)
             props.setDirty(true)
           }}
@@ -486,7 +516,7 @@ function ManagerButton(props) {
         <Button
           style={{ height: '60px' }}
           variant="primary"
-          disabled={ticket.ticketState !== TicketState.OPEN}
+          disabled={ticket.ticketState !== TicketState.OPEN || props.lock}
           onClick={() => setShow(true)}
         >
           Assign Ticket
@@ -497,8 +527,11 @@ function ManagerButton(props) {
         <Button
           style={{ height: '60px' }}
           variant="danger"
-          disabled={ticket.ticketState !== TicketState.IN_PROGRESS}
+          disabled={
+            ticket.ticketState !== TicketState.IN_PROGRESS || props.lock
+          }
           onClick={() => {
+            props.setLock(true)
             managerRelieveExpert(ticket.ticketId)
             props.setDirty(true)
           }}

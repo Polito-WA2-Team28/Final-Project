@@ -2,44 +2,54 @@ import { useContext, useState } from 'react'
 import { Button, Card, Col, Form, CardGroup, Modal, Row } from 'react-bootstrap'
 import { ActionContext, UserContext } from '../Context'
 import EmptySearch from './EmptySearch'
-import { Pagination } from 'react-bootstrap';
+import { Pagination } from 'react-bootstrap'
 
 export default function ExpertsInfoTab(props) {
   const [show, setShow] = useState(false)
+  var [currentPage, setCurrentPage] = useState(1)
+
   const { registerExpert, managerGetExperts } = useContext(ActionContext)
-  const expertPage = useContext(UserContext).experts
+  /* const expertPage = useContext(UserContext).experts
   console.log(expertPage)
   var experts = expertPage.content
   if (experts == null) experts = []
 
-  var totalPages = expertPage.totalPages;
-  var [currentPage, setCurrentPage] = useState(1);
+  var totalPages = expertPage.totalPages; */
+
+  const { experts } = useContext(UserContext)
+
+  console.log("experts", experts)
+
+  let totalPages = 1
+  if (experts != null) totalPages = experts.totalPages
 
   const handlePageChange = (page) => {
     managerGetExperts(page)
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const renderPaginationItems = () => {
-    const items = [];
-    let startPage = Math.max(currentPage - 2, 1);
-    let endPage = Math.min(startPage + 4, totalPages);
-    startPage = Math.max(endPage - 4, 1);
+    const items = []
+    let startPage = Math.max(currentPage - 2, 1)
+    let endPage = Math.min(startPage + 4, totalPages)
+    startPage = Math.max(endPage - 4, 1)
 
     for (let page = startPage; page <= endPage; page++) {
       items.push(
         <Pagination.Item
           key={page}
           active={page === currentPage}
-          onClick={() => {if(page !== currentPage) handlePageChange(page)}}
+          onClick={() => {
+            if (page !== currentPage) handlePageChange(page)
+          }}
         >
           {page}
-        </Pagination.Item>
-      );
+        </Pagination.Item>,
+      )
     }
 
-    return items;
-  };
+    return items
+  }
 
   return (
     <>
@@ -52,11 +62,15 @@ export default function ExpertsInfoTab(props) {
         <Button onClick={() => setShow(true)}>Create a new Expert</Button>
       </Row>
       <CardGroup className="mt-1 justify-content-center">
-        {experts == null || experts.length === 0 ? (
+        {experts == null ||
+        experts.content == null ||
+        experts.content.length === 0 ? (
           <EmptySearch />
         ) : (
-          <Row xs={1}  className="w-50">
-            {experts.map((expert) => (
+          <Row xs={1} className="w-50">
+            {console.log(experts)}
+
+            {experts.content.map((expert) => (
               <Col key={expert.id} className="mb-1 ">
                 <ExpertItem expert={expert} />
               </Col>
@@ -77,11 +91,15 @@ export default function ExpertsInfoTab(props) {
           />
           {renderPaginationItems()}
           <Pagination.Next
-            disabled={currentPage === totalPages || experts.length === 0}
+            disabled={
+              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+            }
             onClick={() => handlePageChange(currentPage + 1)}
           />
           <Pagination.Last
-            disabled={currentPage === totalPages || experts.length === 0}
+            disabled={
+              currentPage === totalPages || experts == null || experts.content == null || experts.content.length === 0
+            }
             onClick={() => handlePageChange(totalPages - 1)}
           />
         </Pagination>
@@ -91,7 +109,6 @@ export default function ExpertsInfoTab(props) {
 }
 
 function ExpertItem(props) {
-
   return (
     <>
       <Card key={props.product} className="h-100">
@@ -131,7 +148,8 @@ function CreateExpertModal(props) {
     if (tablets) expertiseFields.push('TABLETS')
     const expert = { username, email, password, expertiseFields }
 
-    props.registrateExpert(expert)
+    props
+      .registrateExpert(expert)
       .then(() => props.handleClose())
       .catch((error) => console.log(error))
   }
@@ -187,32 +205,32 @@ function CreateExpertModal(props) {
             <Form.Check
               checked={printers}
               onChange={(e) => setPrinters(e.target.value)}
-              type='checkbox'
-              label='PRINTERS'
+              type="checkbox"
+              label="PRINTERS"
             />
             <Form.Check
               checked={drones}
               onChange={(e) => setDrones(e.target.value)}
-              type='checkbox'
-              label='DRONES'
+              type="checkbox"
+              label="DRONES"
             />
             <Form.Check
               checked={headsets}
               onChange={(e) => setHeadsets(e.target.value)}
-              type='checkbox'
-              label='HEADSETS'
+              type="checkbox"
+              label="HEADSETS"
             />
             <Form.Check
               checked={computers}
               onChange={(e) => setComputers(e.target.value)}
-              type='checkbox'
-              label='COMPUTERS'
+              type="checkbox"
+              label="COMPUTERS"
             />
             <Form.Check
               checked={tablets}
               onChange={(e) => setTablets(e.target.value)}
-              type='checkbox'
-              label='TABLETS'
+              type="checkbox"
+              label="TABLETS"
             />
           </Form.Group>
         </Form>
