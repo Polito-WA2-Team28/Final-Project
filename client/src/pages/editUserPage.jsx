@@ -77,7 +77,12 @@ export default function EditUserPage(props) {
     // Implement logic to save the data
     setShowModal(false)
     props.handleEdit(user)
-    navigate('/user')
+      .then(() => {
+      navigate('/user')
+      })
+      .catch((error) => {
+        errorToast(error)
+      })
   }
 
   const handleBirthDateChange = (date) => {

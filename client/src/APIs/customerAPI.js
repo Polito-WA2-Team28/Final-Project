@@ -32,6 +32,7 @@ async function patchProfile(token, profile) {
         })
     if (!res.ok) {
         const body = await res.json()
+            .catch(err => Error("Server is not responding"))
         if (body.error)
             throw body.error
         else
@@ -119,7 +120,7 @@ async function reopenTicket(token, ticketId) {
 */
 async function compileSurvey(token, ticketId, survey) {
     const res = await fetch(url + "/tickets/" + ticketId + "/compileSurvey",
-        { method: "PATCH", headers: compositeHeader(token), body: JSON.stringify({survey: survey}) })
+        { method: "PATCH", headers: compositeHeader(token), body: JSON.stringify({ survey: survey }) })
     if (!res.ok) {
         const body = await res.json()
         if (body.error)

@@ -117,11 +117,11 @@ function App() {
   }
 
   const customerGetProducts = async (noPage) => {
-    if(role==Roles.CUSTOMER){
+    if(role===Roles.CUSTOMER){
       await customerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products); })
       .catch((err) => errorToast(err));
-    }else if(role==Roles.MANAGER){
+    }else if(role===Roles.MANAGER){
       await managerAPI.getProductsPage(token, noPage)
       .then(products => { setProducts(products); })
       .catch((err) => errorToast(err));
@@ -171,12 +171,10 @@ function App() {
   const handleEditProfile = async (profile) => {
     await customerAPI.patchProfile(token, profile)
       .then(() => {
-        setUser(profile);
-        successToast("Changes saved!")
+        customerAPI.getProfile(token)
+          .then((user) =>
+          { setUser(user); successToast("Changes saved!") })
       })
-      .catch((err) => {
-        errorToast(err)
-      });
 
   };
 
