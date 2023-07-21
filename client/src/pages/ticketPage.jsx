@@ -1,5 +1,5 @@
 import { Button, Card, Col, Row, Form, Modal } from 'react-bootstrap'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useContext, useEffect, useState } from 'react'
 import '../styles/TicketPage.css'
 import { ActionContext, UserContext } from '../Context'
@@ -22,10 +22,12 @@ export default function TicketPage() {
   const [messageDirty, setMessageDirty] = useState(true)
   const [lock, setLock] = useState(false)
 
-  const { sendMessage, getMessages, getTicketByID, getAttachment } = useContext(
+  const { sendMessage, getMessages, getTicketByID, getAttachment, handleExpiration } = useContext(
     ActionContext,
   )
   const { role, experts, username } = useContext(UserContext)
+
+  const navigate = useNavigate()
 
   const myGetMessages = (noPage) => {
     getMessages(ticketId, noPage).then((messagesParam) => {
@@ -40,6 +42,11 @@ export default function TicketPage() {
           ),
         )
       scrollToBottom()
+    }).catch((err) => {
+      if (err === "Unauthorized") {
+        handleExpiration()
+        navigate("/")
+      }
     })
   }
 

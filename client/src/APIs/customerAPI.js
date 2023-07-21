@@ -169,12 +169,17 @@ async function sendMessage(token, message, ticketId, files) {
 async function getMessagesPage(token, ticketId, noPages) {
     const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
+
     if (!res.ok) {
-        const body = await res.json()
-        if (body.error)
-            throw body.error
-        else
-            throw res.statusText
+        try {
+            const body = await res.json()
+            if (body.error) throw body.error
+            else if (res.statusText !== "") throw res.statusText
+            else throw "Unrecognized error"
+        } catch {
+            if (res.status === 401) throw "Unauthorized"
+            else throw "Unrecognized error"
+        }    
     }
     const data = await res.json();
     return data;

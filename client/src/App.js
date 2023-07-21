@@ -55,6 +55,14 @@ function App() {
       })
   };
 
+  const handleExpiration = async () => {
+    setToken(null); setLoggedIn(false);
+    setUser(null); setRole(null);
+    setUsername(null); setProducts([]);
+    setTickets([]); setExperts([]);
+    localStorage.removeItem("token");
+  }
+
   const handleLogout = async () => {
     setToken(null); setLoggedIn(false);
     setUser(null); setRole(null);
@@ -243,13 +251,22 @@ function App() {
     switch (role) {
       case Roles.CUSTOMER:
         return await customerAPI.getMessagesPage(token, ticketId, pageNo)
-          .catch((err) => errorToast(err));
+          .catch((err) => {
+            errorToast(err)
+            throw err
+          });
       case Roles.EXPERT:
         return await expertAPI.getMessagesPage(token, ticketId, pageNo)
-          .catch((err) => errorToast(err));
+          .catch((err) => {
+            errorToast(err)
+            throw err
+          });
       case Roles.MANAGER:
         return await managerAPI.getMessagesPage(token, ticketId, pageNo)
-          .catch((err) => errorToast(err));
+          .catch((err) => {
+            errorToast(err)
+            throw err
+          });
       default:
         errorToast("You are not allowed to see messages")
     }
@@ -340,7 +357,7 @@ function App() {
     handleRegistration, handleEditProfile, handleCreateTicket, getTicketByID,
     getProductByID, customerCompileSurvey, customerReopenTicket, managerAssignExpert,
     managerHandleCloseTicket, managerRelieveExpert, expertResolveTicket, getAttachment,
-    registerProduct, getTicketPage, getExpertsPage, customerGetProducts, managerGetExperts
+    registerProduct, getTicketPage, getExpertsPage, customerGetProducts, managerGetExperts, handleExpiration
   }
 
   const userValues = {
