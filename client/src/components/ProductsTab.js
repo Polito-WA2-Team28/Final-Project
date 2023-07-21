@@ -9,6 +9,7 @@ import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icon
 
 import { Pagination } from 'react-bootstrap';
 import Roles from "../model/rolesEnum";
+import { errorToast } from "./toastHandler";
 
 
 export function ProductsTab(props) {
@@ -59,14 +60,14 @@ export function ProductsTab(props) {
   return (
     <>
       <CardGroup className="d-flex justify-content-center">
-      {Roles.CUSTOMER === role &&
-        <>
-          <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button >
-          <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-            handleCreate={registerProduct}
-          />
-        </>
-      }
+        {Roles.CUSTOMER === role &&
+          <>
+            <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button >
+            <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
+              handleCreate={registerProduct}
+            />
+          </>
+        }
         {products === undefined || products.length === 0 ? (
           <EmptySearch />
         ) : (
@@ -136,8 +137,10 @@ function RegisterNewProductModal(props) {
 
   const handleCreate = () => {
     const product = { productId, serialNumber }
-    props.handleCreate(product);
-    props.handleClose();
+    props.handleCreate(product)
+      .then(() =>
+        props.handleClose())
+      .catch((err) => errorToast(err))
   }
 
   return <Modal show={props.show} onHide={props.handleClose} className="custom-modal">

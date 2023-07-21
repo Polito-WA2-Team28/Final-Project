@@ -320,7 +320,6 @@ function App() {
   const registerProduct = async (product) => {
     await customerAPI.registerProduct(token, product)
       .then(() => { customerGetProducts(1); successToast("Product registered!") })
-      .catch((err) => errorToast(err));
 
   }
 
