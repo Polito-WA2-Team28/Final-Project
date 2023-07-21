@@ -5,7 +5,7 @@
 | Manuel Enrique Colotti | Cybersecurity | s297014 | manuelenrique.colotti@studenti.polito.it |
 | Edoardo Colella | Software Engineering | s305951 | edoardo.colella@studenti.polito.it |
 | Davide Arcolini | Cybersecurity | s295229 | davidearcolini.99@gmaiul.com |
-| Juan José Jaramillo Botero | Software Engineering | 301352 | 301352@studenti.polito.it |
+| Juan José Jaramillo Botero | Software Engineering | s301352 | s301352@studenti.polito.it |
 
 ## About this repo
 
