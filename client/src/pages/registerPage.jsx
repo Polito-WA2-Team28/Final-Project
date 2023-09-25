@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { useContext, useState } from 'react'
 import { Form, Button, Card, Alert } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
@@ -47,8 +46,7 @@ function RegistrationForm() {
       email,
       phoneNumber,
       password,
-      birthDate,
-      registrationDate: dayjs().format('YYYY-MM-DD'),
+      birthDate
     }
     let invalids = []
 
@@ -89,7 +87,7 @@ function RegistrationForm() {
   }
 
   return (
-    <Form>
+    <Form onSubmit={e => e.preventDefault()}>
       {message && (
         <Alert variant="danger" onClose={() => setMessage('')} dismissible>
           {message}

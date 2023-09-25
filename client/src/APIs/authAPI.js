@@ -1,5 +1,5 @@
-import { compositeHeader, jsonHeader } from './util.js';
-const url = "http://localhost:3000/api";
+import { compositeHeader, jsonHeader, port } from './util.js';
+const url = `http://localhost:${port}/api`;
 
 /** 
 * @throws {Error} if the data fails
@@ -12,8 +12,14 @@ async function login(credentials) {
             headers: jsonHeader,
             body: JSON.stringify(credentials)
         })
-        .catch((err) => { throw Error("Server error") })
-    if (!res.ok) throw res.statusText
+        .catch((err) => { console.error(err); throw Error("Server error") })
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data.accessToken;
 }
@@ -30,10 +36,16 @@ async function register(profile) {
             body: JSON.stringify(profile)
         })
         .catch((err) => { throw Error("Server error") })
+
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     
-    if (!res.ok) throw res.statusText
-    const data = await res.json();
-    return data;
+    return 
 }
 
 /** 
@@ -48,8 +60,14 @@ async function editProfile(token, profile) {
             body: JSON.stringify(profile)
         })
         .catch((err) => { throw Error("Server error") })
-    
-    if (!res.ok) throw res.statusText
+
+    if (!res.ok) {
+        const body = await res.json()
+        if (body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
     const data = await res.json();
     return data;
 }

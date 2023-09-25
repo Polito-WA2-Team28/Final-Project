@@ -12,7 +12,14 @@ services:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  client:
+    image: runcor3/client:final-project
+    container_name: client
+    ports:
+      - "3000:3000"
+      
 
   ticketing-service:
     depends_on:
@@ -20,6 +27,7 @@ services:
        condition: service_healthy
 
     image: runcor3/ticketing-service:final-project
+    working_dir: /ticketing-service
     command: sh -c "mkdir /ticketing-service"
     container_name: ticketing-service
     ports:

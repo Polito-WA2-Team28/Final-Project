@@ -1,14 +1,19 @@
-import { authHeader, compositeHeader } from './util.js';
-const url = "http://localhost:3000/api/experts";
+import { authHeader, port, handleError } from './util.js';
+const url = `http://localhost:${port}/api/experts`;
 
 /** 
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getTickets(token) {
-    const res = await fetch(url + "/tickets",
+async function getTicketsPage(token, noPages) {
+    const res = await fetch(url + `/tickets?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -21,7 +26,12 @@ async function getTickets(token) {
 async function getTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 
     const data = await res.json();
     return data;
@@ -34,7 +44,12 @@ async function getTicket(token, ticketId) {
 async function resolveTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId + "/resolve",
         { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 }
 
 
@@ -45,7 +60,12 @@ async function resolveTicket(token, ticketId) {
 async function closeTicket(token, ticketId) {
     const res = await fetch(url + "/tickets/" + ticketId + "/close",
         { method: "PATCH", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
 
     const data = await res.json();
     return data;
@@ -55,21 +75,28 @@ async function closeTicket(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function sendMessage(token, message, ticketId) {
+async function sendMessage(token, message, ticketId, files) {
 
     const formdata = new FormData();
     formdata.append("messageText", message);
-    //formdata.append("attachments", []);
+    console.log(files)
 
-    console.log("message", message);
+    if (files) {
+        for (let i = 0; i < files.length; i++) 
+            formdata.append("attachments", files[i]);
+    } 
 
-    formdata.forEach((value, key) => console.log(key + " " + value));
     const res = await fetch(url + "/tickets/" + ticketId + "/messages",
         {
-            method: "POST", headers: { "Authorization": "Bearer " + token },
+            method: "POST", headers: { "Authorization": "Bearer " + token, contentType: "multipart/form-data"  },
             body: formdata
         })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -79,10 +106,20 @@ async function sendMessage(token, message, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getMessages(token, ticketId) {
-    const res = await fetch(url + "/tickets/" + ticketId + "/messages",
+async function getMessagesPage(token, ticketId, noPages) {
+    const res = await fetch(url + `/tickets/${ticketId}/messages?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+        if (!res.ok) {
+            try {
+                const body = await res.json()
+                if (body.error) throw body.error
+                else if (res.statusText !== "") throw res.statusText
+                else throw "Unrecognized error"
+            } catch {
+                if (res.status === 401) throw "Unauthorized"
+                else throw "Unrecognized error"
+            }    
+        }
 
     const data = await res.json();
     return data;
@@ -92,10 +129,16 @@ async function getMessages(token, ticketId) {
 * @throws {Error} if the data fails
 * @throws {String} if the response is not ok
 */
-async function getProducts(token) {
-    const res = await fetch(url + "/products",
+async function getProductsPage(token, noPages) {
+    console.log(url + `/products?pageNo=${noPages}`)
+    const res = await fetch(url + `/products?pageNo=${noPages}`,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
@@ -107,15 +150,44 @@ async function getProducts(token) {
 async function getProduct(token, productId) {
     const res = await fetch(url + "/products/" + productId,
         { method: "GET", headers: authHeader(token) })
-    if (!res.ok) throw res.statusText
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+}
     const data = await res.json();
     return data;
 }
 
+/** 
+* @throws {Error} if the data fails
+* @throws {String} if the response is not ok
+*/
+async function getAttachment(token, ticketId, attachmentName) {
+    const res = await fetch(url + "/tickets/" + ticketId + "/attachments/" + attachmentName,
+        { method: "GET", headers: authHeader(token) })
+    if (!res.ok) {const body = await res.json()
+        if(body.error)
+            throw body.error
+        else
+            throw res.statusText
+    }
+    const response = new Response(res.body);
+    response.blob().then(blob => {
+        const newUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = newUrl;
+        link.download = attachmentName; // Set the desired file name
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
 const expertAPI = {
-    getTickets, getTicket, resolveTicket,
-    closeTicket, sendMessage, getMessages,
-    getProducts, getProduct
+    getTicketsPage, getTicket, resolveTicket,
+    closeTicket, sendMessage, getMessagesPage,
+    getProductsPage, getProduct, getAttachment
 }
 
 export default expertAPI;

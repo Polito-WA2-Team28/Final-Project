@@ -11,12 +11,6 @@ class GlobalConfig {
     @Value("\${keycloak.port}")
     lateinit var keycloakPort:String
 
-    @Value("\${postgres.url}")
-    lateinit var postgresURL:String
-
-    @Value("\${postgres.port}")
-    lateinit var postgresPort:String
-
     @Value("\${keycloak.realm}")
     lateinit var keycloakRealm:String
 

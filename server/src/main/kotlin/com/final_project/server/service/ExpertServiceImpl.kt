@@ -30,4 +30,8 @@ class ExpertServiceImpl @Autowired constructor(val expertRepository: ExpertRepos
     override fun addProfile(profile: ExpertCompleteRegistration): ExpertDTO? {
         return this.expertRepository.save(profile.toModel()).toDTO()
     }
+
+    override fun getAllExperts(): List<ExpertDTO> {
+        return this.expertRepository.findAll().map{it.toDTO()}
+    }
 }

@@ -1,19 +1,34 @@
 package com.final_project.ticketing.util
 
+import com.final_project.security.service.KeycloakService
+import com.final_project.server.config.GlobalConfig
 import com.final_project.server.dto.CustomerDTO
 import com.final_project.server.dto.ExpertDTO
 import com.final_project.server.dto.ManagerDTO
 import com.final_project.server.dto.ProductDTO
 import com.final_project.server.exception.Exception
+import com.final_project.server.repository.ExpertRepository
+import com.final_project.server.repository.ProductRepository
 import java.util.UUID
 import com.final_project.server.service.*
+import com.final_project.ticketing.dto.AttachmentDTO
 import com.final_project.ticketing.dto.TicketDTO
+import com.final_project.ticketing.dto.TicketStateEvolutionDTO
+import com.final_project.ticketing.dto.TicketSurveyDTO
 import com.final_project.ticketing.exception.TicketException
 import com.final_project.ticketing.service.TicketService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.BindingResult
+import org.springframework.validation.FieldError
+import java.io.File
 
-class Nexus () {
+@Configuration
+class Nexus (vararg services: Any) {
 
     /* services */
     private lateinit var customerService: CustomerService
@@ -21,27 +36,23 @@ class Nexus () {
     private lateinit var managerService: ManagerService
     private lateinit var ticketService: TicketService
     private lateinit var productService: ProductService
+    private lateinit var fileStorageService: FileStorageService
+    private lateinit var keycloakService: KeycloakService
 
-    constructor(customerService: CustomerService): this() {
-        this.customerService = customerService
+    init {
+        for (service in services) {
+            when (service) {
+                is CustomerService -> customerService = service
+                is ExpertService -> expertService = service
+                is ManagerService -> managerService = service
+                is TicketService -> ticketService = service
+                is ProductService -> productService = service
+                is FileStorageService -> fileStorageService = service
+                is KeycloakService -> keycloakService = service
+            }
+        }
     }
 
-    constructor(customerService: CustomerService, ticketService: TicketService, productService: ProductService) : this() {
-        this.customerService = customerService
-        this.ticketService = ticketService
-        this.productService = productService
-    }
-
-    constructor(expertService: ExpertService, ticketService: TicketService) : this() {
-        this.expertService = expertService
-        this.ticketService = ticketService
-    }
-
-    constructor(managerService: ManagerService, expertService: ExpertService, ticketService: TicketService) : this() {
-        this.managerService = managerService
-        this.expertService = expertService
-        this.ticketService = ticketService
-    }
 
     /* logging */
     private val endpointHolder: ThreadLocal<String> = ThreadLocal()
@@ -53,6 +64,9 @@ class Nexus () {
     var manager: ManagerDTO? = null
     var ticket: TicketDTO? = null
     var product: ProductDTO? = null
+    var attachment: ResponseEntity<ByteArray>? = null
+    var ticketStatusLifecycle: List<TicketStateEvolutionDTO> = emptyList()
+    var validationErrors: List<FieldError> = emptyList()
 
     fun setEndpointForLogger(endpoint: String): Nexus {
         endpointHolder.set(endpoint)
@@ -60,12 +74,14 @@ class Nexus () {
     }
 
     fun assertCustomerExists(customerId: UUID): Nexus {
+        println(customerService.toString())
         this.customer = customerService.getCustomerById(customerId) ?: run {
             logger.error("Endpoint: ${endpointHolder.get()} Error: No customer profile found with this UUID.")
             throw Exception.CustomerNotFoundException("No customer profile found with this UUID.")
         }
         return this
     }
+
 
     fun assertExpertExists(expertId: UUID): Nexus {
         this.expert = expertService.getExpertById(expertId) ?: run {
@@ -101,8 +117,8 @@ class Nexus () {
 
     fun assertTicketOwnership(): Nexus {
         if (this.ticket!!.customerId != this.customer!!.id) {
-            logger.error("Endpoint: ${endpointHolder.get()} Error: Forbidden.")
-            throw TicketException.TicketForbiddenException("Forbidden.")
+            logger.error("Endpoint: ${endpointHolder.get()} Error: This ticket belongs to another customer.")
+            throw TicketException.TicketForbiddenException("This ticket belongs to another customer.")
         }
         return this
     }
@@ -125,9 +141,18 @@ class Nexus () {
 
     fun assertProductExists(serialNumber: UUID): Nexus {
         this.product = productService.customerGetProductBySerialNumber(this.customer!!.id, serialNumber) ?: run {
-            logger.error("Endpoint: ${endpointHolder.get()} Error: Forbidden.")
-            throw Exception.ProductNotFoundException("Forbidden.")
+            logger.error("Endpoint: ${endpointHolder.get()} Error: Not Found.")
+            throw Exception.ProductNotFoundException("Not Found.")
         }
+        return this
+    }
+
+    fun assertCustomerlessProductExists(serialNumber: UUID, productId: Long): Nexus {
+        this.product = productService.getProductBySerialNumberAndId(serialNumber, productId) ?: run {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: The product you are trying to register doesn't exist")
+            throw Exception.ProductNotFoundException("The product you are trying to register doesn't exist")
+        }
+
         return this
     }
 
@@ -136,6 +161,27 @@ class Nexus () {
             logger.error("Endpoint: ${endpointHolder.get()} Error: Customer is not the owner of this product.")
             throw Exception.CustomerNotOwnerException("Customer is not the owner of this product.")
         }
+        return this
+    }
+
+    fun assertFileExists(filename: String): Nexus {
+        try {
+            this.attachment = fileStorageService.getAttachmentFile(filename)
+        } catch (e: Exception) {
+            logger.error("Endpoint: ${endpointHolder.get()} Error: This attachment does not exist.")
+            throw Exception.FileNotExistException("This attachment does not exist.")
+        }
+        return this
+    }
+
+    fun assertValidationResult(endpoint:String, br: BindingResult): Nexus {
+        println("${br.hasErrors()} ${br.fieldErrors}")
+        if(br.hasErrors()){
+            println("error")
+            val invalidFields = br.fieldErrors.map { it.field }
+            throw Exception.ValidationException("Endpoint: $endpoint, Error: Invalid fields:", invalidFields)
+        }
+
         return this
     }
 
@@ -162,6 +208,12 @@ class Nexus () {
         return this
     }
 
+    fun updateTicketSurvey(ticketId: Long, ticketSurvey:TicketSurveyDTO): Nexus {
+        this.ticket!!.updateSurvey(ticketSurvey.survey)
+        ticketService.updateTicketSurvey(ticketId, ticketSurvey)
+        return this
+    }
+
     fun resolveTicket(ticketId: Long): Nexus {
         this.ticket!!.changeState(TicketState.RESOLVED)
         ticketService.changeTicketStatus(ticketId, TicketState.RESOLVED)
@@ -171,6 +223,11 @@ class Nexus () {
     fun reopenTicket(ticketId: Long): Nexus {
         this.ticket!!.changeState(TicketState.REOPENED)
         ticketService.changeTicketStatus(ticketId, TicketState.REOPENED)
+        return this
+    }
+
+    fun retrieveTicketStateLifecycle(ticketId: Long): Nexus {
+        this.ticketStatusLifecycle = ticketService.retrieveTicketStateLifecycle(ticketId)
         return this
     }
 

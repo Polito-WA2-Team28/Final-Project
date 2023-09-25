@@ -6,8 +6,13 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -20,11 +25,18 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(val jwtAuthConverter:JwtAuthConverter) {
+class SecurityConfig(
+    val jwtAuthConverter: JwtAuthConverter
+) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityConfig::class.java)
 
     @Bean
@@ -113,6 +125,36 @@ class SecurityConfig(val jwtAuthConverter:JwtAuthConverter) {
             }
 
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied")
+        }
+    }
+
+    private val frontendAddress = "http://localhost:3000"
+
+    @Bean
+    fun corsFilter(): FilterRegistrationBean<*> {
+        val config = CorsConfiguration()
+        config.allowCredentials = true
+        config.allowedOrigins = listOf(frontendAddress)
+        config.allowedHeaders = listOf("*")
+        config.allowedMethods = listOf("*")
+        config.exposedHeaders?.add("Content-Disposition")
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", config)
+        val bean = FilterRegistrationBean(CorsFilter(source))
+        bean.order = Ordered.HIGHEST_PRECEDENCE
+        return bean
+    }
+
+    @Bean
+    fun webMvcConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry.addMapping("/**")
+                    .allowedOrigins(frontendAddress)
+                    .allowedMethods("*")
+                    .allowedHeaders("*")
+                    .allowCredentials(true)
+            }
         }
     }
 

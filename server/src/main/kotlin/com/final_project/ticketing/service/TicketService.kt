@@ -4,10 +4,7 @@ import com.final_project.server.dto.CustomerDTO
 import com.final_project.server.dto.ProductDTO
 import com.final_project.server.model.Customer
 import com.final_project.server.model.Product
-import com.final_project.ticketing.dto.MessageDTO
-import com.final_project.ticketing.dto.MessageObject
-import com.final_project.ticketing.dto.TicketCreationData
-import com.final_project.ticketing.dto.TicketDTO
+import com.final_project.ticketing.dto.*
 import com.final_project.ticketing.model.Ticket
 import com.final_project.ticketing.util.TicketState
 import org.springframework.data.domain.Page
@@ -31,7 +28,9 @@ interface TicketService {
 
     fun removeTicketById(ticketId: Long): Unit
 
-    fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketDTO>
+    fun getAllTicketsWithPaging(pageable: Pageable): Page<TicketManagerDTO>
+
+    fun getTicketsByStateWithPaging(pageable: Pageable, state: TicketState): Page<TicketManagerDTO>
 
     fun getAllTicketsWithPagingByCustomerId(customerId: UUID, pageable: Pageable): Page<TicketDTO>
     fun getAllTicketsWithPagingByExpertId(expertId: UUID, pageable: Pageable): Page<TicketDTO>
@@ -43,5 +42,10 @@ interface TicketService {
         ticketId: Long,
         pageable: Pageable
     ): Page<MessageDTO>
+
+
+    fun retrieveTicketStateLifecycle(ticketId: Long): List<TicketStateEvolutionDTO>
+
+    fun updateTicketSurvey(ticketId: Long, ticketSurveyDTO: TicketSurveyDTO)
 
 }

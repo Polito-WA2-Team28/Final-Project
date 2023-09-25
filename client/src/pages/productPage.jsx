@@ -1,13 +1,15 @@
 import { useContext, useState } from 'react'
-import { Button, Form, Modal } from 'react-bootstrap'
-import { useParams } from 'react-router-dom'
-import { ActionContext } from '../Context'
+import { Button, Card, Form, Modal } from 'react-bootstrap'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ActionContext, UserContext } from '../Context'
+import Roles from '../model/rolesEnum'
 
 export default function ProductPage() {
   const { productId } = useParams()
   const [product, setProduct] = useState(null)
   const [show, setShow] = useState(false)
   const { getProductByID, handleCreateTicket } = useContext(ActionContext)
+  const { role } = useContext(UserContext)
 
   product == null &&
     getProductByID(productId).then((product) => {
@@ -15,21 +17,43 @@ export default function ProductPage() {
     })
 
   return (
-    <div>
-      <h1>Product Page</h1>
-      {product == null ?  <h2>Loading</h2> : 
-        <>
-          {console.log(product)}
-          <h2>PRODUCT LOADED</h2>
-          <OpenNewTicketModal
-            show={show}
-            handleClose={() => setShow(false)}
-              handleCreate={handleCreateTicket}
-              product={product}
-          />
-          <Button onClick={() => setShow(true)}>Open a ticket</Button>
-        </>
-      }
+    <div
+      style={{
+        justifyContent: 'center',
+        padding: '10px',
+        alignContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      {product == null ? (
+        <h2>Loading</h2>
+      ) : (
+        <Card
+          className="productCard"
+          style={{ height: '100%', width: '70%', margin: 'auto' }}
+        >
+          <h2>{product.model}</h2>
+          <Card.Body>
+            <h5>Device type</h5>
+            <p>{product.deviceType}</p>
+            <h5>Serial number</h5>
+            <p>{product.serialNumber}</p>
+          </Card.Body>
+          {role === Roles.CUSTOMER && (
+            <Card.Footer>
+              <OpenNewTicketModal
+                show={show}
+                handleClose={() => setShow(false)}
+                handleCreate={handleCreateTicket}
+                product={product}
+              />
+              <Button style={{ width: '100%' }} onClick={() => setShow(true)}>
+                Open a ticket
+              </Button>
+            </Card.Footer>
+          )}
+        </Card>
+      )}
     </div>
   )
 }
@@ -38,28 +62,33 @@ function OpenNewTicketModal(props) {
   const [description, setDescription] = useState('')
   const serialNumber = props.product.serialNumber
 
-  console.log(props)
+  const navigate = useNavigate()
 
-  const handleCreate = () => {
+  const handleCreate = (event) => {
+    event.preventDefault()
     const ticket = { description, serialNumber }
-    props.handleCreate(ticket)
-    props.handleClose()
+    props
+      .handleCreate(ticket)
+      .then(() => props.handleClose())
+      .then(() => navigate('/dashboard'))
   }
 
   return (
     <Modal show={props.show} onHide={props.handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Create a ticket for {props.product.serialNumber}</Modal.Title>
+        <Modal.Title>
+          Create a ticket for {props.product.serialNumber}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter description"
-              value={description}
-              onChange={(ev) => setDescription(ev.target.value)}
-            />
+        <Form onSubmit={(e) => e.preventDefault()}>
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter description"
+            value={description}
+            onChange={(ev) => setDescription(ev.target.value)}
+          />
         </Form>
       </Modal.Body>
       <Modal.Footer>

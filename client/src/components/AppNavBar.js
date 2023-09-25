@@ -1,10 +1,9 @@
 import "../styles/AppNavBar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-	faArrowDown,
 	faCircleUser,
 	faRightToBracket,
-
+	faDoorOpen
 } from "@fortawesome/free-solid-svg-icons";
 import {
 	Button,
@@ -47,12 +46,12 @@ export default function AppNavBar(props) {
 				<Button variant="navbar" onClick={handleUser}> <FontAwesomeIcon icon={faCircleUser} /></Button>
 			</Col >
 			<Col>
-				<Button variant="navbar" onClick={myHandleLogout}><FontAwesomeIcon icon={faArrowDown} /></Button>
+				<Button variant="navbar" onClick={myHandleLogout}><FontAwesomeIcon icon={faDoorOpen} /></Button>
 			</Col >
 		</>
 
 	const componentIfLogged = <Col>
-		<Button variant="navbar" onClick={myHandleLogout}><FontAwesomeIcon icon={faArrowDown} /></Button>
+		<Button variant="navbar" onClick={myHandleLogout}><FontAwesomeIcon icon={faDoorOpen} /></Button>
 	</Col >
 
 	const componentIfNotLogged = <Button variant="navbar" onClick={handleLogin}><FontAwesomeIcon icon={faRightToBracket} /></Button>

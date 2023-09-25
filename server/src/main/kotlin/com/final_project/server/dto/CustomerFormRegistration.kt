@@ -12,16 +12,19 @@ class CustomerFormRegistration(
     @field:NotBlank
     @field:NotNull
     @field:Size(max = 30)
+    @field:Pattern(regexp = "^[A-Za-z]+\$")
     var name:String,
 
     @field:NotBlank
     @field:NotNull
     @field:Size(max = 30)
+    @field:Pattern(regexp = "^[A-Za-z]+\$")
     val surname:String,
 
     @field:NotBlank
     @field:NotNull
     @field:Size(max = 20)
+    @field:Pattern(regexp = "^[A-Za-z0-9]+\$")
     val username:String,
 
     @field:NotBlank
@@ -29,9 +32,6 @@ class CustomerFormRegistration(
     @field:Size(max = 30)
     val password:String,
 
-    @field:DateTimeFormat
-    @field:NotNull
-    val registrationDate: Date,
 
     @field:DateTimeFormat
     @field:NotNull

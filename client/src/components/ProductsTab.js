@@ -2,33 +2,109 @@ import { Button, Card, CardGroup, Modal, Form, Col, Row } from "react-bootstrap"
 import EmptySearch from "./EmptySearch";
 import { useContext, useState } from "react";
 import "../styles/ProductsTab.css"
-import { UserContext } from "../Context";
+import { ActionContext, UserContext } from "../Context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { faUpRightAndDownLeftFromCenter } from "@fortawesome/free-solid-svg-icons";
 
-export function ProductsTab() {
+import { Pagination } from 'react-bootstrap';
+import Roles from "../model/rolesEnum";
+import { errorToast } from "./toastHandler";
+
+
+export function ProductsTab(props) {
+
+  const { customerGetProducts, registerProduct } = useContext(ActionContext)
 
   const productsPage = useContext(UserContext).products;
-  const products = productsPage
-  //.content;
+  const role = useContext(UserContext).role;
+
+
+  var products = productsPage.content;
+  if (products == null) products = []
 
   const [show, setShow] = useState(false);
 
-  return <>
-    <Button onClick={() => setShow(true)}>Register a new product</Button>
-    <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
-      handleCreate={() => { console.log("CREATE") }}
-    />
-    <CardGroup>
-      {(products === undefined || products.length === 0) ?
-        <EmptySearch /> :
-        products.map((product) => <ProductItem key={product.id} product={product} />)
-      }
-    </CardGroup>
-  </ >;
-}
+  const totalPages = productsPage.totalPages;
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const handlePageChange = (selectedPage) => {
+    customerGetProducts(selectedPage);
+    setCurrentPage(selectedPage);
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+
+    // Calcula los límites de los elementos a mostrar
+    let startPage = Math.max(currentPage - 2, 1);
+    let endPage = Math.min(startPage + 4, totalPages);
+    startPage = Math.max(endPage - 4, 1);
+
+    for (let page = startPage; page <= endPage; page++) {
+      items.push(
+        <Pagination.Item
+          key={page}
+          active={page === currentPage}
+          onClick={() => { if (page !== currentPage) handlePageChange(page) }}
+        >
+          {page}
+        </Pagination.Item>
+      );
+    }
+
+    return items;
+  };
+
+
+  return (
+    <>
+      <CardGroup className="d-flex justify-content-center">
+        {Roles.CUSTOMER === role &&
+          <>
+            <Button onClick={() => setShow(true)} className="my-2">Register a new product</Button >
+            <RegisterNewProductModal show={show} handleClose={() => setShow(false)}
+              handleCreate={registerProduct}
+            />
+          </>
+        }
+        {products === undefined || products.length === 0 ? (
+          <EmptySearch />
+        ) : (
+          <Row xs={1} md={2} lg={3} className="mb-3 w-100">
+            {products.map((product) => (
+              <Col key={product.id}>
+                <ProductItem product={product} />
+              </Col>
+            ))}
+          </Row>
+        )}
+      </CardGroup>
+
+      <div className="d-flex justify-content-center">
+        <Pagination>
+          <Pagination.First
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(1)}
+          />
+          <Pagination.Prev
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          />
+          {renderPaginationItems()}
+          <Pagination.Next
+            disabled={currentPage === totalPages || products.length === 0}
+            onClick={() => handlePageChange(currentPage + 1)}
+          />
+          <Pagination.Last
+            disabled={currentPage === totalPages || products.length === 0}
+            onClick={() => handlePageChange(totalPages - 1)}
+          />
+        </Pagination>
+      </div>
+    </>
+  );
+}
 
 function ProductItem(props) {
 
@@ -60,9 +136,11 @@ function RegisterNewProductModal(props) {
   const [serialNumber, setSerialNumber] = useState("");
 
   const handleCreate = () => {
-    const product = { serialNumber }
-    props.handleCreate(product);
-    props.handleClose();
+    const product = { productId, serialNumber }
+    props.handleCreate(product)
+      .then(() =>
+        props.handleClose())
+      .catch((err) => errorToast(err))
   }
 
   return <Modal show={props.show} onHide={props.handleClose} className="custom-modal">
@@ -70,7 +148,7 @@ function RegisterNewProductModal(props) {
       <Modal.Title>Register a new product</Modal.Title>
     </Modal.Header>
     <Modal.Body>
-      <Form>
+      <Form onSubmit={e => e.preventDefault()}>
         <Form.Group className="mb-3" controlId="productId">
           <Form.Label>Product ID</Form.Label>
           <Form.Control type="text" placeholder="Enter product ID" value={productId} onChange={ev => setProductId(ev.target.value)} className="custom-form-control" />

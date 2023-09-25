@@ -77,6 +77,7 @@ class KeycloakService(
                     .clientLevel(clientRepresentation.id)
                     .add(listOf(clientRole))
 
+
             //Propagate User creation to Postgres DB
             val completeProfile:CustomerCompleteRegistration = customer.toCompleteCustomer(UUID.fromString(userId), customer)
             customerService.addProfile(completeProfile)
